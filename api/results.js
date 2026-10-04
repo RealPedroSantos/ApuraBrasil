@@ -212,7 +212,7 @@ async function getResult(query) {
     municipalityName: municipality?.name || null,
     sourceUrl: url
   });
-  persistSnapshot(result);
+  await persistSnapshot(result);
   return result;
 }
 
