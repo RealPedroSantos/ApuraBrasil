@@ -60,8 +60,25 @@ module.exports = async function handler(req, res) {
     } else if (level === 'districts') {
       const municipality = String(req.query?.municipality || '').replace(/\D/g, '');
       if (!municipality) return send(res, 400, { ok: false, error: 'Informe o código IBGE do município.' }, 'no-store');
-      shapeUrl = `${IBGE}/v4/malhas/municipios/${municipality}?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=distrito`;
+
+      // A API Localidades do IBGE fornece a relação oficial de distritos, porém a
+      // API pública de Malhas v4 não expõe a subdivisão distrital pelo mesmo
+      // endpoint de estados/municípios. Retornamos a lista oficial sem inventar
+      // polígonos. Uma malha intramunicipal do Censo 2022 pode ser adicionada em
+      // camada própria posteriormente.
       listUrl = `${IBGE}/v1/localidades/municipios/${municipality}/distritos?orderBy=nome`;
+      const items = await fetchJson(listUrl);
+      const normalizedItems = (items || []).map((item) => ({
+        code: String(item.id), name: item.nome, abbr: null
+      }));
+      return send(res, 200, {
+        ok: true,
+        level,
+        geometryAvailable: false,
+        geojson: { type: 'FeatureCollection', features: [] },
+        items: normalizedItems,
+        sources: { geometry: null, names: listUrl }
+      });
     } else {
       return send(res, 400, { ok: false, error: 'Nível geográfico inválido.' }, 'no-store');
     }
@@ -73,6 +90,7 @@ module.exports = async function handler(req, res) {
     return send(res, 200, {
       ok: true,
       level,
+      geometryAvailable: true,
       geojson: normalizeGeo(geojson, items, level),
       items: normalizedItems,
       sources: { geometry: shapeUrl, names: listUrl }
