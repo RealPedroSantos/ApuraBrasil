@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f4f4f2" />
+  <title>ApuraBrasil — Eleições 2026</title>
+  <link rel="stylesheet" href="/dashboard.css" />
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand" aria-label="ApuraBrasil">
+      <div class="brand-temp" title="Logo oficial será substituída pelo arquivo original enviado pelo usuário">ApuraBrasil</div>
+      <span class="brand-divider"></span>
+    </div>
+    <nav class="office-nav" aria-label="Cargos">
+      <button class="office-btn active" data-office="presidente">Presidente</button>
+      <button class="office-btn" data-office="governador">Governador</button>
+      <button class="office-btn" data-office="senador">Senador</button>
+      <button class="office-btn" data-office="deputado-federal">Deputado Federal</button>
+      <button class="office-btn" data-office="deputado-estadual">Deputado Estadual</button>
+      <a class="office-btn composition-link" href="/composicao">Composição</a>
+    </nav>
+    <div class="source-status"><span class="status-dot"></span><span id="feedStatus">Conectando</span></div>
+  </header>
+
+  <main class="main-grid">
+    <section class="map-panel">
+      <div class="map-head">
+        <div class="map-titles">
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <h1 id="mapTitle">Brasil</h1>
+          <p id="mapSubtitle">Passe o cursor ou toque sobre uma área para identificá-la</p>
+        </div>
+        <div class="map-actions">
+          <button id="backButton" type="button">Voltar</button>
+          <button id="resetButton" type="button">Brasil</button>
+        </div>
+      </div>
+      <div class="map-stage" id="mapStage">
+        <div id="map" class="map-canvas"><div class="loading">Carregando mapa...</div></div>
+        <div id="mapTooltip" class="map-tooltip" role="status" aria-live="polite"></div>
+      </div>
+      <div class="map-foot">
+        <span id="mapHint">Mapa ilustrado • limites administrativos oficiais</span>
+        <span id="selectionStatus">Brasil • Presidente</span>
+      </div>
+    </section>
+
+    <aside class="results-panel">
+      <section class="summary-box">
+        <div class="summary-heading">
+          <div>
+            <span class="eyebrow">APURAÇÃO OFICIAL</span>
+            <h2 id="scopeTitle">Brasil</h2>
+            <p id="scopeSubtitle">Presidente</p>
+          </div>
+          <button class="refresh-button" id="refreshButton" type="button">Atualizar</button>
+        </div>
+        <div id="resultSummary" class="result-summary"><div class="loading">Consultando TSE...</div></div>
+      </section>
+
+      <div class="details-tabs" role="tablist">
+        <button class="detail-tab active" data-tab="candidates">Candidatos</button>
+        <button class="detail-tab" data-tab="places">Localidades</button>
+        <button class="detail-tab" data-tab="zones">Zonas e seções</button>
+      </div>
+
+      <section class="detail-panel active" data-panel="candidates">
+        <div id="candidateList" class="candidate-list"></div>
+      </section>
+      <section class="detail-panel" data-panel="places">
+        <div class="place-toolbar">
+          <label for="citySelect">Município</label>
+          <select id="citySelect" disabled><option>Selecione primeiro um estado</option></select>
+          <div id="cityHelp" class="helper">Toque em um estado no mapa.</div>
+        </div>
+        <div id="districtList" class="district-list"></div>
+      </section>
+      <section class="detail-panel" data-panel="zones">
+        <div id="zoneList" class="empty-state">Selecione um município para carregar zonas e seções.</div>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="status-bar">
+    <div><span class="status-dot"></span><span id="bottomSource">Fonte oficial</span><strong id="clock">--:--:--</strong></div>
+    <div>ApuraBrasil • dados TSE / geografia IBGE</div>
+  </footer>
+</div>
+<script src="/dashboard.js" defer></script>
+</body>
+</html>
