@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#08111f" />
+  <title>ApuraBrasil — Eleições 2026</title>
+  <meta name="description" content="Acompanhamento dos resultados oficiais das Eleições 2026 com dados do Tribunal Superior Eleitoral." />
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandmark">AB</div>
+      <div><h1>ApuraBrasil</h1><small>Resultados oficiais • Eleições 2026</small></div>
+    </div>
+    <div class="live"><i class="dot"></i><span id="feedStatus">Conectando ao TSE</span><span id="clock"></span></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <h2>Apuração em tempo real</h2>
+        <p>Navegue pelo Brasil, estados, municípios, distritos/regiões e zonas eleitorais. Os números exibidos são lidos dos arquivos oficiais de divulgação do TSE.</p>
+      </div>
+      <div class="source-pill">Fonte primária: Tribunal Superior Eleitoral</div>
+    </section>
+
+    <nav class="toolbar" id="officeToolbar" aria-label="Cargos">
+      <button class="office-btn active" data-office="presidente">Presidente</button>
+      <button class="office-btn" data-office="governador">Governador</button>
+      <button class="office-btn" data-office="senador">Senador</button>
+      <button class="office-btn" data-office="deputado-federal">Deputado Federal</button>
+      <button class="office-btn" data-office="deputado-estadual">Deputado Estadual</button>
+    </nav>
+
+    <div class="breadcrumb" id="breadcrumb"></div>
+
+    <section class="dashboard">
+      <article class="map-card">
+        <div class="map-head">
+          <div><strong id="mapTitle">Brasil</strong><br><span id="mapSubtitle">Clique em um estado para detalhar</span></div>
+          <div class="map-actions">
+            <button class="mini" id="backButton">Voltar</button>
+            <button class="mini" id="resetButton">Brasil</button>
+          </div>
+        </div>
+        <div id="map" class="map"></div>
+        <div class="legend" id="legend"><strong>Legenda</strong><div class="legend-item"><i class="legend-dot" style="background:#24405f"></i>Sem seleção / aguardando</div></div>
+      </article>
+
+      <aside class="sidebar">
+        <section class="panel">
+          <div class="scope-title">
+            <div><h3 id="scopeTitle">Brasil</h3><small id="scopeSubtitle">Presidente</small></div>
+            <button class="refresh" id="refreshButton">Atualizar</button>
+          </div>
+          <div id="resultSummary" class="loading">Carregando resultado oficial...</div>
+        </section>
+
+        <section class="panel">
+          <h3>Municípios</h3>
+          <div class="search-row">
+            <select id="citySelect" disabled><option>Selecione primeiro um estado</option></select>
+          </div>
+          <div id="cityHelp" class="empty">No mapa, clique em um estado e depois em um município.</div>
+        </section>
+
+        <section class="panel">
+          <h3>Candidatos</h3>
+          <div id="candidateList" class="candidates"><div class="loading">Aguardando dados...</div></div>
+        </section>
+
+        <section class="panel">
+          <h3>Zonas e seções eleitorais</h3>
+          <div id="zoneList" class="empty">Selecione um município para abrir as zonas e seções disponíveis no arquivo oficial do TSE.</div>
+        </section>
+      </aside>
+    </section>
+
+    <p class="footnote">O ApuraBrasil não realiza a totalização oficial dos votos. Ele consulta, organiza e apresenta os arquivos oficiais disponibilizados pela Justiça Eleitoral. Distritos/regiões geográficas são obtidos do IBGE; bairros dependem do enriquecimento dos endereços dos locais de votação.</p>
+  </main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="/app.js" defer></script>
+</body>
+</html>
