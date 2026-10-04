@@ -3,100 +3,96 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#070b13" />
+  <meta name="theme-color" content="#f6f6f4" />
   <title>ApuraBrasil — Eleições 2026</title>
-  <meta name="description" content="Acompanhamento dos resultados oficiais das Eleições 2026 com dados do Tribunal Superior Eleitoral." />
+  <meta name="description" content="Acompanhamento dinâmico dos resultados oficiais das Eleições 2026 com dados do TSE." />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <div class="brand">
-      <span class="brandmark">AB</span>
-      <div class="brand-copy">
-        <strong>ApuraBrasil</strong>
-        <span>Eleições 2026</span>
-      </div>
+    <div class="brand-wrap" aria-label="ApuraBrasil">
+      <img class="brand-logo" alt="ApuraBrasil" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUcAAABtCAYAAAAyCaOPAAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kd8rg1EYxz/7IZqJQrlwsYSr0UYtbpQtjZLWTBluttd+qG3e3nfScqvcrihx49cFfwG3yrVSREqu5ZK4Yb2ed1Nbsuf0nOdzvuc8T+c8B6yRjJLV7R7I5vJaOOh3zUcXXI2vOLDTiRNvTNHV8VBomrr2eY/FjLcDZq365/615uWEroClSXhMUbW88KTw9HpeNXlHuENJx5aFz4TdmlxQ+M7U4xV+MTlV4W+TtUg4ANY2YVeqhuM1rKS1rLC8nN5sZk35vY/5EmciNzcrsUe8G50wQfy4mGKCAD68jMrsY4AhBmVFnXxPOX+GVclVZFYpoLFCijR53KKuSfWExKToCRkZCmb///ZVTw4PVao7/dDwbBjvfdC4DaWiYXwdGUbpGGxPcJmr5q8ewsiH6MWq1nsArZtwflXV4rtwsQVdj2pMi5Ulm7g1mYS3U2iJQvsNOBYrPfvd5+QBIhvyVdewtw/9cr516QdTxmfd2jloQgAAAAlwSFlzAAALEwAACxMBAJqcGAAAIABJREFUeJztnXeYJUd57n9vnzibZuaMpJV2Z0ZksAGLYJAxBiQwOWN8Acu6GF2TTDDXlxxtwIQLJhtMMtfGAZNkog0mG2MbhEFGJItgdjYo7cxsnnPmnH7vH9XV3WfCBkmziX6fZ3dOp+qvqqu++lJ9BRUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKhQoUKFChUqVKiQozU22Wx1pjonmo4KFSqcnkhONAHXB63xyfVK9FFJVzQ70w890fRUqFDh9INONAFHQmvT5vpAiZNGTUp1b8xjJB6Fkk0IsH/YO7hw2/TQNT6GYtXuTD3LcE/B8xdmZ364VvRXqFDh1ET9RBOwGlrjW0dQ8h6ZB9WknqwU+QyEbCMMgR1ONVqtdd1DHDj6sid/zfjVoBowV9t0zv8a7N11LMy1QoUKpzlOWrVaSm4h9BiLTcJn4PQsAr2SJGec0XadhPFjKDqRktdKSUNSgvRb9Vr9rmtRhwoVKpy6OGmZo/vpD4CvCEBBSLQBI7CEBEKoBjrnSOW1xibb7c7Uee3O1LuQC2ZoGpJe1xrb2lyrulSoUOHUw0ltc2yNT16I9DkpkGmDFFmlIBMfjf/C9rMWYV9TrAPGQB3gzkj3xvwy4iZAQ3aCllU7tf3I7uzMJ49f7SpUqHAy44Qxx9b4ZA3pweDHGz7Wm93+l0vvaY9PPRvxWoCMoSnyxRJsY+GfAVcBZ1mMymwyqksIW0iZHp4VJgPKDZeYPcZ37s7O/HSNqlyhQoVTCCeEObY7U38IPAHYAiSGg8DjurMzn2pu2pyo3vwV4DGgJwvqKKMzukwUOKJQZJfDcPwv07yXXAmqef4/hSTpbZg/dZq+ozu//agdPBUqVDj9cNyZY3tsyyi1+lWYZvntNgZ/icAwb6VIm6RCuGNII86FyKBvZ1p3caW4nj0QmGHBTFX8cMYrMyf4VcBF4K91Z2d6N1LVK1SocArhuDtkrORWmOD8KMl8wcOiCwW3VsbjQsROFPa8OieXwIE9BqGxEAyXqOF2+Hel8W47Y5WOZSsSshn4FPD51tjWm91ola9QocIpg+POHIWy2Mpg/ANU5k25aChJJeokBZ4X4ZJUWJIsIzPFmY1RpSvmIPDwQdr/xUE62Gp8B+B3EX8OXAHuxgIELaG7kST/2epMPepGa4AKFSqcEjgBQeDpgkmcKOjBkPHDzIQYeJNy13SQGY2cGQ9VMhxm3NKl5wrzoXMJEmQEMt+0+Yf+/M4USIErsn/vA2h0pjcn4jdlHgecC4xKahvfF/joWrdMhQoVTh4cd+...TRUNCATED_FOR_BREVITY..." />
+      <span class="brand-divider" aria-hidden="true"></span>
     </div>
 
-    <nav class="office-nav" id="officeToolbar" aria-label="Cargos">
+    <nav class="office-nav" id="officeToolbar" aria-label="Cargos da eleição">
       <button class="office-btn active" data-office="presidente">Presidente</button>
       <button class="office-btn" data-office="governador">Governador</button>
       <button class="office-btn" data-office="senador">Senador</button>
-      <button class="office-btn" data-office="deputado-federal">Dep. Federal</button>
-      <button class="office-btn" data-office="deputado-estadual">Dep. Estadual</button>
+      <button class="office-btn" data-office="deputado-federal">Deputado Federal</button>
+      <button class="office-btn" data-office="deputado-estadual">Deputado Estadual</button>
     </nav>
 
-    <div class="live-status">
-      <span class="live-dot"></span>
-      <span id="feedStatus">Conectando ao TSE</span>
-      <span id="clock"></span>
+    <div class="top-status" title="Conexão com a fonte oficial">
+      <span class="status-dot"></span>
+      <span id="feedStatus">Conectando</span>
     </div>
   </header>
 
-  <main class="workspace">
-    <section class="visual-stage">
-      <div class="stage-head">
+  <main class="main-grid">
+    <section class="map-side">
+      <div class="map-toolbar">
         <div>
           <div class="breadcrumb" id="breadcrumb"></div>
           <h1 id="mapTitle">Brasil</h1>
-          <p id="mapSubtitle">Selecione um estado no mapa ilustrado</p>
+          <p id="mapSubtitle">Clique em um estado para detalhar a apuração</p>
         </div>
-        <div class="stage-actions">
-          <button class="ghost-btn" id="backButton">Voltar</button>
-          <button class="ghost-btn" id="resetButton">Brasil</button>
+        <div class="map-actions">
+          <button type="button" id="backButton">Voltar</button>
+          <button type="button" id="resetButton">Brasil</button>
         </div>
       </div>
 
-      <div id="map" class="illustrated-map" aria-live="polite"></div>
+      <div id="map" class="map-canvas" aria-live="polite"></div>
 
-      <div class="map-footer">
-        <div class="legend" id="legend">
-          <span class="legend-title">Mapa ilustrado</span>
-          <span class="legend-item"><i style="background:#253247"></i> aguardando</span>
-        </div>
-        <span class="source-line">Dados: TSE • Localidades: IBGE</span>
+      <div class="map-bottom">
+        <div class="legend" id="legend"><strong>Liderança</strong></div>
+        <div class="map-note">Mapa vetorial ilustrado • limites administrativos: IBGE</div>
       </div>
     </section>
 
-    <aside class="data-rail">
-      <div class="scope-header">
-        <div>
-          <span class="eyebrow">APURAÇÃO</span>
-          <h2 id="scopeTitle">Brasil</h2>
-          <p id="scopeSubtitle">Presidente</p>
+    <aside class="results-side">
+      <section class="summary-box">
+        <div class="summary-heading">
+          <div>
+            <span class="eyebrow">APURAÇÃO OFICIAL</span>
+            <h2 id="scopeTitle">Brasil</h2>
+            <p id="scopeSubtitle">Presidente</p>
+          </div>
+          <button class="refresh-button" type="button" id="refreshButton">Atualizar</button>
         </div>
-        <button class="refresh-btn" id="refreshButton" aria-label="Atualizar dados">Atualizar</button>
-      </div>
-
-      <div id="resultSummary" class="summary-card loading">Carregando resultado oficial...</div>
-
-      <div class="rail-tabs" role="tablist" aria-label="Detalhes da apuração">
-        <button class="rail-tab active" data-tab="candidates">Candidatos</button>
-        <button class="rail-tab" data-tab="places">Localidade</button>
-        <button class="rail-tab" data-tab="zones">Zonas</button>
-      </div>
-
-      <section class="rail-panel active" data-panel="candidates">
-        <div id="candidateList" class="candidates"><div class="loading">Aguardando dados...</div></div>
+        <div id="resultSummary" class="result-summary loading">Carregando dados do TSE...</div>
       </section>
 
-      <section class="rail-panel" data-panel="places">
-        <label class="field-label" for="citySelect">Município</label>
-        <select id="citySelect" disabled><option>Selecione primeiro um estado</option></select>
-        <div id="cityHelp" class="empty compact">Clique em um estado no mapa para abrir os municípios.</div>
+      <div class="details-tabs" role="tablist" aria-label="Detalhes">
+        <button type="button" class="detail-tab active" data-tab="candidates">Candidatos</button>
+        <button type="button" class="detail-tab" data-tab="places">Localidades</button>
+        <button type="button" class="detail-tab" data-tab="zones">Zonas e seções</button>
+      </div>
+
+      <section class="detail-panel active" data-panel="candidates">
+        <div id="candidateList" class="candidate-list"><div class="loading">Aguardando candidatos...</div></div>
+      </section>
+
+      <section class="detail-panel" data-panel="places">
+        <div class="place-toolbar">
+          <label for="citySelect">Município</label>
+          <select id="citySelect" disabled><option>Selecione primeiro um estado</option></select>
+          <div id="cityHelp" class="helper">Clique em um estado no mapa.</div>
+        </div>
         <div id="districtList" class="district-list"></div>
       </section>
 
-      <section class="rail-panel" data-panel="zones">
-        <div id="zoneList" class="empty">Selecione um município para abrir zonas e seções disponíveis.</div>
+      <section class="detail-panel" data-panel="zones">
+        <div id="zoneList" class="empty-state">Selecione um município para carregar as zonas e seções.</div>
       </section>
     </aside>
   </main>
 
-  <footer class="bottom-bar">
-    <span>Mapa esquemático, não cartográfico. A totalização oficial é realizada pela Justiça Eleitoral.</span>
-    <span id="selectionStatus">Brasil • Presidente</span>
+  <footer class="status-bar">
+    <div><span class="status-dot"></span><span id="bottomSource">Fonte oficial conectada</span> <strong id="clock">--:--:--</strong></div>
+    <div id="selectionStatus">Brasil • Presidente</div>
   </footer>
 </div>
 <script src="/app.js" defer></script>
