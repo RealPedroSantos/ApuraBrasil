@@ -1,0 +1,62 @@
+:root{--candidate-card-bg:#f3f3f1;--candidate-card-line:#c8ced1;--candidate-track:#d9dcdd;--candidate-text:#101417;--candidate-muted:#50585c}
+
+/* Candidate card — visual reference approved by the user */
+.candidate-list{gap:clamp(5px,.55vh,8px);padding-right:3px}
+.candidate-card{position:relative;flex:0 0 auto;min-height:clamp(88px,10.6vh,128px);background:var(--candidate-card-bg);border:1px solid var(--candidate-card-line);border-radius:0;display:grid;grid-template-columns:clamp(88px,7.1vw,126px) minmax(0,1fr) clamp(150px,12vw,230px);overflow:hidden;box-shadow:none;animation:cardIn .3s ease both}
+.candidate-avatar{position:relative;overflow:hidden;background:#e4e6e6;border-right:1px solid var(--candidate-card-line);display:flex;align-items:center;justify-content:center}
+.candidate-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 14%;z-index:2}
+.candidate-avatar.photo-loaded .avatar-fallback{display:none}
+.avatar-fallback{font-size:clamp(22px,2vw,34px);font-weight:950;color:#39484e}
+.candidate-main{min-width:0;padding:clamp(7px,.75vh,11px) clamp(10px,.8vw,16px) clamp(8px,.8vh,12px);display:grid;grid-template-rows:auto auto minmax(25px,1fr);align-content:stretch}
+.candidate-name{margin:0;font-size:clamp(20px,1.55vw,32px);font-weight:950;line-height:1;text-transform:uppercase;letter-spacing:-.025em;color:var(--candidate-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.candidate-subline{display:flex;align-items:center;gap:clamp(7px,.55vw,11px);margin-top:clamp(3px,.38vh,6px);min-height:25px}
+.party-chip{display:inline-flex;align-items:center;justify-content:center;min-height:clamp(23px,2.2vh,30px);padding:1px clamp(7px,.55vw,11px);border-radius:0;color:#fff;font-size:clamp(14px,1vw,20px);line-height:1;font-weight:700}
+.candidate-number{font-size:clamp(15px,1.05vw,21px);font-weight:850;color:var(--candidate-muted);white-space:nowrap}
+.candidate-bar{align-self:end;position:relative;height:clamp(24px,2.55vh,32px);border:1px solid #b7bec1;border-radius:0;background:var(--candidate-track);overflow:hidden}
+.candidate-bar i{position:absolute;inset:0 auto 0 0;transform-origin:left;animation:barGrow .65s cubic-bezier(.2,.8,.2,1) both}
+.candidate-bar span{position:relative;z-index:2;height:100%;display:flex;align-items:center;padding:0 clamp(8px,.6vw,12px);color:#fff;font-size:clamp(13px,.92vw,18px);font-weight:950;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap}
+.candidate-score{min-width:0;padding:clamp(6px,.7vh,10px) clamp(12px,1vw,20px);display:flex;flex-direction:column;align-items:flex-end;justify-content:center;text-align:right}
+.candidate-score strong{font-size:clamp(48px,4.2vw,82px);line-height:.88;font-weight:950;letter-spacing:-.045em;color:var(--candidate-text);font-variant-numeric:tabular-nums;animation:numberPop .3s ease both;white-space:nowrap}
+.candidate-score small{display:none}
+.candidate-status{margin-top:7px;font-size:clamp(9px,.66vw,12px);font-weight:900;line-height:1;color:#4b5458;text-transform:uppercase;white-space:nowrap}
+
+/* TV / large touch displays */
+@media(min-width:1800px) and (min-height:900px){
+  .candidate-card{grid-template-columns:126px minmax(0,1fr) 245px;min-height:126px}
+  .candidate-name{font-size:31px}
+  .party-chip{font-size:19px;min-height:30px}
+  .candidate-number{font-size:20px}
+  .candidate-bar{height:31px}
+  .candidate-bar span{font-size:17px}
+  .candidate-score strong{font-size:80px}
+}
+
+/* Short desktop screens keep the same composition but denser */
+@media(max-height:800px){
+  .candidate-card{grid-template-columns:76px minmax(0,1fr) 130px;min-height:74px}
+  .candidate-main{padding:5px 8px 6px;grid-template-rows:auto auto minmax(18px,1fr)}
+  .candidate-name{font-size:16px}
+  .candidate-subline{min-height:19px;margin-top:2px;gap:5px}
+  .party-chip{font-size:11px;min-height:18px;padding:1px 6px}
+  .candidate-number{font-size:11px}
+  .candidate-bar{height:18px}
+  .candidate-bar span{font-size:10px;padding:0 6px}
+  .candidate-score{padding:5px 8px}
+  .candidate-score strong{font-size:34px}
+  .candidate-status{font-size:8px;margin-top:3px}
+}
+
+/* Narrow layouts preserve the reference hierarchy */
+@media(max-width:900px){
+  .candidate-card{grid-template-columns:68px minmax(0,1fr) 102px;min-height:70px}
+  .candidate-main{padding:5px 7px 6px;grid-template-rows:auto auto minmax(17px,1fr)}
+  .candidate-name{font-size:14px}
+  .candidate-subline{gap:5px;min-height:18px;margin-top:2px}
+  .party-chip{font-size:10px;min-height:17px;padding:1px 5px}
+  .candidate-number{font-size:10px}
+  .candidate-bar{height:17px}
+  .candidate-bar span{font-size:9px;padding:0 5px}
+  .candidate-score{padding:4px 6px}
+  .candidate-score strong{font-size:30px}
+  .candidate-status{font-size:7px;margin-top:3px}
+}
