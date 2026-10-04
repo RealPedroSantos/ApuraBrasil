@@ -1,0 +1,12 @@
+{
+  "name": "apurabrasil",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Painel de acompanhamento dos resultados oficiais das Eleições 2026 com dados do TSE.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
