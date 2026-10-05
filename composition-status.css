@@ -1,0 +1,24 @@
+/* Composition status layer: party color stays inside, status lives in the ring. */
+:root{--status-official:#2f9b61;--status-projected:#d89119;--status-pending:#aeb5b8}
+.composition-status-key{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.status-key-item{display:inline-flex;align-items:center;gap:5px;padding:4px 6px;border:1px solid #c5cacc;background:#fff;font-size:8px;font-weight:900;white-space:nowrap}
+.status-ring-icon{width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 3px var(--ring)}
+.seat-dot.status-official{box-shadow:0 0 0 2px var(--status-official),0 0 0 3px rgba(255,255,255,.95)!important;z-index:3}
+.seat-dot.status-projected{box-shadow:0 0 0 2px var(--status-projected),0 0 0 3px rgba(255,255,255,.95)!important;z-index:2}
+.seat-dot.status-pending{box-shadow:0 0 0 1px rgba(60,70,75,.25)!important}
+.projected-card.status-official{background:#e8f6ed;border-color:#72b98f}
+.projected-card.status-projected{background:#fff4df;border-color:#d8ad60}
+.projected-card.status-official .rank-badge{background:#d5eddf;color:#1d6641}
+.projected-card.status-projected .rank-badge{background:#f7e5be;color:#81570e}
+.projected-card .seat-status strong{font-size:13px;line-height:1.05}
+.projected-card.status-official .seat-status strong{color:var(--status-official)}
+.projected-card.status-projected .seat-status strong{color:#9a6917}
+.composition-status-counter{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.composition-status-pill{display:inline-flex;align-items:center;gap:5px;min-height:24px;padding:4px 7px;border:1px solid #c7ccce;background:#fff;font-size:8px;font-weight:900}
+.composition-status-pill b{font-size:12px}
+.composition-status-pill.official{border-color:#80be99;background:#eef9f2;color:#226f47}
+.composition-status-pill.projected{border-color:#d8b36d;background:#fff6e6;color:#895d11}
+.composition-status-pill.pending{color:#626c70}
+.chamber-card.status-aware .chamber-count{display:grid;gap:2px}
+.status-disclaimer{font-size:8px;color:#6d767a;line-height:1.25;max-width:390px;text-align:right}
+@media(max-width:900px){.composition-status-key{justify-content:flex-start}.status-disclaimer{text-align:left}.projected-card .seat-status strong{font-size:11px}}
