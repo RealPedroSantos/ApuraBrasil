@@ -26,6 +26,7 @@
   projectionMeta.appendChild(disclaimer);
 
   function activeMode(){return document.querySelector('.mode.active')?.dataset.office||'deputado-federal';}
+  function setText(el,value){if(el&&el.textContent!==value)el.textContent=value;}
 
   function decorateCards(){
     const counts=new Map();
@@ -33,19 +34,21 @@
     [...projectedList.querySelectorAll('.projected-card')].forEach(card=>{
       const statusEl=card.querySelector('.seat-status strong');
       if(!statusEl)return;
-      const wasOfficial=norm(statusEl.textContent).includes('oficial')||norm(statusEl.textContent).includes('eleito');
+      const statusText=norm(statusEl.textContent);
+      const wasOfficial=statusText.includes('oficial')||statusText.includes('eleito');
       const party=partyFromCard(card);
       const entry=counts.get(party)||{official:0,projected:0};
+      const detail=card.querySelector('.seat-status span');
       if(wasOfficial){
         official++;entry.official++;
         card.classList.add('status-official');card.classList.remove('status-projected');
-        statusEl.textContent='ELEITO — TSE';
-        const detail=card.querySelector('.seat-status span');if(detail)detail.textContent='situação oficial';
+        setText(statusEl,'ELEITO — TSE');
+        setText(detail,'situação oficial');
       }else{
         projected++;entry.projected++;
         card.classList.add('status-projected');card.classList.remove('status-official');
-        statusEl.textContent='PRÉ-APROVADO';
-        const detail=card.querySelector('.seat-status span');if(detail)detail.textContent='projeção ApuraBrasil';
+        setText(statusEl,'PRÉ-APROVADO');
+        setText(detail,'projeção ApuraBrasil');
       }
       counts.set(party,entry);
     });
@@ -75,14 +78,16 @@
     const {counts,official,projected}=decorateCards();
     let pending=0;
     if(mode==='congresso'){
-      /* Combined candidate list does not identify the house of each dot. Avoid falsely assigning official green seats to a specific chamber. */
+      /* The combined list does not identify which house owns each candidate. Keep chamber rings projected rather than falsely assigning official seats. */
       pending+=decorateVisual(chamberVisual,counts,false).pending;
       pending+=decorateVisual(secondaryVisual,counts,false).pending;
     }else{
       pending+=decorateVisual(chamberVisual,counts,true).pending;
-      if(secondaryVisual&&!secondaryVisual.closest('.hidden'))pending+=decorateVisual(secondaryVisual,counts,true).pending;
+      const secondaryCard=secondaryVisual?.closest('.secondary-chamber');
+      if(secondaryVisual&&secondaryCard&&!secondaryCard.classList.contains('hidden'))pending+=decorateVisual(secondaryVisual,counts,true).pending;
     }
-    counters.innerHTML=`<span class="composition-status-pill official"><b>${official}</b> ELEITOS TSE</span><span class="composition-status-pill projected"><b>${projected}</b> PRÉ-APROVADOS</span><span class="composition-status-pill pending"><b>${pending}</b> EM DISPUTA</span>`;
+    const html=`<span class="composition-status-pill official"><b>${official}</b> ELEITOS TSE</span><span class="composition-status-pill projected"><b>${projected}</b> PRÉ-APROVADOS</span><span class="composition-status-pill pending"><b>${pending}</b> EM DISPUTA</span>`;
+    if(counters.innerHTML!==html)counters.innerHTML=html;
   }
 
   function schedule(){clearTimeout(timer);timer=setTimeout(render,80);}
