@@ -8,7 +8,7 @@
 
   const wrap=document.createElement('div');
   wrap.className='geo-search-wrap';
-  wrap.innerHTML='<div class="geo-search-box"><span class="geo-search-icon">⌕</span><input id="geoSearchInput" class="geo-search-input" type="search" autocomplete="off" spellcheck="false" placeholder="Buscar estado, município, distrito, zona ou seção"><button class="geo-search-clear" type="button" aria-label="Limpar busca">×</button><div id="geoSearchResults" class="geo-search-results" role="listbox"></div></div>';
+  wrap.innerHTML='<div class="geo-search-box"><span class="geo-search-icon">⌕</span><input id="geoSearchInput" class="geo-search-input" type="search" autocomplete="off" spellcheck="false" placeholder="Buscar estado, município, bairro, distrito, local, zona ou seção"><button class="geo-search-clear" type="button" aria-label="Limpar busca">×</button><div id="geoSearchResults" class="geo-search-results" role="listbox"></div></div>';
   mapHead.insertAdjacentElement('afterend',wrap);
   const input=wrap.querySelector('#geoSearchInput');
   const results=wrap.querySelector('#geoSearchResults');
@@ -19,12 +19,14 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   async function waitFor(fn,timeout=18000){const start=Date.now();while(Date.now()-start<timeout){const value=typeof fn==='function'?fn():document.querySelector(fn);if(value)return value;await wait(90);}throw new Error('Tempo esgotado ao abrir a localidade.');}
-  function typeLabel(type){return ({state:'Estado',municipality:'Município',district:'Distrito',zone:'Zona',section:'Seção'})[type]||type;}
-  function typeIcon(type){return ({state:'UF',municipality:'M',district:'D',zone:'Z',section:'S'})[type]||'•';}
+  function typeLabel(type){return ({state:'Estado',municipality:'Município',district:'Distrito',neighborhood:'Bairro',place:'Local',zone:'Zona',section:'Seção'})[type]||type;}
+  function typeIcon(type){return ({state:'UF',municipality:'M',district:'D',neighborhood:'B',place:'L',zone:'Z',section:'S'})[type]||'•';}
   function subtitle(item){
     if(item.type==='state')return item.abbr||item.name;
     if(item.type==='municipality')return `${item.abbr||''} • ${item.stateName||''}`;
     if(item.type==='district')return `${item.municipalityName||''} • ${item.abbr||''}`;
+    if(item.type==='neighborhood')return `${item.municipalityName||'Município atual'} • ${item.places||0} locais de votação`;
+    if(item.type==='place')return `${item.neighborhood||'Bairro não informado'} • Zona ${item.zone||'—'} • Local ${item.code||'—'}`;
     if(item.type==='zone')return `${item.municipalityName||'Município atual'} • Zona ${item.zone}`;
     if(item.type==='section')return `${item.municipalityName||'Município atual'} • Zona ${item.zone}`;
     return '';
@@ -37,25 +39,35 @@
     results.classList.add('open');
   }
   function currentMunicipality(){
-    const crumbs=[...document.querySelectorAll('#breadcrumb button,#breadcrumb span')].map(el=>el.textContent.trim()).filter(Boolean);
+    const crumbs=[...document.querySelectorAll('#breadcrumb button,#breadcrumb span')].filter(el=>!el.classList.contains('crumb-sep')).map(el=>el.textContent.trim()).filter(Boolean);
     return crumbs.length>=3?crumbs[2]:document.getElementById('mapTitle')?.textContent?.trim()||'';
   }
   function localElectionMatches(q){
     const out=[];
-    if(!zoneList)return out;
     const nq=norm(q),zoneMatch=nq.match(/(?:zona\s*)?(\d{1,4})$/),sectionMatch=nq.match(/(?:secao\s*)?(\d{1,4})$/);
     const asksZone=nq.includes('zona');
     const asksSection=nq.includes('secao');
     const city=currentMunicipality();
-    if(asksZone&&zoneMatch){
+    if(zoneList&&asksZone&&zoneMatch){
       const wanted=zoneMatch[1];
       [...zoneList.querySelectorAll('.zone-card')].forEach(card=>{const text=card.querySelector('h4')?.textContent||'';const m=text.match(/(\d+)/);if(m&&m[1].includes(wanted))out.push({type:'zone',label:`Zona ${m[1]}`,zone:m[1],municipalityName:city});});
     }
-    if(asksSection&&sectionMatch){
+    if(zoneList&&asksSection&&sectionMatch){
       const wanted=sectionMatch[1];
       [...zoneList.querySelectorAll('.zone-card')].forEach(card=>{const z=(card.querySelector('h4')?.textContent||'').match(/(\d+)/)?.[1]||'';[...card.querySelectorAll('.section-pill')].forEach(pill=>{const n=pill.textContent.trim();if(n===wanted||n.startsWith(wanted))out.push({type:'section',label:`Seção ${n}`,section:n,zone:z,municipalityName:city});});});
     }
-    return out.slice(0,10);
+    const md=window.ApuraMunicipalData;
+    if(md&&nq.length>=2){
+      for(const n of md.neighborhoods||[]){
+        if(norm(n.name).includes(nq)||nq.includes(norm(n.name)))out.push({type:'neighborhood',label:n.name,name:n.name,municipalityName:md.municipality,places:n.places,electorate:n.electorate});
+      }
+      for(const p of md.places||[]){
+        const hay=norm(`${p.name} ${p.address} ${p.neighborhood} zona ${p.zone} local ${p.code}`);
+        if(hay.includes(nq))out.push({type:'place',label:p.name||`Local ${p.code}`,name:p.name,code:p.code,zone:p.zone,neighborhood:p.neighborhood,address:p.address,municipalityName:md.municipality});
+        if(out.length>=14)break;
+      }
+    }
+    return out.slice(0,12);
   }
   async function search(q){
     const my=++requestId;
@@ -105,10 +117,24 @@
     target.scrollIntoView({behavior:'smooth',block:'center'});target.classList.add('search-target');setTimeout(()=>target.classList.remove('search-target'),2600);
     input.value='';
   }
-  results.addEventListener('click',async e=>{const btn=e.target.closest('[data-index]');if(!btn)return;const item=items[Number(btn.dataset.index)];if(!item)return;try{if(item.type==='zone'||item.type==='section')await navigateElection(item);else await navigateGeo(item);}catch(error){const done=navStatus(error.message||'Não foi possível abrir o local.');setTimeout(done,1800);}});
+  async function navigateMunicipalData(item){
+    results.classList.remove('open');
+    const button=document.querySelector(`[data-municipal-layer="${item.type==='neighborhood'?'neighborhoods':'places'}"]`);button?.click();
+    await wait(160);
+    if(item.type==='neighborhood'){
+      const card=await waitFor(()=>[...document.querySelectorAll('.neighborhood-card')].find(el=>norm(el.dataset.neighborhood)===norm(item.name)),10000);
+      card.scrollIntoView({behavior:'smooth',block:'center'});card.classList.add('search-target');setTimeout(()=>card.classList.remove('search-target'),2600);
+    }else{
+      const card=await waitFor(()=>[...document.querySelectorAll('.place-card')].find(el=>String(el.dataset.place)===String(item.code)&&String(el.dataset.zone)===String(item.zone)),10000);
+      card.scrollIntoView({behavior:'smooth',block:'center'});card.classList.add('search-target');setTimeout(()=>card.classList.remove('search-target'),2600);
+    }
+    input.value='';
+  }
+  results.addEventListener('click',async e=>{const btn=e.target.closest('[data-index]');if(!btn)return;const item=items[Number(btn.dataset.index)];if(!item)return;try{if(item.type==='zone'||item.type==='section')await navigateElection(item);else if(item.type==='neighborhood'||item.type==='place')await navigateMunicipalData(item);else await navigateGeo(item);}catch(error){const done=navStatus(error.message||'Não foi possível abrir o local.');setTimeout(done,1800);}});
   input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>search(input.value),180);});
   input.addEventListener('focus',()=>{if(input.value.trim().length>=2)search(input.value);});
   input.addEventListener('keydown',e=>{if(e.key==='Escape'){results.classList.remove('open');input.blur();}if(e.key==='Enter'){const first=results.querySelector('[data-index]');if(first){e.preventDefault();first.click();}}});
   clear.addEventListener('click',()=>{input.value='';results.classList.remove('open');input.focus();});
+  window.addEventListener('apura:municipal-data',()=>{if(input.value.trim().length>=2)search(input.value);});
   document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target))results.classList.remove('open');});
 })();
