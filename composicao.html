@@ -3,22 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>ApuraBrasil — Composição projetada</title>
+  <title>ApuraBrasil — Simulação das casas legislativas</title>
   <script src="/mobile-mode.js"></script>
   <link rel="stylesheet" href="/composicao.css">
   <link rel="stylesheet" href="/mobile-ui.css">
-  <link rel="stylesheet" href="/composition-status.css">
 </head>
 <body>
 <div class="projection-app">
   <header class="projection-top">
-    <img src="/assets/logo-apura-current.svg" alt="Apura Brasil" class="projection-logo" style="display:block;height:48px;width:auto;max-width:220px;object-fit:contain" />
+    <img src="/assets/logo-apura-current.svg" alt="Apura Brasil" class="projection-logo" />
     <div class="projection-title"><span>COMPOSIÇÃO</span><strong>Simulação das casas legislativas</strong></div>
     <a href="/" class="back-link">Voltar à apuração</a>
   </header>
 
   <section class="projection-controls">
-    <div class="control-group">
+    <div class="control-group house-control">
       <label>Casa</label>
       <div class="segmented">
         <button class="mode active" data-office="deputado-federal">Câmara</button>
@@ -27,7 +26,17 @@
         <button class="mode" data-office="deputado-estadual">Assembleia</button>
       </div>
     </div>
-    <div class="control-group">
+
+    <div class="control-group simulation-control">
+      <label>Modo</label>
+      <div class="segmented simulation-segmented">
+        <button class="simulation-mode active" data-simulation="live">Projeção</button>
+        <button class="simulation-mode" data-simulation="scenario">Criar cenário</button>
+        <button class="simulation-mode" data-simulation="forecast">Probabilidade</button>
+      </div>
+    </div>
+
+    <div class="control-group uf-control">
       <label>Abrangência</label>
       <select id="ufSelect"><option value="BR">Brasil</option></select>
     </div>
@@ -38,7 +47,7 @@
     <section class="composition-panel">
       <div class="panel-head">
         <div>
-          <span class="eyebrow">SE A APURAÇÃO TERMINASSE AGORA</span>
+          <span class="eyebrow">SIMULADOR ELEITORAL 2026</span>
           <h1 id="compositionTitle">Câmara dos Deputados • Brasil</h1>
         </div>
         <div class="projection-meta">
@@ -49,10 +58,22 @@
 
       <div id="seatSummary" class="seat-summary"></div>
 
+      <section id="scenarioPanel" class="scenario-panel hidden">
+        <div class="scenario-head">
+          <div>
+            <span class="eyebrow">CENÁRIO MANUAL</span>
+            <strong>Altere a força eleitoral</strong>
+            <small id="scenarioNote"></small>
+          </div>
+          <button id="resetScenario" type="button" class="reset-scenario">Zerar alterações</button>
+        </div>
+        <div id="scenarioControls" class="scenario-controls"></div>
+      </section>
+
       <div id="chamberArea" class="chamber-area">
         <div class="chamber-card">
           <div class="chamber-head">
-            <div><span class="eyebrow" id="chamberEyebrow">PLENÁRIO PROJETADO</span><strong id="chamberTitle">Câmara dos Deputados</strong></div>
+            <div><span class="eyebrow">PLENÁRIO PROJETADO</span><strong id="chamberTitle">Câmara dos Deputados</strong></div>
             <div id="chamberCount" class="chamber-count">—</div>
           </div>
           <div id="chamberVisual" class="chamber-visual" aria-label="Simulação visual das cadeiras"></div>
@@ -68,24 +89,28 @@
         </div>
       </div>
 
+      <div class="party-section-head">
+        <span class="eyebrow">DISTRIBUIÇÃO</span>
+        <strong>Composição por partido</strong>
+      </div>
       <div id="partyComposition" class="party-composition"></div>
     </section>
 
     <section class="projected-panel">
       <div class="panel-head">
-        <div><span class="eyebrow">NOMES EM FAIXA</span><h2>Projetados neste momento</h2></div>
+        <div><span class="eyebrow">NOMES EM FAIXA</span><h2 id="namesTitle">Projetados neste momento</h2></div>
       </div>
       <div id="projectedList" class="projected-list"></div>
     </section>
   </main>
 
   <footer class="projection-footer">
-    <span>Simulação parcial baseada nos dados correntes do TSE. Não equivale à proclamação oficial de eleitos.</span>
+    <span id="modeDisclaimer">Projeção matemática com os votos parciais disponíveis. Não equivale à proclamação oficial de eleitos.</span>
     <span id="projectionClock">--:--:--</span>
   </footer>
 </div>
 <script src="/logo-override.js"></script>
+<script src="/legislative-simulator.js" defer></script>
 <script src="/composicao.js" defer></script>
-<script src="/composition-status.js" defer></script>
 </body>
 </html>
