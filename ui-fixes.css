@@ -1,0 +1,22 @@
+/* Final UI alignment layer based on the approved mockups */
+.brand{gap:12px}.brand-logo{display:block;width:clamp(210px,18vw,330px);height:auto;object-fit:contain}.brand-divider{height:46px}.topbar{min-height:76px;padding:8px 14px}.office-nav{gap:clamp(12px,1.15vw,22px)}.office-btn{font-weight:700}.office-btn.active{font-weight:950}
+
+.main-grid{grid-template-columns:minmax(0,58fr) minmax(500px,42fr)}
+.map-stage{border-radius:10px;background:#e8e8e5}.map-canvas{padding:3%}.geo-region{stroke:rgba(255,255,255,.95);stroke-width:1.25}.geo-region:hover,.geo-region:focus-visible{filter:none;transform:none;fill:#34525e}.geo-region.selected{stroke-width:1.8}
+.results-panel{gap:8px}.summary-box{padding:10px 12px}.summary-heading h2{font-size:clamp(24px,1.9vw,34px)}.details-tabs{min-height:40px}
+
+/* Candidate cards must match the approved horizontal reference */
+.candidate-list{gap:6px}.candidate-card{min-height:clamp(82px,9.2vh,112px);grid-template-columns:clamp(74px,5.8vw,100px) minmax(0,1fr) clamp(165px,11.4vw,220px);background:#f4f4f2;border:1px solid #c7ccce}.candidate-main{padding:6px 10px 7px;grid-template-rows:auto auto minmax(20px,1fr)}.candidate-name{font-size:clamp(17px,1.35vw,25px);font-weight:950}.candidate-subline{min-height:21px;margin-top:2px}.party-chip{font-size:clamp(11px,.82vw,15px);min-height:20px;padding:1px 7px}.candidate-number{font-size:clamp(11px,.83vw,15px)}.candidate-bar{height:clamp(20px,2.1vh,27px);border-radius:0;border-color:#b8bec1}.candidate-bar span{font-size:clamp(10px,.78vw,14px)}.candidate-score{min-width:0;padding:5px 12px;justify-content:center}.candidate-score strong{font-size:clamp(42px,3.45vw,66px);letter-spacing:-.045em;line-height:.9}.candidate-status{margin-top:4px}
+
+/* Prevent the percentage column from ever colliding with the progress bar */
+.candidate-main{overflow:hidden}.candidate-score{position:relative;z-index:2;background:#f4f4f2}.candidate-bar{max-width:100%}
+
+/* Leadership highlights reserve a real column instead of covering the map */
+.map-stage.highlight-ready .map-canvas{padding-left:clamp(160px,11.5vw,225px)}.candidate-highlights{width:clamp(132px,9.2vw,182px)}.highlight-ring{width:clamp(74px,5.7vw,104px)}.highlight-info,.highlight-percent{background:#f4f4f2}.highlight-percent{font-size:clamp(24px,2.15vw,40px)}
+
+/* TV/touch: fixed shell, only internal lists scroll */
+html,body,.app-shell{overflow:hidden}.candidate-list,.detail-panel[data-panel="places"],.detail-panel[data-panel="zones"]{overscroll-behavior:contain;scrollbar-gutter:stable}
+
+@media(max-width:1400px){.main-grid{grid-template-columns:minmax(0,55fr) minmax(470px,45fr)}.brand-logo{width:220px}.candidate-card{grid-template-columns:76px minmax(0,1fr) 150px}.candidate-score strong{font-size:40px}}
+@media(max-height:820px){.topbar{min-height:64px}.brand-logo{width:190px}.brand-divider{height:38px}.candidate-card{min-height:72px;grid-template-columns:66px minmax(0,1fr) 130px}.candidate-name{font-size:15px}.candidate-score strong{font-size:33px}.candidate-bar{height:17px}.candidate-highlights{width:118px}.map-stage.highlight-ready .map-canvas{padding-left:136px}}
+@media(max-width:900px), (max-aspect-ratio:4/3){.main-grid{grid-template-columns:1fr;grid-template-rows:minmax(0,45%) minmax(0,55%)}.brand-logo{width:175px}.candidate-card{grid-template-columns:58px minmax(0,1fr) 98px}.candidate-score strong{font-size:28px}.map-stage.highlight-ready .map-canvas{padding-left:2.5%;padding-bottom:108px}}
