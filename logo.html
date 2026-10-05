@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f4f4f2" />
+  <title>ApuraBrasil — Configurar logo</title>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#f2f2ef;color:#101417}body{min-height:100vh;display:grid;place-items:center;padding:24px}.panel{width:min(820px,100%);background:#fff;border:1px solid #c8cdcf;padding:24px}.head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}.head h1{margin:0;font-size:28px}.back{color:#101417;text-decoration:none;border:1px solid #bfc5c7;padding:9px 14px;background:#f7f7f5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{border:1px solid #d3d7d8;background:#f7f7f5;padding:18px}.card h2{margin:0 0 12px;font-size:18px}.field{display:flex;flex-direction:column;gap:7px;margin-top:12px}.field label{font-weight:800;font-size:13px}.field input{width:100%;border:1px solid #bfc5c7;background:#fff;padding:11px;font-size:14px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.button{border:0;background:#243f49;color:#fff;font-weight:800;padding:10px 14px;cursor:pointer}.button.secondary{background:#e7e9e9;color:#101417;border:1px solid #bfc5c7}.preview{min-height:210px;display:grid;place-items:center;background:#ececea;border:1px dashed #bcc2c4;padding:20px;overflow:hidden}.preview img{display:block;max-width:100%;max-height:170px;object-fit:contain}.preview .empty{color:#6a7377;font-size:14px}.status{margin-top:16px;min-height:22px;font-weight:700;font-size:13px}.status.ok{color:#187745}.status.bad{color:#b42318}.note{margin-top:18px;font-size:12px;line-height:1.5;color:#5c666a;border-top:1px solid #ddd;padding-top:14px}@media(max-width:700px){body{padding:12px}.panel{padding:16px}.grid{grid-template-columns:1fr}.head{align-items:flex-start}.head h1{font-size:23px}}
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <div class="head">
+      <div><div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#687277">CONFIGURAÇÃO</div><h1>Logo do ApuraBrasil</h1></div>
+      <a class="back" href="/">Voltar ao sistema</a>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Enviar arquivo</h2>
+        <p style="margin:0;color:#5f696d;font-size:13px">PNG, SVG, JPG ou WebP. O arquivo é salvo neste navegador.</p>
+        <div class="field">
+          <label for="fileInput">Escolher logo</label>
+          <input id="fileInput" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" />
+        </div>
+        <div class="actions">
+          <button id="saveFile" class="button" type="button">Salvar arquivo</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Usar link da imagem</h2>
+        <p style="margin:0;color:#5f696d;font-size:13px">Cole uma URL direta da logo, por exemplo um PNG ou SVG publicado na internet.</p>
+        <div class="field">
+          <label for="urlInput">URL da logo</label>
+          <input id="urlInput" type="url" placeholder="https://exemplo.com/logo.png" />
+        </div>
+        <div class="actions">
+          <button id="saveUrl" class="button" type="button">Salvar link</button>
+        </div>
+      </section>
+    </div>
+
+    <section style="margin-top:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px"><strong>Prévia</strong><button id="restore" class="button secondary" type="button">Restaurar logo padrão</button></div>
+      <div id="preview" class="preview"><div class="empty">Nenhuma logo personalizada salva.</div></div>
+      <div id="status" class="status"></div>
+    </section>
+
+    <div class="note">Esta configuração é local: fica salva somente neste navegador/dispositivo. Se quiser que a mesma logo seja aplicada automaticamente para todos os usuários e aparelhos, o próximo passo é guardar o arquivo em um armazenamento do sistema.</div>
+  </main>
+
+  <script>
+    (() => {
+      const KEY='apurabrasil.customLogo';
+      const fileInput=document.getElementById('fileInput');
+      const urlInput=document.getElementById('urlInput');
+      const preview=document.getElementById('preview');
+      const status=document.getElementById('status');
+      const show=(message,ok=true)=>{status.textContent=message;status.className='status '+(ok?'ok':'bad')};
+      const draw=(src)=>{preview.innerHTML=src?`<img src="${src.replace(/"/g,'&quot;')}" alt="Prévia da logo">`:'<div class="empty">Nenhuma logo personalizada salva.</div>'};
+      const current=()=>{try{return localStorage.getItem(KEY)||''}catch{return ''}};
+      draw(current());
+
+      document.getElementById('saveUrl').addEventListener('click',()=>{
+        const value=urlInput.value.trim();
+        if(!/^https?:\/\//i.test(value)){show('Cole uma URL válida começando com http:// ou https://',false);return}
+        try{localStorage.setItem(KEY,value);draw(value);show('Logo salva. Ao voltar ao sistema ela será aplicada automaticamente.')}catch{show('Não foi possível salvar a logo neste navegador.',false)}
+      });
+
+      document.getElementById('saveFile').addEventListener('click',()=>{
+        const file=fileInput.files?.[0];
+        if(!file){show('Escolha um arquivo de imagem primeiro.',false);return}
+        if(file.size>2*1024*1024){show('Use um arquivo de até 2 MB para salvar no navegador.',false);return}
+        const reader=new FileReader();
+        reader.onload=()=>{try{localStorage.setItem(KEY,String(reader.result));draw(String(reader.result));show('Arquivo salvo. Ao voltar ao sistema ele será usado como logo.')}catch{show('O navegador não conseguiu armazenar esse arquivo.',false)}};
+        reader.onerror=()=>show('Não foi possível ler o arquivo.',false);
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('restore').addEventListener('click',()=>{
+        try{localStorage.removeItem(KEY);draw('');urlInput.value='';fileInput.value='';show('Logo personalizada removida. O sistema voltará à logo padrão.')}catch{show('Não foi possível restaurar a logo.',false)}
+      });
+    })();
+  </script>
+</body>
+</html>
