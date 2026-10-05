@@ -49,19 +49,19 @@
     if(!response.ok||payload.ok===false)throw new Error(payload.detail||payload.error||'Não foi possível carregar os locais de votação.');
     data=payload;dataKey=key;filterNeighborhood='';expose();return data;
   }
-  function note(){return '<div class="municipal-layer-note"><strong>APURAÇÃO DERIVADA.</strong> Bairro não é uma abrangência oficial de totalização do TSE. O ApuraBrasil relaciona locais e, quando a base de votação por seção estiver vinculada, soma as urnas do bairro. Até essa associação estar disponível, não exibimos percentuais de votos por bairro.</div>';}
+  function note(){return '<div class="municipal-layer-note"><strong>APURAÇÃO DERIVADA.</strong> Bairro não é uma abrangência oficial de totalização do TSE. O ApuraBrasil relaciona locais e seções; os votos por bairro só serão exibidos quando a votação detalhada por seção estiver disponível e vinculada com segurança.</div>';}
   function renderNeighborhoods(){
     title.textContent=`Bairros • ${data?.municipality||context()?.municipality||''}`;
     subtitle.textContent='Cadastro dos locais de votação do TSE • camada derivada';
     const list=data?.neighborhoods||[];
-    body.innerHTML=note()+(list.length?`<div class="neighborhood-grid">${list.map((n,i)=>`<button type="button" class="neighborhood-card" data-neighborhood="${esc(n.name)}" style="text-align:left;cursor:pointer"><strong>${esc(n.name)}</strong><div class="n-meta"><span>${fmt(n.places)} locais</span><span>${fmt(n.electorate)} eleitores</span><span>${n.zones?.length?`Zonas ${esc(n.zones.join(', '))}`:''}</span></div><div class="n-status">VOTAÇÃO POR BAIRRO: aguardando vínculo oficial das seções</div></button>`).join('')}</div>`:'<div class="municipal-layer-error">Nenhum bairro informado no cadastro do TSE para este município.</div>');
+    body.innerHTML=note()+(list.length?`<div class="neighborhood-grid">${list.map(n=>`<button type="button" class="neighborhood-card" data-neighborhood="${esc(n.name)}" style="text-align:left;cursor:pointer"><strong>${esc(n.name)}</strong><div class="n-meta"><span>${fmt(n.places)} locais</span><span>${fmt(n.sections)} seções</span><span>${fmt(n.electorate)} eleitores</span><span>${n.zones?.length?`Zonas ${esc(n.zones.join(', '))}`:''}</span></div><div class="n-status">VOTAÇÃO POR BAIRRO: aguardando votos detalhados das seções</div></button>`).join('')}</div>`:'<div class="municipal-layer-error">Nenhum bairro informado no cadastro do TSE para este município.</div>');
   }
   function renderPlaces(neighborhood=''){
     filterNeighborhood=neighborhood||'';
     title.textContent=`Locais de votação • ${data?.municipality||context()?.municipality||''}`;
     subtitle.textContent=filterNeighborhood?`Bairro: ${filterNeighborhood}`:'Endereço e bairro conforme cadastro eleitoral do TSE';
     const list=(data?.places||[]).filter(p=>!filterNeighborhood||norm(p.neighborhood)===norm(filterNeighborhood));
-    body.innerHTML=(filterNeighborhood?`<div class="municipal-layer-note"><button type="button" id="clearNeighborhoodFilter" style="border:0;background:none;padding:0;font:inherit;font-weight:900;cursor:pointer">← Todos os bairros</button> • ${fmt(list.length)} locais em <strong>${esc(filterNeighborhood)}</strong></div>`:'')+(list.length?`<div class="place-list">${list.map(p=>`<article class="place-card" data-place="${esc(p.code)}" data-zone="${esc(p.zone)}"><div class="place-zone">Zona ${esc(p.zone)}<br>Local ${esc(p.code)}</div><div class="place-main"><strong>${esc(p.name||`Local ${p.code}`)}</strong><span>${esc(p.address||'Endereço não informado')}${p.zipCode?` • CEP ${esc(p.zipCode)}`:''}</span></div><div class="place-bairro">${esc(p.neighborhood||'Bairro não informado')}</div></article>`).join('')}</div>`:'<div class="municipal-layer-error">Nenhum local de votação encontrado para este recorte.</div>');
+    body.innerHTML=(filterNeighborhood?`<div class="municipal-layer-note"><button type="button" id="clearNeighborhoodFilter" style="border:0;background:none;padding:0;font:inherit;font-weight:900;cursor:pointer">← Todos os bairros</button> • ${fmt(list.length)} locais em <strong>${esc(filterNeighborhood)}</strong></div>`:'')+(list.length?`<div class="place-list">${list.map(p=>`<article class="place-card" data-place="${esc(p.code)}" data-zone="${esc(p.zone)}"><div class="place-zone">Zona ${esc(p.zone)}<br>Local ${esc(p.code)}</div><div class="place-main"><strong>${esc(p.name||`Local ${p.code}`)}</strong><span>${esc(p.address||'Endereço não informado')}${p.zipCode?` • CEP ${esc(p.zipCode)}`:''}</span><span>${fmt(p.sections?.length||0)} seções • ${fmt(p.electorate)} eleitores</span></div><div class="place-bairro">${esc(p.neighborhood||'Bairro não informado')}</div></article>`).join('')}</div>`:'<div class="municipal-layer-error">Nenhum local de votação encontrado para este recorte.</div>');
     body.querySelector('#clearNeighborhoodFilter')?.addEventListener('click',()=>renderPlaces(''));
   }
   async function show(nextMode){
@@ -73,6 +73,6 @@
   }
   switcher.addEventListener('click',e=>{const btn=e.target.closest('[data-municipal-layer]');if(btn)show(btn.dataset.municipalLayer);});
   body.addEventListener('click',e=>{const card=e.target.closest('[data-neighborhood]');if(!card)return;show('places').then(()=>renderPlaces(card.dataset.neighborhood));});
-  new MutationObserver(()=>{const before=!!context();updateVisibility();const ctx=context();if(ctx&&dataKey&&dataKey!==`${ctx.uf}|${norm(ctx.municipality)}`){data=null;dataKey='';expose();}if(!ctx)overlay.classList.remove('open');}).observe(breadcrumb,{childList:true,subtree:true});
+  new MutationObserver(()=>{updateVisibility();const ctx=context();if(ctx&&dataKey&&dataKey!==`${ctx.uf}|${norm(ctx.municipality)}`){data=null;dataKey='';expose();}if(!ctx)overlay.classList.remove('open');}).observe(breadcrumb,{childList:true,subtree:true});
   updateVisibility();
 })();
