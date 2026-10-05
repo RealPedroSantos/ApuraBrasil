@@ -83,7 +83,7 @@
     counts.forEach((count,row)=>{
       const radius=rows===1?82:35+(55*row/(rows-1));
       for(let i=0;i<count;i++){
-        const t=count===1?.5:i/(count-1);
+        const t=count===1 ? 0.5 : i/(count-1);
         const angle=Math.PI*(.07+.86*t);
         points.push({x:50+Math.cos(angle)*radius*.5,y:93-Math.sin(angle)*radius*.83,row});
       }
@@ -204,6 +204,11 @@
         const ok=settled.filter(x=>x.status==='fulfilled').map(x=>x.value);
         renderStandard(ok,targets.length,view);
       }
+    }catch(error){
+      console.error('composition load failed',error);
+      projectionProgress.textContent='Falha ao carregar';
+      partyComposition.innerHTML='<div class="summary-card">Não foi possível carregar a composição agora.</div>';
+      projectedList.innerHTML='<div class="summary-card">Tente novamente em alguns segundos.</div>';
     }finally{loading=false;}
   }
 
