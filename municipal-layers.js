@@ -9,7 +9,7 @@
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=v=>new Intl.NumberFormat('pt-BR').format(Number(v||0));
-  let data=null,dataKey='',mode='districts',filterNeighborhood='';
+  let data=null,dataKey='',mode='districts',filterNeighborhood='',preloadTimer=null;
 
   const switcher=document.createElement('div');
   switcher.className='municipal-layer-switch';
@@ -43,11 +43,20 @@
     const ctx=context();if(!ctx||!ctx.uf)throw new Error('Não foi possível identificar a UF do município.');
     const key=`${ctx.uf}|${norm(ctx.municipality)}`;
     if(data&&dataKey===key)return data;
-    body.innerHTML='<div class="municipal-layer-loading">Carregando bairros e locais de votação do TSE…</div>';
+    if(overlay.classList.contains('open'))body.innerHTML='<div class="municipal-layer-loading">Carregando bairros e locais de votação do TSE…</div>';
     const response=await fetch(`/api/polling-places?uf=${encodeURIComponent(ctx.uf)}&municipalityName=${encodeURIComponent(ctx.municipality)}`,{headers:{Accept:'application/json'}});
     const payload=await response.json().catch(()=>({}));
     if(!response.ok||payload.ok===false)throw new Error(payload.detail||payload.error||'Não foi possível carregar os locais de votação.');
+    const current=context();
+    if(!current||`${current.uf}|${norm(current.municipality)}`!==key)return payload;
     data=payload;dataKey=key;filterNeighborhood='';expose();return data;
+  }
+  function preload(){
+    clearTimeout(preloadTimer);
+    const ctx=context();if(!ctx||!ctx.uf)return;
+    const key=`${ctx.uf}|${norm(ctx.municipality)}`;
+    if(data&&dataKey===key)return;
+    preloadTimer=setTimeout(()=>loadData().catch(()=>{}),420);
   }
   function note(){return '<div class="municipal-layer-note"><strong>APURAÇÃO DERIVADA.</strong> Bairro não é uma abrangência oficial de totalização do TSE. O ApuraBrasil relaciona locais e seções; os votos por bairro só serão exibidos quando a votação detalhada por seção estiver disponível e vinculada com segurança.</div>';}
   function renderNeighborhoods(){
@@ -73,6 +82,12 @@
   }
   switcher.addEventListener('click',e=>{const btn=e.target.closest('[data-municipal-layer]');if(btn)show(btn.dataset.municipalLayer);});
   body.addEventListener('click',e=>{const card=e.target.closest('[data-neighborhood]');if(!card)return;show('places').then(()=>renderPlaces(card.dataset.neighborhood));});
-  new MutationObserver(()=>{updateVisibility();const ctx=context();if(ctx&&dataKey&&dataKey!==`${ctx.uf}|${norm(ctx.municipality)}`){data=null;dataKey='';expose();}if(!ctx)overlay.classList.remove('open');}).observe(breadcrumb,{childList:true,subtree:true});
-  updateVisibility();
+  new MutationObserver(()=>{
+    updateVisibility();
+    const ctx=context();
+    if(ctx&&dataKey&&dataKey!==`${ctx.uf}|${norm(ctx.municipality)}`){data=null;dataKey='';expose();}
+    if(!ctx){clearTimeout(preloadTimer);overlay.classList.remove('open');}
+    else preload();
+  }).observe(breadcrumb,{childList:true,subtree:true});
+  updateVisibility();preload();
 })();
