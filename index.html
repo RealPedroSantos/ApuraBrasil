@@ -7,12 +7,14 @@
   <title>ApuraBrasil — Eleições 2026</title>
   <link rel="stylesheet" href="/dashboard.css" />
   <link rel="stylesheet" href="/candidate-card.css" />
+  <link rel="stylesheet" href="/candidate-highlights.css" />
+  <link rel="stylesheet" href="/ui-fixes.css" />
 </head>
 <body>
 <div class="app-shell">
   <header class="topbar">
     <div class="brand" aria-label="ApuraBrasil">
-      <div class="brand-temp" title="Logo oficial será substituída pelo arquivo original enviado pelo usuário">ApuraBrasil</div>
+      <img class="brand-logo" src="/assets/logo-apurabrasil.svg" alt="ApuraBrasil" />
       <span class="brand-divider"></span>
     </div>
     <nav class="office-nav" aria-label="Cargos">
@@ -40,6 +42,7 @@
         </div>
       </div>
       <div class="map-stage" id="mapStage">
+        <div id="candidateHighlights" class="candidate-highlights" aria-label="Candidatos em destaque"></div>
         <div id="map" class="map-canvas"><div class="loading">Carregando mapa...</div></div>
         <div id="mapTooltip" class="map-tooltip" role="status" aria-live="polite"></div>
       </div>
@@ -91,5 +94,6 @@
   </footer>
 </div>
 <script src="/dashboard.js" defer></script>
+<script src="/candidate-highlights.js" defer></script>
 </body>
 </html>
