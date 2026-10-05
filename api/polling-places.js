@@ -77,6 +77,10 @@ module.exports=async function handler(req,res){
     const municipalityCode=String(req.query?.municipalityCode||'').replace(/\D/g,'');
     if(!uf||(!municipalityName&&!municipalityCode))return send(res,400,{ok:false,error:'Informe UF e município.'},'no-store');
     const rows=await allRows();
+    if(String(req.query?.debug||'')==='1'){
+      const samples=rows.slice(0,4).map(row=>({raw:row,normalized:normalizedPlace(row)}));
+      return send(res,200,{ok:true,rowCount:rows.length,columns:Object.keys(rows[0]||{}),samples},'no-store');
+    }
     const seen=new Map();
     for(const row of rows){
       const place=normalizedPlace(row);
