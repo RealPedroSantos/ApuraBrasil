@@ -1,0 +1,129 @@
+/* Prevent numeric and alignment clipping across desktop/tablet breakpoints. */
+
+/* Candidate card: protect the numeric column; text column absorbs compression. */
+.candidate-card{
+  grid-template-columns:clamp(60px,5.2vw,84px) minmax(0,1fr) clamp(132px,10vw,174px)!important;
+}
+
+.candidate-main{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+
+.candidate-name{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+.candidate-subline{
+  min-width:0!important;
+  max-width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  flex-wrap:nowrap!important;
+  overflow:visible!important;
+}
+
+.party-chip,
+.candidate-number{
+  flex:0 0 auto!important;
+  min-width:max-content!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+.candidate-score{
+  min-width:132px!important;
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+  padding-left:10px!important;
+  padding-right:10px!important;
+  overflow:visible!important;
+}
+
+.candidate-score strong{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+  font-size:clamp(28px,2.45vw,44px)!important;
+  line-height:.94!important;
+  letter-spacing:-.055em!important;
+  text-align:right!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+.candidate-status{
+  max-width:100%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* Highlight percentages also need a protected numeric box. */
+.highlight-percent{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  padding-left:4px!important;
+  padding-right:4px!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* Elected badge must not squeeze the official ballot number/score. */
+.elected-badge{
+  flex:0 0 auto!important;
+}
+
+@media(max-width:1380px){
+  .candidate-card{
+    grid-template-columns:62px minmax(0,1fr) 132px!important;
+  }
+  .candidate-score{
+    min-width:132px!important;
+  }
+  .candidate-score strong{
+    font-size:29px!important;
+  }
+}
+
+@media(max-height:780px) and (min-width:901px){
+  .candidate-card{
+    grid-template-columns:58px minmax(0,1fr) 132px!important;
+  }
+  .candidate-score{
+    min-width:132px!important;
+    padding-left:8px!important;
+    padding-right:8px!important;
+  }
+  .candidate-score strong{
+    font-size:28px!important;
+  }
+}
+
+@media(max-width:900px), (max-aspect-ratio:4/3){
+  .candidate-card{
+    grid-template-columns:54px minmax(0,1fr) 104px!important;
+  }
+  .candidate-score{
+    min-width:104px!important;
+    padding-left:5px!important;
+    padding-right:5px!important;
+  }
+  .candidate-score strong{
+    font-size:24px!important;
+    letter-spacing:-.06em!important;
+  }
+  .candidate-number{
+    font-size:9px!important;
+  }
+}
