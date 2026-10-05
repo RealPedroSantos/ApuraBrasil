@@ -1,0 +1,109 @@
+/* Stable final UI layer — keeps the app fixed to the viewport and removes conflicting sizing rules */
+:root{--rail-w:clamp(132px,9.4vw,168px)}
+
+/* Header */
+.topbar{min-height:clamp(66px,7.2vh,82px);grid-template-columns:auto minmax(0,1fr) auto;gap:clamp(10px,1vw,18px);padding:7px 12px;overflow:hidden}
+.brand{min-width:0;gap:10px;flex:0 0 auto}
+.brand-logo{display:block!important;width:auto!important;height:clamp(44px,5.4vh,62px)!important;max-width:clamp(180px,15vw,245px)!important;object-fit:contain!important;object-position:left center}
+.brand-divider{height:clamp(36px,4.4vh,48px);flex:0 0 2px}
+.office-nav{min-width:0;gap:clamp(9px,.95vw,19px);overflow-x:auto;overflow-y:hidden}
+.office-btn{font-size:clamp(14px,1.22vw,22px);min-height:38px;padding:5px 1px}
+.source-status{font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+
+/* Main split */
+.main-grid{grid-template-columns:minmax(0,57fr) minmax(500px,43fr);gap:clamp(10px,1vw,16px)}
+.map-panel,.results-panel{min-height:0}
+.map-head{padding-bottom:5px}
+.map-head h1{font-size:clamp(25px,2vw,34px)}
+.map-head p{font-size:clamp(10px,.78vw,13px)}
+
+/* Map stage: highlights get their own rail; they never overlay or squeeze the SVG unpredictably */
+.map-stage{display:grid!important;grid-template-columns:0 minmax(0,1fr);gap:0;min-height:0;border-radius:8px;overflow:hidden;background:#e8e8e5;transition:grid-template-columns .22s ease,gap .22s ease}
+.map-stage.highlight-ready{grid-template-columns:var(--rail-w) minmax(0,1fr);gap:clamp(5px,.5vw,9px)}
+.candidate-highlights{position:relative!important;inset:auto!important;grid-column:1;width:auto!important;height:100%!important;min-width:0;min-height:0;padding:clamp(7px,.7vh,11px) 5px;display:flex!important;flex-direction:column;justify-content:space-evenly;gap:clamp(5px,.6vh,9px);overflow:hidden;pointer-events:none}
+.candidate-highlights:empty{visibility:hidden}
+.map-canvas{position:relative!important;inset:auto!important;grid-column:2;width:100%;height:100%;min-width:0;min-height:0;padding:clamp(12px,2.2%,24px)!important;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.map-stage.highlight-ready .map-canvas{padding-left:clamp(12px,2.2%,24px)!important}
+.vector-map{width:100%;height:100%;max-width:100%;max-height:100%;display:block}
+.geo-region{stroke:rgba(255,255,255,.96);stroke-width:1.2;filter:none!important;transform:none!important}
+.geo-region:hover,.geo-region:focus-visible{fill:#35525d;stroke-width:1.55}
+
+/* Highlight cards */
+.highlight-card{width:100%;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:auto;overflow:hidden}
+.highlight-ring{width:clamp(62px,5vw,86px)!important;flex:0 0 auto;aspect-ratio:1;border-radius:50%;padding:4px;background:conic-gradient(from -90deg,var(--candidate-color) calc(var(--pct)*1%),#484d50 0)!important;box-shadow:none!important}
+.highlight-ring-inner{padding:4px;background:#2c3032}
+.highlight-photo{background:#f4f4f2}
+.highlight-info{width:100%;min-width:0;padding:3px 5px!important;background:#f4f4f2!important;border:1px solid #c8cdcf!important;overflow:hidden}
+.highlight-name{font-size:clamp(8px,.62vw,11px)!important;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.highlight-subline{margin-top:2px;gap:3px}
+.highlight-party,.highlight-number{font-size:clamp(7px,.5vw,9px)!important}
+.highlight-percent{width:100%;padding:1px 3px!important;background:#f4f4f2!important;border:1px solid #c8cdcf!important;font-size:clamp(21px,1.75vw,31px)!important;line-height:1;text-align:center;white-space:nowrap;overflow:hidden}
+
+/* Results panel */
+.results-panel{grid-template-rows:auto auto minmax(0,1fr);gap:6px}
+.summary-box{padding:8px 10px}
+.summary-heading{margin-bottom:5px}
+.summary-heading h2{font-size:clamp(21px,1.7vw,30px)}
+.total-main strong{font-size:clamp(30px,2.7vw,46px)}
+.section-counter strong{font-size:clamp(19px,1.6vw,27px)}
+.details-tabs{min-height:38px}
+
+/* Candidate list matches the approved horizontal reference without collisions */
+.candidate-list{gap:5px;padding-right:2px}
+.candidate-card{min-height:clamp(72px,8.1vh,92px)!important;grid-template-columns:clamp(66px,5.2vw,84px) minmax(0,1fr) clamp(128px,9.2vw,165px)!important;background:#f4f4f2!important;border:1px solid #c6cbcd!important;overflow:hidden!important}
+.candidate-avatar{min-width:0}
+.candidate-main{min-width:0;overflow:hidden;padding:5px 8px 6px!important;grid-template-rows:auto auto minmax(17px,1fr)!important}
+.candidate-name{font-size:clamp(15px,1.18vw,20px)!important;line-height:1!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.candidate-subline{min-height:18px!important;margin-top:2px!important;gap:5px!important}
+.party-chip{min-height:18px!important;padding:1px 6px!important;font-size:clamp(10px,.7vw,12px)!important}
+.candidate-number{font-size:clamp(10px,.72vw,12px)!important}
+.candidate-bar{height:clamp(17px,1.7vh,21px)!important;max-width:100%;border-radius:0!important;overflow:hidden}
+.candidate-bar span{font-size:clamp(9px,.66vw,11px)!important;padding:0 6px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.candidate-score{min-width:0!important;max-width:100%;padding:4px 8px!important;background:#f4f4f2!important;overflow:hidden!important;align-items:flex-end;justify-content:center}
+.candidate-score strong{max-width:100%;font-size:clamp(30px,2.75vw,48px)!important;line-height:.92!important;letter-spacing:-.04em!important;white-space:nowrap;overflow:hidden;text-overflow:clip;font-variant-numeric:tabular-nums}
+.candidate-status{font-size:8px!important;margin-top:3px!important;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+
+/* Only internal panels scroll */
+html,body,.app-shell{overflow:hidden!important}
+.detail-panel,.candidate-list,.detail-panel[data-panel="places"],.detail-panel[data-panel="zones"]{min-height:0;overscroll-behavior:contain}
+.candidate-list,.detail-panel[data-panel="places"],.detail-panel[data-panel="zones"]{overflow:auto!important;scrollbar-width:thin}
+
+@media(max-width:1380px){
+  :root{--rail-w:118px}
+  .main-grid{grid-template-columns:minmax(0,54fr) minmax(470px,46fr)}
+  .brand-logo{height:42px!important;max-width:175px!important}
+  .candidate-card{grid-template-columns:62px minmax(0,1fr) 120px!important}
+  .candidate-score strong{font-size:31px!important}
+  .highlight-ring{width:58px!important}
+  .highlight-percent{font-size:21px!important}
+}
+
+@media(max-height:780px) and (min-width:901px){
+  :root{--rail-w:108px}
+  .topbar{min-height:60px}
+  .brand-logo{height:38px!important;max-width:160px!important}
+  .map-head p{display:none}
+  .highlight-card:nth-child(n+4){display:none}
+  .highlight-ring{width:52px!important}
+  .highlight-info{padding:2px 4px!important}
+  .highlight-percent{font-size:19px!important}
+  .candidate-card{min-height:64px!important;grid-template-columns:58px minmax(0,1fr) 112px!important}
+  .candidate-name{font-size:14px!important}
+  .candidate-score strong{font-size:29px!important}
+  .candidate-bar{height:16px!important}
+}
+
+@media(max-width:900px), (max-aspect-ratio:4/3){
+  .main-grid{grid-template-columns:1fr;grid-template-rows:minmax(0,44%) minmax(0,56%)}
+  .map-stage,.map-stage.highlight-ready{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 82px;gap:5px}
+  .map-canvas{grid-column:1;grid-row:1;padding:10px!important}
+  .candidate-highlights{grid-column:1;grid-row:2;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));padding:4px;gap:4px}
+  .highlight-card{display:grid;grid-template-columns:48px minmax(0,1fr);grid-template-rows:1fr 1fr;align-items:center;gap:2px 5px;background:rgba(244,244,242,.97);border:1px solid #c7ccce;padding:4px}
+  .highlight-card:nth-child(n+4){display:none}
+  .highlight-ring{grid-row:1/3;width:48px!important}
+  .highlight-info,.highlight-percent{border:0!important;background:transparent!important;padding:0!important;text-align:left}
+  .highlight-percent{font-size:18px!important}
+  .brand-logo{height:36px!important;max-width:145px!important}
+  .candidate-card{grid-template-columns:54px minmax(0,1fr) 92px!important}
+  .candidate-score strong{font-size:27px!important}
+}
