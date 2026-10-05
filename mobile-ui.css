@@ -1,0 +1,116 @@
+/* Dedicated mobile/touch UI. Activated by mobile-mode.js via html.mobile-ui */
+html.mobile-ui,html.mobile-ui body{width:100%;height:100%;overflow:hidden;background:#f4f4f2;-webkit-text-size-adjust:100%;touch-action:manipulation}
+html.mobile-ui .app-shell{height:100svh;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+
+/* Header */
+html.mobile-ui .topbar{min-height:0!important;height:auto!important;display:grid!important;grid-template-columns:auto 1fr auto!important;grid-template-rows:auto auto!important;gap:6px 8px!important;padding:6px 8px!important;align-items:center!important;overflow:hidden!important}
+html.mobile-ui .brand{grid-column:1;grid-row:1;gap:6px!important;min-width:0}
+html.mobile-ui .brand-logo{height:34px!important;max-width:132px!important;width:auto!important}
+html.mobile-ui .brand-divider{height:28px!important}
+html.mobile-ui .source-status{grid-column:3;grid-row:1;font-size:8px!important;max-width:92px!important;white-space:nowrap}
+html.mobile-ui .office-nav{grid-column:1/-1;grid-row:2;width:100%;display:flex!important;gap:6px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:1px 0 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+html.mobile-ui .office-nav::-webkit-scrollbar{display:none}
+html.mobile-ui .office-btn{flex:0 0 auto;min-height:34px!important;padding:5px 9px!important;font-size:12px!important;border:1px solid #c9cdcf;border-radius:7px;background:#ececea;scroll-snap-align:start}
+html.mobile-ui .office-btn.active{background:#294651;color:#fff;border-color:#294651}
+
+/* Main screen */
+html.mobile-ui .main-grid{min-height:0!important;height:100%!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:minmax(190px,39%) minmax(0,61%)!important;gap:6px!important;padding:0 7px 6px!important;overflow:hidden!important}
+html.mobile-ui .map-panel,html.mobile-ui .results-panel{min-width:0;min-height:0;overflow:hidden}
+html.mobile-ui .map-panel{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:3px}
+html.mobile-ui .map-head{display:flex;align-items:flex-end;gap:6px;padding:1px 1px 2px!important;min-height:0}
+html.mobile-ui .map-titles{min-width:0;flex:1}
+html.mobile-ui .breadcrumb{font-size:8px!important;line-height:1.1}
+html.mobile-ui .map-head h1{font-size:20px!important;line-height:1!important;margin:1px 0!important}
+html.mobile-ui .map-head p{font-size:9px!important;line-height:1.1!important;margin:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.mobile-ui .map-actions{display:flex;gap:4px;flex:0 0 auto}
+html.mobile-ui .map-actions button{min-height:30px;padding:4px 8px;font-size:10px;border-radius:7px}
+html.mobile-ui .map-stage,html.mobile-ui .map-stage.highlight-ready{min-height:0!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:minmax(0,1fr) 72px!important;gap:4px!important;border-radius:8px!important;overflow:hidden!important}
+html.mobile-ui .map-canvas,html.mobile-ui .map-stage.highlight-ready .map-canvas{grid-column:1!important;grid-row:1!important;padding:6px!important;min-height:0!important;width:100%!important;height:100%!important}
+html.mobile-ui .candidate-highlights{grid-column:1!important;grid-row:2!important;position:relative!important;inset:auto!important;width:100%!important;height:72px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch!important;gap:4px!important;padding:3px!important;overflow:hidden!important}
+html.mobile-ui .highlight-card{display:grid!important;grid-template-columns:46px minmax(0,1fr)!important;grid-template-rows:1fr 1fr!important;gap:2px 5px!important;align-items:center!important;background:rgba(244,244,242,.97)!important;border:1px solid #c7ccce!important;padding:4px!important;min-height:0!important;height:66px!important;overflow:hidden!important}
+html.mobile-ui .highlight-card:nth-child(n+4){display:none!important}
+html.mobile-ui .highlight-ring{grid-row:1/3!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;aspect-ratio:1/1!important;padding:3px!important}
+html.mobile-ui .highlight-ring-inner,html.mobile-ui .highlight-photo{width:100%!important;height:100%!important;aspect-ratio:1/1!important}
+html.mobile-ui .highlight-info,html.mobile-ui .highlight-percent{border:0!important;background:transparent!important;padding:0!important;text-align:left!important}
+html.mobile-ui .highlight-name{font-size:8px!important}
+html.mobile-ui .highlight-party,html.mobile-ui .highlight-number{font-size:7px!important}
+html.mobile-ui .highlight-percent{font-size:18px!important;line-height:1!important}
+html.mobile-ui .map-foot{font-size:8px!important;min-height:15px;overflow:hidden;white-space:nowrap}
+
+/* Results: summary fixed, tabs fixed, selected panel scrolls internally */
+html.mobile-ui .results-panel{display:grid!important;grid-template-rows:auto auto minmax(0,1fr)!important;gap:5px!important}
+html.mobile-ui .summary-box{padding:6px 7px!important;border-radius:7px}
+html.mobile-ui .summary-heading{margin-bottom:3px!important}
+html.mobile-ui .summary-heading h2{font-size:18px!important;line-height:1!important}
+html.mobile-ui .summary-heading p,html.mobile-ui .eyebrow{font-size:8px!important}
+html.mobile-ui .refresh-button{min-height:30px;padding:4px 8px;font-size:10px;border-radius:7px}
+html.mobile-ui .total-main strong{font-size:27px!important}
+html.mobile-ui .section-counter strong{font-size:17px!important}
+html.mobile-ui .details-tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;min-height:34px!important}
+html.mobile-ui .detail-tab{min-height:34px!important;font-size:10px!important;padding:4px 2px!important}
+html.mobile-ui .detail-panel{min-height:0!important;overflow:hidden!important}
+html.mobile-ui .detail-panel.active{display:block!important}
+html.mobile-ui .candidate-list,html.mobile-ui .detail-panel[data-panel="places"],html.mobile-ui .detail-panel[data-panel="zones"]{height:100%!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin}
+html.mobile-ui .candidate-list{display:flex!important;flex-direction:column!important;gap:4px!important;padding-bottom:6px}
+html.mobile-ui .candidate-card{min-height:66px!important;grid-template-columns:58px minmax(0,1fr) 88px!important}
+html.mobile-ui .candidate-main{padding:4px 6px 5px!important}
+html.mobile-ui .candidate-name{font-size:13px!important}
+html.mobile-ui .candidate-subline{min-height:16px!important}
+html.mobile-ui .party-chip,html.mobile-ui .candidate-number{font-size:9px!important}
+html.mobile-ui .candidate-bar{height:15px!important}
+html.mobile-ui .candidate-bar span{font-size:8px!important;padding:0 4px!important}
+html.mobile-ui .candidate-score{padding:3px 5px!important}
+html.mobile-ui .candidate-score strong{font-size:24px!important}
+html.mobile-ui .candidate-status{font-size:7px!important}
+html.mobile-ui .place-toolbar{position:sticky;top:0;z-index:2;background:#f4f4f2;padding:5px}
+html.mobile-ui .place-toolbar select{min-height:38px;font-size:13px}
+html.mobile-ui .district-list{padding:4px 5px 10px}
+html.mobile-ui .status-bar{min-height:22px!important;height:22px!important;padding:3px 7px!important;font-size:8px!important;overflow:hidden!important}
+html.mobile-ui .status-bar>div:last-child{display:none}
+
+/* Portrait phones favor data while preserving the map */
+html.mobile-ui.mobile-portrait .main-grid{grid-template-rows:minmax(180px,36%) minmax(0,64%)!important}
+html.mobile-ui.mobile-portrait .map-stage,html.mobile-ui.mobile-portrait .map-stage.highlight-ready{grid-template-rows:minmax(0,1fr) 64px!important}
+html.mobile-ui.mobile-portrait .candidate-highlights{height:64px!important}
+html.mobile-ui.mobile-portrait .highlight-card{height:58px!important;grid-template-columns:40px minmax(0,1fr)!important}
+html.mobile-ui.mobile-portrait .highlight-ring{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important}
+html.mobile-ui.mobile-portrait .highlight-percent{font-size:16px!important}
+
+/* Very small phones */
+@media(max-width:430px){
+ html.mobile-ui .brand-logo{height:30px!important;max-width:112px!important}
+ html.mobile-ui .office-btn{font-size:11px!important;padding:4px 8px!important}
+ html.mobile-ui .candidate-highlights{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ html.mobile-ui .highlight-card:nth-child(n+3){display:none!important}
+ html.mobile-ui .candidate-card{grid-template-columns:52px minmax(0,1fr) 78px!important}
+ html.mobile-ui .candidate-score strong{font-size:21px!important}
+ html.mobile-ui .candidate-name{font-size:12px!important}
+}
+
+/* Composition page on mobile */
+html.mobile-ui .projection-app{height:100svh;min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;overflow:hidden}
+html.mobile-ui .projection-top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important;padding:7px 8px!important;align-items:center}
+html.mobile-ui .projection-top .brand-temp{font-size:18px!important}
+html.mobile-ui .projection-title{min-width:0}
+html.mobile-ui .projection-title span{font-size:8px!important}
+html.mobile-ui .projection-title strong{font-size:12px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.mobile-ui .back-link{font-size:10px!important;padding:6px 8px!important}
+html.mobile-ui .projection-controls{display:flex!important;gap:6px!important;padding:6px 8px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html.mobile-ui .projection-controls::-webkit-scrollbar{display:none}
+html.mobile-ui .control-group{flex:0 0 auto!important;min-width:auto!important}
+html.mobile-ui .control-group label{font-size:8px!important}
+html.mobile-ui .segmented{display:flex!important;white-space:nowrap}
+html.mobile-ui .segmented button,html.mobile-ui .projection-controls select,html.mobile-ui .projection-controls .refresh{min-height:34px!important;font-size:10px!important;padding:5px 8px!important}
+html.mobile-ui .projection-main{min-height:0!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:minmax(0,56%) minmax(0,44%)!important;gap:6px!important;padding:0 7px 6px!important;overflow:hidden!important}
+html.mobile-ui .composition-panel,html.mobile-ui .projected-panel{min-height:0!important;overflow:hidden!important}
+html.mobile-ui .composition-panel{display:grid!important;grid-template-rows:auto auto minmax(0,1fr) auto!important}
+html.mobile-ui .panel-head{padding:5px 6px!important;gap:5px!important}
+html.mobile-ui .panel-head h1,html.mobile-ui .panel-head h2{font-size:15px!important}
+html.mobile-ui .seat-summary{font-size:10px!important;overflow-x:auto!important;white-space:nowrap}
+html.mobile-ui .chamber-area{min-height:0!important;overflow:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+html.mobile-ui .chamber-card{min-width:0!important;padding:6px!important}
+html.mobile-ui .chamber-visual{min-height:160px!important}
+html.mobile-ui .chamber-legend,html.mobile-ui .party-composition{font-size:9px!important}
+html.mobile-ui .projected-panel{display:grid!important;grid-template-rows:auto minmax(0,1fr)!important}
+html.mobile-ui .projected-list{min-height:0!important;height:100%!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+html.mobile-ui .projection-footer{min-height:22px!important;height:22px!important;padding:3px 7px!important;font-size:8px!important;overflow:hidden!important}
