@@ -1,6 +1,7 @@
 const IBGE = 'https://servicodados.ibge.gov.br/api';
 const IBGE_DISTRICT_ZIP = 'https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2022/distritos/shp/UF';
 const districtCache = new Map();
+let searchIndexPromise = null;
 
 function send(res, status, payload, cache = 'public, s-maxage=86400, stale-while-revalidate=604800') {
   res.statusCode = status;
@@ -32,6 +33,10 @@ async function fetchBuffer(url, timeout = 45000) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function normalizeText(value) {
+  return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 function featureCode(feature) {
@@ -91,6 +96,67 @@ function districtFields(feature) {
   };
 }
 
+function stateFromMunicipality(item) {
+  return item?.['regiao-imediata']?.['regiao-intermediaria']?.UF
+    || item?.microrregiao?.mesorregiao?.UF
+    || item?.UF
+    || null;
+}
+
+async function searchIndex() {
+  if (searchIndexPromise) return searchIndexPromise;
+  searchIndexPromise = (async () => {
+    const [states, municipalities, districts] = await Promise.all([
+      fetchJson(`${IBGE}/v1/localidades/estados?orderBy=nome`, 25000),
+      fetchJson(`${IBGE}/v1/localidades/municipios?orderBy=nome`, 35000),
+      fetchJson(`${IBGE}/v1/localidades/distritos?orderBy=nome`, 35000)
+    ]);
+    const stateMap = new Map((states || []).map(state => [String(state.id), state]));
+    const items = [];
+    for (const state of states || []) {
+      items.push({ type:'state', code:String(state.id), name:state.nome, abbr:state.sigla, stateCode:String(state.id), stateName:state.nome, search:`${state.nome} ${state.sigla}` });
+    }
+    for (const city of municipalities || []) {
+      const uf = stateFromMunicipality(city);
+      if (!uf) continue;
+      items.push({ type:'municipality', code:String(city.id), name:city.nome, municipalityCode:String(city.id), municipalityName:city.nome, stateCode:String(uf.id), stateName:uf.nome, abbr:uf.sigla, search:`${city.nome} ${uf.sigla} ${uf.nome}` });
+    }
+    for (const district of districts || []) {
+      const city = district.municipio || null;
+      const uf = stateFromMunicipality(city);
+      if (!city || !uf) continue;
+      items.push({ type:'district', code:String(district.id), name:district.nome, districtCode:String(district.id), municipalityCode:String(city.id), municipalityName:city.nome, stateCode:String(uf.id), stateName:uf.nome, abbr:uf.sigla, search:`${district.nome} ${city.nome} ${uf.sigla} ${uf.nome}` });
+    }
+    return { items, states: stateMap };
+  })();
+  try { return await searchIndexPromise; }
+  catch (error) { searchIndexPromise = null; throw error; }
+}
+
+async function searchPlaces(query) {
+  const q = normalizeText(query);
+  if (q.length < 2) return [];
+  const { items } = await searchIndex();
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const ranked = [];
+  for (const item of items) {
+    const hay = normalizeText(item.search || item.name);
+    if (!tokens.every(token => hay.includes(token))) continue;
+    const name = normalizeText(item.name);
+    let score = 100;
+    if (name === q) score = 0;
+    else if (name.startsWith(q)) score = 10;
+    else if (hay.startsWith(q)) score = 20;
+    else if (name.includes(q)) score = 30;
+    else score = 50;
+    if (item.type === 'state') score -= 2;
+    else if (item.type === 'municipality') score -= 1;
+    ranked.push({ score, item });
+  }
+  ranked.sort((a,b) => a.score-b.score || a.item.name.localeCompare(b.item.name,'pt-BR'));
+  return ranked.slice(0,18).map(({item}) => item);
+}
+
 async function districtGeoByUF(uf) {
   const key = String(uf || '').toUpperCase();
   if (districtCache.has(key)) return districtCache.get(key);
@@ -135,6 +201,12 @@ function filterDistricts(geojson, municipality) {
 module.exports = async function handler(req, res) {
   try {
     const level = String(req.query?.level || 'states');
+    if (level === 'search') {
+      const query = String(req.query?.q || '');
+      const items = await searchPlaces(query);
+      return send(res, 200, { ok:true, level, query, items, source:'IBGE Localidades' }, 'public, s-maxage=3600, stale-while-revalidate=86400');
+    }
+
     let shapeUrl;
     let listUrl;
 
