@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#f4f4f2" />
-  <title>ApuraBrasil — Eleições 2026</title>
+  <title>ApuraBrasil — Eleições</title>
   <script src="/mobile-mode.js"></script>
   <link rel="stylesheet" href="/dashboard.css" />
   <link rel="stylesheet" href="/candidate-card.css" />
@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/map-intelligence.css" />
   <link rel="stylesheet" href="/geo-search.css" />
   <link rel="stylesheet" href="/municipal-layers.css" />
+  <link rel="stylesheet" href="/election-timeline.css" />
 </head>
 <body>
 <div class="app-shell">
@@ -56,7 +57,7 @@
       </div>
       <div class="map-foot">
         <span id="mapHint">Mapa ilustrado • limites administrativos oficiais</span>
-        <span id="selectionStatus">Brasil • Presidente</span>
+        <span id="selectionStatus">Brasil • Presidente • 2026</span>
       </div>
     </section>
 
@@ -66,7 +67,7 @@
           <div>
             <span class="eyebrow">APURAÇÃO OFICIAL</span>
             <h2 id="scopeTitle">Brasil</h2>
-            <p id="scopeSubtitle">Presidente</p>
+            <p id="scopeSubtitle">Presidente • 2026</p>
           </div>
           <button class="refresh-button" id="refreshButton" type="button">Atualizar</button>
         </div>
@@ -109,5 +110,6 @@
 <script src="/map-intelligence.js" defer></script>
 <script src="/geo-search.js" defer></script>
 <script src="/municipal-layers.js" defer></script>
+<script src="/election-timeline.js" defer></script>
 </body>
 </html>
