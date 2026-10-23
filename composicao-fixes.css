@@ -1,0 +1,45 @@
+/* Final composition/simulator visual corrections */
+.projection-logo{object-fit:contain!important;object-position:left center!important}
+
+body.ab-state-scope .chamber-card{
+  background:#f1f2f0!important;
+}
+body.ab-state-scope .chamber-visual{
+  background:#e4e6e5!important;
+  border-radius:8px;
+}
+
+.chamber-visual .ab-seat-backdrop{
+  fill:#aeb5b8;
+  fill-opacity:.34;
+  pointer-events:none;
+}
+.chamber-visual .ab-seat[fill="#c8ccce"],
+.chamber-visual .ab-seat[fill="#d2d5d6"],
+.chamber-visual .ab-seat[fill="#aeb5b8"]{
+  fill-opacity:.42;
+}
+
+.chamber-visual .ab-center-label{
+  letter-spacing:.045em!important;
+}
+.chamber-visual .ab-center-label tspan{
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:.045em;
+}
+
+.projected-card.ab-incumbent-card{
+  background:#f7f8f6;
+  border-style:dashed;
+}
+.projected-card.ab-incumbent-card .seat-status strong{
+  color:#315f88;
+}
+
+.incumbent-note{
+  display:block;
+  margin-top:2px;
+  font-size:9px;
+  color:#6e767b;
+}
