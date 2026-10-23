@@ -215,18 +215,47 @@
     return svg;
   }
 
-  function nearestSeat(event, runtime) {
-    const rect = runtime.svg.getBoundingClientRect();
+  function pointerInViewBox(event, runtime) {
+    const svg = runtime.svg;
+    const matrix = svg.getScreenCTM?.();
+    if (matrix) {
+      try {
+        const point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        const local = point.matrixTransform(matrix.inverse());
+        return { x: local.x, y: local.y };
+      } catch (_) {
+        // Fallback abaixo para navegadores/estados transitórios sem matriz invertível.
+      }
+    }
+
+    const rect = svg.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
     const g = runtime.geometry;
-    const x = ((event.clientX - rect.left) / rect.width) * g.width;
-    const y = ((event.clientY - rect.top) / rect.height) * g.height;
+    const scale = Math.min(rect.width / g.width, rect.height / g.height);
+    if (!Number.isFinite(scale) || scale <= 0) return null;
+    const renderedWidth = g.width * scale;
+    const renderedHeight = g.height * scale;
+    const offsetX = (rect.width - renderedWidth) / 2;
+    const offsetY = (rect.height - renderedHeight) / 2;
+    return {
+      x: (event.clientX - rect.left - offsetX) / scale,
+      y: (event.clientY - rect.top - offsetY) / scale,
+    };
+  }
+
+  function nearestSeat(event, runtime) {
+    const point = pointerInViewBox(event, runtime);
+    if (!point) return null;
+    const g = runtime.geometry;
+    if (point.x < 0 || point.y < 0 || point.x > g.width || point.y > g.height) return null;
     const radius = g.hoverRadius;
     let nearest = null;
     let best = radius * radius;
     for (const seat of runtime.seats) {
-      const dx = x - seat.x;
-      const dy = y - seat.y;
+      const dx = point.x - seat.x;
+      const dy = point.y - seat.y;
       const d = dx * dx + dy * dy;
       if (d <= best) {
         best = d;
