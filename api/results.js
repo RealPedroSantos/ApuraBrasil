@@ -2,48 +2,628 @@ const TSE_BASE='https://resultados.tse.jus.br/oficial';
 const UFS=['ac','al','ap','am','ba','ce','df','es','go','ma','mt','ms','mg','pa','pb','pr','pe','pi','rj','rn','rs','ro','rr','sc','sp','se','to'];
 
 const YEAR_CONFIG={
-  2026:{cycle:'ele2026',pleito:'3220',format:'unified',offices:{
-    presidente:{election:'6257',cargo:'0001',label:'Presidente'},governador:{election:'6259',cargo:'0003',label:'Governador'},senador:{election:'6259',cargo:'0005',label:'Senador'},'deputado-federal':{election:'6259',cargo:'0006',label:'Deputado Federal'},'deputado-estadual':{election:'6259',cargo:'0007',label:'Deputado Estadual'}
-  }},
-  2022:{cycle:'ele2022',pleito:'406',format:'simplified',offices:{
-    presidente:{election:'544',cargo:'0001',label:'Presidente'},governador:{election:'546',cargo:'0003',label:'Governador'},senador:{election:'546',cargo:'0005',label:'Senador'},'deputado-federal':{election:'546',cargo:'0006',label:'Deputado Federal'},'deputado-estadual':{election:'546',cargo:'0007',label:'Deputado Estadual'}
-  }}
+  2026:{
+    cycle:'ele2026',
+    format:'unified',
+    rounds:{
+      1:{
+        pleito:'3220',
+        sectionsElection:'6259',
+        offices:{
+          presidente:{election:'6257',cargo:'0001',label:'Presidente'},
+          governador:{election:'6259',cargo:'0003',label:'Governador'},
+          senador:{election:'6259',cargo:'0005',label:'Senador'},
+          'deputado-federal':{election:'6259',cargo:'0006',label:'Deputado Federal'},
+          'deputado-estadual':{election:'6259',cargo:'0007',label:'Deputado Estadual'}
+        }
+      },
+      2:{
+        pleito:'3221',
+        sectionsElection:'6260',
+        offices:{
+          presidente:{election:'6258',cargo:'0001',label:'Presidente'},
+          governador:{election:'6260',cargo:'0003',label:'Governador'}
+        }
+      }
+    }
+  },
+  2022:{
+    cycle:'ele2022',
+    pleito:'406',
+    format:'simplified',
+    offices:{
+      presidente:{election:'544',cargo:'0001',label:'Presidente'},
+      governador:{election:'546',cargo:'0003',label:'Governador'},
+      senador:{election:'546',cargo:'0005',label:'Senador'},
+      'deputado-federal':{election:'546',cargo:'0006',label:'Deputado Federal'},
+      'deputado-estadual':{election:'546',cargo:'0007',label:'Deputado Estadual'}
+    }
+  }
 };
 
-function send(res,status,payload,cache='public, s-maxage=5, stale-while-revalidate=20'){res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control',cache);res.setHeader('Access-Control-Allow-Origin','*');res.end(JSON.stringify(payload));}
+const SECOND_ROUND_PUBLIC_AT=Date.parse('2026-10-23T17:00:00-03:00');
+
+function send(res,status,payload,cache='public, s-maxage=5, stale-while-revalidate=20'){
+  res.statusCode=status;
+  res.setHeader('Content-Type','application/json; charset=utf-8');
+  res.setHeader('Cache-Control',cache);
+  res.setHeader('Access-Control-Allow-Origin','*');
+  res.end(JSON.stringify(payload));
+}
+
 const pad=(v,n)=>String(v).padStart(n,'0');
-function integer(v){const n=parseInt(String(v??'').replace(/\D/g,''),10);return Number.isFinite(n)?n:0;}
-function decimal(v){if(typeof v==='number')return v;const s=String(v??'').trim();const n=s.includes(',')?Number(s.replace(/\./g,'').replace(',','.')):Number(s);return Number.isFinite(n)?n:0;}
-function norm(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
-function electionType(year){return Number(year)%4===0?'municipal':'geral';}
-function contextFor(value){const year=Number(value||2026);return{year,config:YEAR_CONFIG[year]||null,type:electionType(year),future:year>2026,archive:year<2026&&!YEAR_CONFIG[year]};}
 
-async function fetchJson(url,timeout=15000){const c=new AbortController(),t=setTimeout(()=>c.abort(),timeout);try{const r=await fetch(url,{signal:c.signal,headers:{Accept:'application/json','User-Agent':'ApuraBrasil/0.3 (+Vercel)'},cache:'no-store'});if(!r.ok)throw new Error(`TSE respondeu ${r.status}`);return await r.json();}finally{clearTimeout(t);}}
+function integer(v){
+  const n=parseInt(String(v??'').replace(/\D/g,''),10);
+  return Number.isFinite(n)?n:0;
+}
 
-function placeholder(query,ctx){const municipal=ctx.type==='municipal',office=String(query.office||'presidente');return{ok:true,year:ctx.year,electionType:ctx.type,future:ctx.future,archive:ctx.archive||municipal,available:false,office,officeLabel:office,scope:String(query.uf||'BR').toUpperCase(),final:false,sections:{total:0,totalized:0,percentage:0},electorate:{total:0,turnout:0,turnoutPercentage:0,abstentions:0,abstentionPercentage:0},votes:{valid:0,validPercentage:0,blank:0,blankPercentage:0,null:0,nullPercentage:0},candidates:[],groups:[],notice:ctx.future?(municipal?`Eleições municipais ${ctx.year}: aguardando dados oficiais.`:`Eleições gerais ${ctx.year}: aguardando dados oficiais.`):(municipal?`Eleições municipais ${ctx.year}: os cargos desta tela pertencem às eleições gerais.`:`Arquivo histórico ${ctx.year}: integração detalhada ainda não normalizada no ApuraBrasil.`),checkedAt:new Date().toISOString()};}
+function decimal(v){
+  if(typeof v==='number')return v;
+  const s=String(v??'').trim();
+  const n=s.includes(',')?Number(s.replace(/\./g,'').replace(',','.')):Number(s);
+  return Number.isFinite(n)?n:0;
+}
 
-function officeDef(office,uf,ctx){const base=ctx.config?.offices?.[office];if(!base)throw new Error('Cargo não suportado para esta eleição.');if(office==='deputado-estadual'&&String(uf||'').toLowerCase()==='df')return{...base,cargo:'0008',label:'Deputado Distrital'};return base;}
+function norm(v){
+  return String(v??'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
+}
 
-function resultUrl(def,ctx,uf,municipalityCode){const election=pad(def.election,6),state=String(uf||'').toLowerCase(),scope=municipalityCode?`${state}${pad(municipalityCode,5)}`:(state||'br');if(!state&&def.cargo!=='0001')throw new Error('Selecione uma UF para este cargo.');if(ctx.config.format==='simplified')return`${TSE_BASE}/${ctx.config.cycle}/${def.election}/dados-simplificados/${state||'br'}/${scope}-c${def.cargo}-e${election}-r.json`;return`${TSE_BASE}/${ctx.config.cycle}/${def.election}/dados/${state||'br'}/${scope}-c${def.cargo}-e${election}-u.json`;}
+function electionType(year){
+  return Number(year)%4===0?'municipal':'geral';
+}
 
-function baseResult(meta,raw){return{ok:true,available:true,future:false,archive:false,year:meta.year,electionType:'geral',round:integer(raw.t)||1,electionCode:String(raw.ele||meta.election),office:meta.office,officeLabel:meta.officeLabel,scope:String(raw.cdabr||meta.scope||'').toUpperCase(),municipalityCode:meta.municipalityCode||null,municipalityName:meta.municipalityName||null,generatedDate:raw.dg||raw.dt||'',generatedTime:raw.hg||raw.ht||'',idg:String(raw.idg||''),final:String(raw.tf||'').toLowerCase()==='s',mathematicallyDefined:String(raw.md||'').toLowerCase()!=='n'&&String(raw.md||'')!==''};}
+function defaultRoundForYear(year){
+  if(Number(year)!==2026)return 1;
+  return Date.now()>=SECOND_ROUND_PUBLIC_AT?2:1;
+}
 
-function normalizeUnified(raw,meta){const cargo=raw?.carg?.[0]||{},candidates=[],groups=[];for(const group of cargo.agr||[]){let groupVotes=0;const parties=[];for(const party of group.par||[]){parties.push(party.sg||'');groupVotes+=integer(party.tval);for(const candidate of party.cand||[]){const votes=integer(candidate.vap);groupVotes+=votes;candidates.push({number:String(candidate.n||''),sequence:String(candidate.sqcand||''),name:candidate.nm||'',ballotName:candidate.nmu||candidate.nm||'',party:party.sg||candidate.sgp||'',coalition:group.nm||'',votes,percentage:decimal(candidate.pvap),status:candidate.st||'',electedFlag:candidate.e||'',photoUrl:candidate.sqcand?`${TSE_BASE}/${meta.cycle}/${meta.election}/fotos/${meta.photoScope}/${candidate.sqcand}.jpeg`:''});}}groups.push({name:group.nm||'',composition:group.com||'',parties,seats:integer(group.vag),votes:groupVotes});}candidates.sort((a,b)=>b.votes-a.votes||a.ballotName.localeCompare(b.ballotName,'pt-BR'));groups.sort((a,b)=>b.seats-a.seats||b.votes-a.votes);const s=raw.s||{},e=raw.e||{},v=raw.v||{};return{...baseResult(meta,raw),sections:{total:integer(s.ts),totalized:integer(s.st),percentage:decimal(s.pst)},electorate:{total:integer(e.te),turnout:integer(e.c),turnoutPercentage:decimal(e.pc),abstentions:integer(e.a),abstentionPercentage:decimal(e.pa)},votes:{valid:integer(v.vv!==undefined?v.vv:v.vvc),validPercentage:decimal(v.pvv!==undefined?v.pvv:v.pvvc),blank:integer(v.vb),blankPercentage:decimal(v.pvb),null:integer(v.tvn!==undefined?v.tvn:v.vn),nullPercentage:decimal(v.ptvn!==undefined?v.ptvn:v.pvn)},candidates,groups,sourceUrl:meta.sourceUrl,checkedAt:new Date().toISOString()};}
+function contextFor(value,roundValue){
+  const year=Number(value||2026);
+  const yearConfig=YEAR_CONFIG[year]||null;
+  const requestedRound=integer(roundValue);
+  const roundExplicit=requestedRound===1||requestedRound===2;
+  const round=roundExplicit?requestedRound:defaultRoundForYear(year);
 
-function normalizeSimplified(raw,meta){const candidates=(raw.cand||[]).map(c=>({number:String(c.n||''),sequence:String(c.sqcand||''),name:c.nm||'',ballotName:c.nm||'',party:c.cc||'',coalition:'',votes:integer(c.vap),percentage:decimal(c.pvap),status:c.st||'',electedFlag:c.e||'',photoUrl:c.sqcand?`${TSE_BASE}/${meta.cycle}/${meta.election}/fotos/${meta.photoScope}/${c.sqcand}.jpeg`:''})).sort((a,b)=>b.votes-a.votes||a.ballotName.localeCompare(b.ballotName,'pt-BR'));return{...baseResult(meta,raw),sections:{total:integer(raw.s),totalized:integer(raw.st),percentage:decimal(raw.pst)},electorate:{total:integer(raw.e),turnout:integer(raw.c),turnoutPercentage:decimal(raw.pc),abstentions:integer(raw.a),abstentionPercentage:decimal(raw.pa)},votes:{valid:integer(raw.vvc||raw.vv),validPercentage:decimal(raw.pvvc||raw.pvv),blank:integer(raw.vb),blankPercentage:decimal(raw.pvb),null:integer(raw.tvn||raw.vn),nullPercentage:decimal(raw.ptvn||raw.pvn)},candidates,groups:[],sourceUrl:meta.sourceUrl,checkedAt:new Date().toISOString()};}
-function normalizeResult(raw,meta){return meta.format==='simplified'?normalizeSimplified(raw,meta):normalizeUnified(raw,meta);}
+  let config=yearConfig;
+  if(yearConfig?.rounds){
+    const roundConfig=yearConfig.rounds[round]||yearConfig.rounds[1];
+    config={
+      cycle:yearConfig.cycle,
+      format:yearConfig.format,
+      ...roundConfig
+    };
+  }
 
-async function municipalityList(election,uf,ctx){const code=pad(election,6),url=`${TSE_BASE}/${ctx.config.cycle}/${election}/config/mun-e${code}-cm.json`,payload=await fetchJson(url);const scope=(payload.abr||[]).find(x=>String(x.cd||'').toLowerCase()===String(uf||'').toLowerCase());return{municipalities:(scope?.mu||[]).map(m=>({code:String(m.cd),name:m.nm||'',capital:/^s$/i.test(String(m.c||''))})),sourceUrl:url};}
-async function resolveMunicipality(election,uf,code,name,ctx){const list=await municipalityList(election,uf,ctx);let match;if(code)match=list.municipalities.find(m=>String(m.code)===String(code).padStart(5,'0'));if(!match&&name){const target=norm(name);match=list.municipalities.find(m=>norm(m.name)===target)||list.municipalities.find(m=>norm(m.name).includes(target)||target.includes(norm(m.name)));}if(!match)throw new Error(`Município ${name||code||''} não encontrado na configuração oficial do TSE.`);return match;}
+  return{
+    year,
+    round,
+    roundExplicit,
+    config,
+    type:electionType(year),
+    future:year>2026,
+    archive:year<2026&&!yearConfig
+  };
+}
 
-async function persistSnapshot(result){const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key||!result?.sourceUrl)return;const body={election_code:result.electionCode,office:result.office,scope:result.scope,source_url:result.sourceUrl,idg:result.idg||null,generated_date:result.generatedDate||null,generated_time:result.generatedTime||null,sections_percentage:result.sections?.percentage||0,payload:result};try{await fetch(`${url}/rest/v1/result_snapshots?on_conflict=source_url,idg`,{method:'POST',headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});}catch(error){console.warn('snapshot persistence failed',error.message);}}
+async function fetchJson(url,timeout=15000){
+  const c=new AbortController(),t=setTimeout(()=>c.abort(),timeout);
+  try{
+    const r=await fetch(url,{
+      signal:c.signal,
+      headers:{Accept:'application/json','User-Agent':'ApuraBrasil/0.4 (+Vercel)'},
+      cache:'no-store'
+    });
+    if(!r.ok)throw new Error(`TSE respondeu ${r.status}`);
+    return await r.json();
+  }finally{
+    clearTimeout(t);
+  }
+}
 
-async function getResult(query){const ctx=contextFor(query.year);if(!ctx.config)return placeholder(query,ctx);const office=String(query.office||'presidente'),uf=query.uf?String(query.uf).toLowerCase():'',def=officeDef(office,uf,ctx);let municipality=null;if(query.municipalityName||query.municipalityCode){if(!uf)throw new Error('UF obrigatória para resultado municipal.');municipality=await resolveMunicipality(def.election,uf,query.municipalityCode,query.municipalityName,ctx);}const url=resultUrl(def,ctx,uf||null,municipality?.code),raw=await fetchJson(url),result=normalizeResult(raw,{year:ctx.year,cycle:ctx.config.cycle,format:ctx.config.format,office,officeLabel:def.label,election:def.election,scope:municipality?`${uf}${municipality.code}`:(uf||'br'),photoScope:office==='presidente'?'br':(uf||'br'),municipalityCode:municipality?.code||null,municipalityName:municipality?.name||null,sourceUrl:url});await persistSnapshot(result);return result;}
+function placeholder(query,ctx){
+  const municipal=ctx.type==='municipal',office=String(query.office||'presidente');
+  return{
+    ok:true,
+    year:ctx.year,
+    round:ctx.round,
+    electionType:ctx.type,
+    future:ctx.future,
+    archive:ctx.archive||municipal,
+    available:false,
+    office,
+    officeLabel:office,
+    scope:String(query.uf||'BR').toUpperCase(),
+    final:false,
+    sections:{total:0,totalized:0,percentage:0},
+    electorate:{total:0,turnout:0,turnoutPercentage:0,abstentions:0,abstentionPercentage:0},
+    votes:{valid:0,validPercentage:0,blank:0,blankPercentage:0,null:0,nullPercentage:0},
+    candidates:[],
+    groups:[],
+    notice:ctx.future
+      ?(municipal?`Eleições municipais ${ctx.year}: aguardando dados oficiais.`:`Eleições gerais ${ctx.year}: aguardando dados oficiais.`)
+      :(municipal?`Eleições municipais ${ctx.year}: os cargos desta tela pertencem às eleições gerais.`:`Arquivo histórico ${ctx.year}: integração detalhada ainda não normalizada no ApuraBrasil.`),
+    checkedAt:new Date().toISOString()
+  };
+}
 
-async function stateSummaries(query){const ctx=contextFor(query.year);if(!ctx.config)return UFS.map(uf=>({uf:uf.toUpperCase(),available:false}));const def=officeDef('presidente','',ctx),settled=await Promise.allSettled(UFS.map(async uf=>{const url=resultUrl(def,ctx,uf,null),raw=await fetchJson(url,10000),result=normalizeResult(raw,{year:ctx.year,cycle:ctx.config.cycle,format:ctx.config.format,office:'presidente',officeLabel:def.label,election:def.election,scope:uf,photoScope:'br',sourceUrl:url});return{uf:uf.toUpperCase(),available:true,sectionsPercentage:result.sections.percentage,winner:result.candidates[0]||null,sourceUrl:url};}));return settled.map((x,i)=>x.status==='fulfilled'?x.value:{uf:UFS[i].toUpperCase(),available:false});}
+function officeDef(office,uf,ctx){
+  let base=ctx.config?.offices?.[office];
+  let effectiveRound=ctx.round;
 
-function resolveDirectory(template,ctx){if(!template)return null;let value=String(template);for(const[from,to]of Object.entries({'<base>/<ambiente>':TSE_BASE,'<base>':'https://resultados.tse.jus.br','<ambiente>':'oficial','<ciclo>':ctx.cycle,'<cd_eleicao>':ctx.election,'<cd_pleito>':ctx.pleito,'<uf>':ctx.uf}))value=value.split(from).join(to);if(value.startsWith('/'))value=`https://resultados.tse.jus.br${value}`;return value.replace(/\/$/,'');}
-async function sectionsConfigUrl(uf,ctx){const fallback=`${TSE_BASE}/${ctx.config.cycle}/arquivo-urna/${ctx.config.pleito}/config/${uf}/${uf}-p${pad(ctx.config.pleito,6)}-cs.json`;if(ctx.year!==2026)return fallback;try{const config=await fetchJson(`${TSE_BASE}/comum/config/ele-c.json`),template=(config.arq||[]).find(x=>String(x.tp||'').toLowerCase()==='cs')?.dir,dir=resolveDirectory(template,{cycle:ctx.config.cycle,election:'6259',pleito:ctx.config.pleito,uf});return dir?`${dir}/${uf}-p${pad(ctx.config.pleito,6)}-cs.json`:fallback;}catch{return fallback;}}
-async function getZones(query){const ctx=contextFor(query.year);if(!ctx.config)return{ok:true,year:ctx.year,zones:[],available:false};const uf=String(query.uf||'').toLowerCase(),municipalityCode=String(query.municipalityCode||'').padStart(5,'0');if(!uf||!municipalityCode)throw new Error('UF e município são obrigatórios para listar zonas.');const url=await sectionsConfigUrl(uf,ctx),payload=await fetchJson(url,20000),state=(payload.abr||[]).find(x=>String(x.cd||'').toLowerCase()===uf)||payload.abr?.[0],municipality=(state?.mu||[]).find(m=>String(m.cd||'').padStart(5,'0')===municipalityCode);if(!municipality)throw new Error('Município não localizado no arquivo oficial de seções.');const zones=(municipality.zon||[]).map(z=>({code:String(z.cd||'').replace(/^0+/,'')||'0',sections:(z.sec||[]).map(s=>({number:String(s.ns||s.nsp||'').replace(/^0+/,'')||'0',original:String(s.nsp||s.ns||'').replace(/^0+/,'')||'0',auxiliaryDate:s.da||null,auxiliaryTime:s.ha||null}))}));return{ok:true,year:ctx.year,uf:uf.toUpperCase(),municipalityCode,municipalityName:municipality.nm||'',zones,sourceUrl:url,checkedAt:new Date().toISOString()};}
+  if(!base && ctx.year===2026 && ctx.round===2 && !ctx.roundExplicit){
+    base=YEAR_CONFIG[2026].rounds[1].offices[office];
+    effectiveRound=1;
+  }
 
-module.exports=async function handler(req,res){const query=req.query||{},action=String(query.action||'result');try{if(action==='result')return send(res,200,await getResult(query));if(action==='state-summaries')return send(res,200,{ok:true,year:Number(query.year||2026),office:'presidente',states:await stateSummaries(query),checkedAt:new Date().toISOString()},'public, s-maxage=15, stale-while-revalidate=45');if(action==='municipalities'){const ctx=contextFor(query.year),uf=String(query.uf||'').toLowerCase();if(!uf)return send(res,400,{ok:false,error:'Informe a UF.'},'no-store');if(!ctx.config)return send(res,200,{ok:true,year:ctx.year,uf:uf.toUpperCase(),municipalities:[],available:false},'public, s-maxage=3600');const def=officeDef(String(query.office||'presidente'),uf,ctx),data=await municipalityList(def.election,uf,ctx);return send(res,200,{ok:true,year:ctx.year,uf:uf.toUpperCase(),municipalities:data.municipalities,sourceUrl:data.sourceUrl},'public, s-maxage=86400, stale-while-revalidate=604800');}if(action==='zones')return send(res,200,await getZones(query),'public, s-maxage=300, stale-while-revalidate=1800');if(action==='timeline'){const years=[];for(let year=2000;year<=2030;year+=2){const ctx=contextFor(year);years.push({year,type:ctx.type,current:year===2026,future:ctx.future,integrated:!!ctx.config,archive:ctx.archive});}return send(res,200,{ok:true,years},'public, s-maxage=86400, stale-while-revalidate=604800');}return send(res,400,{ok:false,error:'Ação inválida.'},'no-store');}catch(error){return send(res,502,{ok:false,error:'Não foi possível obter os dados eleitorais oficiais.',detail:error.message,checkedAt:new Date().toISOString()},'no-store');}};
+  if(!base){
+    if(ctx.year===2026&&ctx.round===2){
+      throw new Error('Cargo não disputado no 2º turno de 2026.');
+    }
+    throw new Error('Cargo não suportado para esta eleição.');
+  }
+
+  if(office==='deputado-estadual'&&String(uf||'').toLowerCase()==='df'){
+    return{...base,cargo:'0008',label:'Deputado Distrital',round:effectiveRound};
+  }
+
+  return{...base,round:effectiveRound};
+}
+
+function resultUrl(def,ctx,uf,municipalityCode){
+  const election=pad(def.election,6);
+  const state=String(uf||'').toLowerCase();
+  const scope=municipalityCode?`${state}${pad(municipalityCode,5)}`:(state||'br');
+
+  if(!state&&def.cargo!=='0001')throw new Error('Selecione uma UF para este cargo.');
+
+  if(ctx.config.format==='simplified'){
+    return`${TSE_BASE}/${ctx.config.cycle}/${def.election}/dados-simplificados/${state||'br'}/${scope}-c${def.cargo}-e${election}-r.json`;
+  }
+
+  return`${TSE_BASE}/${ctx.config.cycle}/${def.election}/dados/${state||'br'}/${scope}-c${def.cargo}-e${election}-u.json`;
+}
+
+function baseResult(meta,raw){
+  return{
+    ok:true,
+    available:true,
+    future:false,
+    archive:false,
+    year:meta.year,
+    electionType:'geral',
+    round:integer(raw.t)||meta.round||1,
+    electionCode:String(raw.ele||meta.election),
+    office:meta.office,
+    officeLabel:meta.officeLabel,
+    scope:String(raw.cdabr||meta.scope||'').toUpperCase(),
+    municipalityCode:meta.municipalityCode||null,
+    municipalityName:meta.municipalityName||null,
+    generatedDate:raw.dg||raw.dt||'',
+    generatedTime:raw.hg||raw.ht||'',
+    idg:String(raw.idg||''),
+    final:String(raw.tf||'').toLowerCase()==='s',
+    mathematicallyDefined:String(raw.md||'').toLowerCase()!=='n'&&String(raw.md||'')!==''
+  };
+}
+
+function normalizeUnified(raw,meta){
+  const cargo=raw?.carg?.[0]||{},candidates=[],groups=[];
+
+  for(const group of cargo.agr||[]){
+    let groupVotes=0;
+    const parties=[];
+
+    for(const party of group.par||[]){
+      parties.push(party.sg||'');
+      groupVotes+=integer(party.tval);
+
+      for(const candidate of party.cand||[]){
+        const votes=integer(candidate.vap);
+        groupVotes+=votes;
+        candidates.push({
+          number:String(candidate.n||''),
+          sequence:String(candidate.sqcand||''),
+          name:candidate.nm||'',
+          ballotName:candidate.nmu||candidate.nm||'',
+          party:party.sg||candidate.sgp||'',
+          coalition:group.nm||'',
+          votes,
+          percentage:decimal(candidate.pvap),
+          status:candidate.st||'',
+          electedFlag:candidate.e||'',
+          photoUrl:candidate.sqcand?`${TSE_BASE}/${meta.cycle}/${meta.election}/fotos/${meta.photoScope}/${candidate.sqcand}.jpeg`:''
+        });
+      }
+    }
+
+    groups.push({
+      name:group.nm||'',
+      composition:group.com||'',
+      parties,
+      seats:integer(group.vag),
+      votes:groupVotes
+    });
+  }
+
+  candidates.sort((a,b)=>b.votes-a.votes||a.ballotName.localeCompare(b.ballotName,'pt-BR'));
+  groups.sort((a,b)=>b.seats-a.seats||b.votes-a.votes);
+
+  const s=raw.s||{},e=raw.e||{},v=raw.v||{};
+
+  return{
+    ...baseResult(meta,raw),
+    sections:{total:integer(s.ts),totalized:integer(s.st),percentage:decimal(s.pst)},
+    electorate:{
+      total:integer(e.te),
+      turnout:integer(e.c),
+      turnoutPercentage:decimal(e.pc),
+      abstentions:integer(e.a),
+      abstentionPercentage:decimal(e.pa)
+    },
+    votes:{
+      valid:integer(v.vv!==undefined?v.vv:v.vvc),
+      validPercentage:decimal(v.pvv!==undefined?v.pvv:v.pvvc),
+      blank:integer(v.vb),
+      blankPercentage:decimal(v.pvb),
+      null:integer(v.tvn!==undefined?v.tvn:v.vn),
+      nullPercentage:decimal(v.ptvn!==undefined?v.ptvn:v.pvn)
+    },
+    candidates,
+    groups,
+    sourceUrl:meta.sourceUrl,
+    checkedAt:new Date().toISOString()
+  };
+}
+
+function normalizeSimplified(raw,meta){
+  const candidates=(raw.cand||[])
+    .map(c=>({
+      number:String(c.n||''),
+      sequence:String(c.sqcand||''),
+      name:c.nm||'',
+      ballotName:c.nm||'',
+      party:c.cc||'',
+      coalition:'',
+      votes:integer(c.vap),
+      percentage:decimal(c.pvap),
+      status:c.st||'',
+      electedFlag:c.e||'',
+      photoUrl:c.sqcand?`${TSE_BASE}/${meta.cycle}/${meta.election}/fotos/${meta.photoScope}/${c.sqcand}.jpeg`:''
+    }))
+    .sort((a,b)=>b.votes-a.votes||a.ballotName.localeCompare(b.ballotName,'pt-BR'));
+
+  return{
+    ...baseResult(meta,raw),
+    sections:{total:integer(raw.s),totalized:integer(raw.st),percentage:decimal(raw.pst)},
+    electorate:{
+      total:integer(raw.e),
+      turnout:integer(raw.c),
+      turnoutPercentage:decimal(raw.pc),
+      abstentions:integer(raw.a),
+      abstentionPercentage:decimal(raw.pa)
+    },
+    votes:{
+      valid:integer(raw.vvc||raw.vv),
+      validPercentage:decimal(raw.pvvc||raw.pvv),
+      blank:integer(raw.vb),
+      blankPercentage:decimal(raw.pvb),
+      null:integer(raw.tvn||raw.vn),
+      nullPercentage:decimal(raw.ptvn||raw.pvn)
+    },
+    candidates,
+    groups:[],
+    sourceUrl:meta.sourceUrl,
+    checkedAt:new Date().toISOString()
+  };
+}
+
+function normalizeResult(raw,meta){
+  return meta.format==='simplified'?normalizeSimplified(raw,meta):normalizeUnified(raw,meta);
+}
+
+async function municipalityList(election,uf,ctx){
+  const code=pad(election,6);
+  const url=`${TSE_BASE}/${ctx.config.cycle}/${election}/config/mun-e${code}-cm.json`;
+  const payload=await fetchJson(url);
+  const scope=(payload.abr||[]).find(x=>String(x.cd||'').toLowerCase()===String(uf||'').toLowerCase());
+  return{
+    municipalities:(scope?.mu||[]).map(m=>({
+      code:String(m.cd),
+      name:m.nm||'',
+      capital:/^s$/i.test(String(m.c||''))
+    })),
+    sourceUrl:url
+  };
+}
+
+async function resolveMunicipality(election,uf,code,name,ctx){
+  const list=await municipalityList(election,uf,ctx);
+  let match;
+
+  if(code){
+    match=list.municipalities.find(m=>String(m.code)===String(code).padStart(5,'0'));
+  }
+
+  if(!match&&name){
+    const target=norm(name);
+    match=list.municipalities.find(m=>norm(m.name)===target)
+      ||list.municipalities.find(m=>norm(m.name).includes(target)||target.includes(norm(m.name)));
+  }
+
+  if(!match)throw new Error(`Município ${name||code||''} não encontrado na configuração oficial do TSE.`);
+  return match;
+}
+
+async function persistSnapshot(result){
+  const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if(!url||!key||!result?.sourceUrl)return;
+
+  const body={
+    election_code:result.electionCode,
+    office:result.office,
+    scope:result.scope,
+    source_url:result.sourceUrl,
+    idg:result.idg||null,
+    generated_date:result.generatedDate||null,
+    generated_time:result.generatedTime||null,
+    sections_percentage:result.sections?.percentage||0,
+    payload:result
+  };
+
+  try{
+    await fetch(`${url}/rest/v1/result_snapshots?on_conflict=source_url,idg`,{
+      method:'POST',
+      headers:{
+        apikey:key,
+        Authorization:`Bearer ${key}`,
+        'Content-Type':'application/json',
+        Prefer:'resolution=merge-duplicates,return=minimal'
+      },
+      body:JSON.stringify(body)
+    });
+  }catch(error){
+    console.warn('snapshot persistence failed',error.message);
+  }
+}
+
+async function getResult(query){
+  const ctx=contextFor(query.year,query.round);
+  if(!ctx.config)return placeholder(query,ctx);
+
+  const office=String(query.office||'presidente');
+  const uf=query.uf?String(query.uf).toLowerCase():'';
+  const def=officeDef(office,uf,ctx);
+  let municipality=null;
+
+  if(query.municipalityName||query.municipalityCode){
+    if(!uf)throw new Error('UF obrigatória para resultado municipal.');
+    municipality=await resolveMunicipality(def.election,uf,query.municipalityCode,query.municipalityName,ctx);
+  }
+
+  const url=resultUrl(def,ctx,uf||null,municipality?.code);
+  const raw=await fetchJson(url);
+  const result=normalizeResult(raw,{
+    year:ctx.year,
+    round:def.round||ctx.round,
+    cycle:ctx.config.cycle,
+    format:ctx.config.format,
+    office,
+    officeLabel:def.label,
+    election:def.election,
+    scope:municipality?`${uf}${municipality.code}`:(uf||'br'),
+    photoScope:office==='presidente'?'br':(uf||'br'),
+    municipalityCode:municipality?.code||null,
+    municipalityName:municipality?.name||null,
+    sourceUrl:url
+  });
+
+  await persistSnapshot(result);
+  return result;
+}
+
+async function stateSummaries(query){
+  const ctx=contextFor(query.year,query.round);
+  if(!ctx.config)return UFS.map(uf=>({uf:uf.toUpperCase(),available:false}));
+
+  const def=officeDef('presidente','',ctx);
+  const settled=await Promise.allSettled(UFS.map(async uf=>{
+    const url=resultUrl(def,ctx,uf,null);
+    const raw=await fetchJson(url,10000);
+    const result=normalizeResult(raw,{
+      year:ctx.year,
+      round:def.round||ctx.round,
+      cycle:ctx.config.cycle,
+      format:ctx.config.format,
+      office:'presidente',
+      officeLabel:def.label,
+      election:def.election,
+      scope:uf,
+      photoScope:'br',
+      sourceUrl:url
+    });
+
+    return{
+      uf:uf.toUpperCase(),
+      available:true,
+      round:result.round,
+      sectionsPercentage:result.sections.percentage,
+      winner:(result.sections.percentage>0&&result.candidates[0]?.votes>0)?result.candidates[0]:null,
+      sourceUrl:url
+    };
+  }));
+
+  return settled.map((x,i)=>x.status==='fulfilled'?x.value:{uf:UFS[i].toUpperCase(),available:false});
+}
+
+function resolveDirectory(template,ctx){
+  if(!template)return null;
+  let value=String(template);
+
+  for(const[from,to]of Object.entries({
+    '<base>/<ambiente>':TSE_BASE,
+    '<base>':'https://resultados.tse.jus.br',
+    '<ambiente>':'oficial',
+    '<ciclo>':ctx.cycle,
+    '<cd_eleicao>':ctx.election,
+    '<cd_pleito>':ctx.pleito,
+    '<uf>':ctx.uf
+  })){
+    value=value.split(from).join(to);
+  }
+
+  if(value.startsWith('/'))value=`https://resultados.tse.jus.br${value}`;
+  return value.replace(/\/$/,'');
+}
+
+async function sectionsConfigUrl(uf,ctx){
+  const fallback=`${TSE_BASE}/${ctx.config.cycle}/arquivo-urna/${ctx.config.pleito}/config/${uf}/${uf}-p${pad(ctx.config.pleito,6)}-cs.json`;
+
+  if(ctx.year!==2026)return fallback;
+
+  try{
+    const config=await fetchJson(`${TSE_BASE}/comum/config/ele-c.json`);
+    const template=(config.arq||[]).find(x=>String(x.tp||'').toLowerCase()==='cs')?.dir;
+    const election=ctx.config.sectionsElection
+      ||ctx.config.offices?.governador?.election
+      ||ctx.config.offices?.presidente?.election;
+    const dir=resolveDirectory(template,{
+      cycle:ctx.config.cycle,
+      election,
+      pleito:ctx.config.pleito,
+      uf
+    });
+
+    return dir?`${dir}/${uf}-p${pad(ctx.config.pleito,6)}-cs.json`:fallback;
+  }catch{
+    return fallback;
+  }
+}
+
+async function getZones(query){
+  const ctx=contextFor(query.year,query.round);
+  if(!ctx.config)return{ok:true,year:ctx.year,round:ctx.round,zones:[],available:false};
+
+  const uf=String(query.uf||'').toLowerCase();
+  const municipalityCode=String(query.municipalityCode||'').padStart(5,'0');
+
+  if(!uf||!municipalityCode)throw new Error('UF e município são obrigatórios para listar zonas.');
+
+  const url=await sectionsConfigUrl(uf,ctx);
+  const payload=await fetchJson(url,20000);
+  const state=(payload.abr||[]).find(x=>String(x.cd||'').toLowerCase()===uf)||payload.abr?.[0];
+  const municipality=(state?.mu||[]).find(m=>String(m.cd||'').padStart(5,'0')===municipalityCode);
+
+  if(!municipality)throw new Error('Município não localizado no arquivo oficial de seções.');
+
+  const zones=(municipality.zon||[]).map(z=>({
+    code:String(z.cd||'').replace(/^0+/,'')||'0',
+    sections:(z.sec||[]).map(s=>({
+      number:String(s.ns||s.nsp||'').replace(/^0+/,'')||'0',
+      original:String(s.nsp||s.ns||'').replace(/^0+/,'')||'0',
+      auxiliaryDate:s.da||null,
+      auxiliaryTime:s.ha||null
+    }))
+  }));
+
+  return{
+    ok:true,
+    year:ctx.year,
+    round:ctx.round,
+    uf:uf.toUpperCase(),
+    municipalityCode,
+    municipalityName:municipality.nm||'',
+    zones,
+    sourceUrl:url,
+    checkedAt:new Date().toISOString()
+  };
+}
+
+module.exports=async function handler(req,res){
+  const query=req.query||{};
+  const action=String(query.action||'result');
+
+  try{
+    if(action==='result'){
+      return send(res,200,await getResult(query));
+    }
+
+    if(action==='state-summaries'){
+      const ctx=contextFor(query.year,query.round);
+      return send(res,200,{
+        ok:true,
+        year:ctx.year,
+        round:ctx.round,
+        office:'presidente',
+        states:await stateSummaries(query),
+        checkedAt:new Date().toISOString()
+      },'public, s-maxage=15, stale-while-revalidate=45');
+    }
+
+    if(action==='municipalities'){
+      const ctx=contextFor(query.year,query.round);
+      const uf=String(query.uf||'').toLowerCase();
+
+      if(!uf)return send(res,400,{ok:false,error:'Informe a UF.'},'no-store');
+
+      if(!ctx.config){
+        return send(res,200,{
+          ok:true,
+          year:ctx.year,
+          round:ctx.round,
+          uf:uf.toUpperCase(),
+          municipalities:[],
+          available:false
+        },'public, s-maxage=3600');
+      }
+
+      const def=officeDef(String(query.office||'presidente'),uf,ctx);
+      const data=await municipalityList(def.election,uf,ctx);
+
+      return send(res,200,{
+        ok:true,
+        year:ctx.year,
+        round:def.round||ctx.round,
+        uf:uf.toUpperCase(),
+        municipalities:data.municipalities,
+        sourceUrl:data.sourceUrl
+      },'public, s-maxage=86400, stale-while-revalidate=604800');
+    }
+
+    if(action==='zones'){
+      return send(res,200,await getZones(query),'public, s-maxage=300, stale-while-revalidate=1800');
+    }
+
+    if(action==='timeline'){
+      const years=[];
+      for(let year=2000;year<=2030;year+=2){
+        const ctx=contextFor(year,year===2026?2:1);
+        years.push({
+          year,
+          type:ctx.type,
+          current:year===2026,
+          future:ctx.future,
+          integrated:!!YEAR_CONFIG[year],
+          archive:ctx.archive,
+          rounds:YEAR_CONFIG[year]?.rounds?Object.keys(YEAR_CONFIG[year].rounds).map(Number):[1]
+        });
+      }
+
+      return send(res,200,{ok:true,years},'public, s-maxage=86400, stale-while-revalidate=604800');
+    }
+
+    return send(res,400,{ok:false,error:'Ação inválida.'},'no-store');
+  }catch(error){
+    return send(res,502,{
+      ok:false,
+      error:'Não foi possível obter os dados eleitorais oficiais.',
+      detail:error.message,
+      checkedAt:new Date().toISOString()
+    },'no-store');
+  }
+};
