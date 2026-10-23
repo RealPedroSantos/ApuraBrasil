@@ -4,16 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#f4f4f2" />
-  <title>ApuraBrasil — Eleições 2026</title>
+  <title>ApuraBrasil — Eleições</title>
+  <script src="/mobile-mode.js"></script>
   <link rel="stylesheet" href="/dashboard.css" />
+  <link rel="stylesheet" href="/candidate-card.css" />
+  <link rel="stylesheet" href="/candidate-highlights.css" />
+  <link rel="stylesheet" href="/ui-fixes.css" />
+  <link rel="stylesheet" href="/ui-stable.css" />
+  <link rel="stylesheet" href="/mobile-ui.css" />
   <link rel="stylesheet" href="/elected-cards.css" />
   <link rel="stylesheet" href="/ui-overflow-fix.css" />
+  <link rel="stylesheet" href="/map-intelligence.css" />
+  <link rel="stylesheet" href="/geo-search.css" />
+  <link rel="stylesheet" href="/municipal-layers.css" />
+  <link rel="stylesheet" href="/election-timeline.css" />
 </head>
 <body>
 <div class="app-shell">
   <header class="topbar">
     <div class="brand" aria-label="ApuraBrasil">
-      <div class="brand-temp" title="Logo configurável">ApuraBrasil</div>
+      <img class="brand-logo" src="/assets/logo-apurabrasil.svg" alt="Apura Brasil" />
       <span class="brand-divider"></span>
     </div>
     <nav class="office-nav" aria-label="Cargos">
@@ -41,12 +51,13 @@
         </div>
       </div>
       <div class="map-stage" id="mapStage">
+        <div id="candidateHighlights" class="candidate-highlights" aria-label="Candidatos em destaque"></div>
         <div id="map" class="map-canvas"><div class="loading">Carregando mapa...</div></div>
         <div id="mapTooltip" class="map-tooltip" role="status" aria-live="polite"></div>
       </div>
       <div class="map-foot">
         <span id="mapHint">Mapa ilustrado • limites administrativos oficiais</span>
-        <span id="selectionStatus">Brasil • Presidente</span>
+        <span id="selectionStatus">Brasil • Presidente • 2026</span>
       </div>
     </section>
 
@@ -56,7 +67,7 @@
           <div>
             <span class="eyebrow">APURAÇÃO OFICIAL</span>
             <h2 id="scopeTitle">Brasil</h2>
-            <p id="scopeSubtitle">Presidente</p>
+            <p id="scopeSubtitle">Presidente • 2026</p>
           </div>
           <button class="refresh-button" id="refreshButton" type="button">Atualizar</button>
         </div>
@@ -91,10 +102,14 @@
     <div>ApuraBrasil • dados TSE / geografia IBGE</div>
   </footer>
 </div>
-<script src="/logo-override.js"></script>
 <script src="/round-selector.js"></script>
 <script src="/dashboard.js" defer></script>
-<script src="/dashboard-map-v1.js" defer></script>
+<script src="/candidate-photo-fix.js" defer></script>
+<script src="/candidate-highlights.js" defer></script>
 <script src="/elected-cards.js" defer></script>
+<script src="/map-intelligence.js" defer></script>
+<script src="/geo-search.js" defer></script>
+<script src="/municipal-layers.js" defer></script>
+<script src="/election-timeline.js" defer></script>
 </body>
 </html>
