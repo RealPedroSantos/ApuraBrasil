@@ -96,10 +96,26 @@ module.exports=async function handler(req,res){
       if(!municipalityCode&&municipalityName&&norm(s.municipality)!==municipalityName)continue;
       const key=`${s.zone}|${s.code}`;
       let place=placesMap.get(key);
-      if(!place){place={uf:s.uf,municipality:s.municipality,municipalityCode:s.municipalityCode,zone:s.zone,code:s.code,name:s.name,address:s.address,neighborhood:s.neighborhood,zipCode:s.zipCode,latitude:s.latitude,longitude:s.longitude,electorate:0,sections:[],_sections:new Set()};placesMap.set(key,place);}
-      if(s.section&&!place._sections.has(s.section)){place._sections.add(s.section);place.sections.push(s.section);place.electorate+=Number(s.electorate||0);}
+      if(!place){
+        place={uf:s.uf,municipality:s.municipality,municipalityCode:s.municipalityCode,zone:s.zone,code:s.code,name:s.name,address:s.address,neighborhood:s.neighborhood,zipCode:s.zipCode,latitude:s.latitude,longitude:s.longitude,electorate:0,sections:[],sectionElectorate:[],_sections:new Set(),_sectionElectorate:new Map()};
+        placesMap.set(key,place);
+      }
+      if(s.section&&!place._sections.has(s.section)){
+        place._sections.add(s.section);
+        place.sections.push(s.section);
+        place.electorate+=Number(s.electorate||0);
+        place._sectionElectorate.set(s.section,Number(s.electorate||0));
+      }
     }
-    const places=[...placesMap.values()].map(({_sections,...p})=>({...p,sections:p.sections.sort((a,b)=>Number(a)-Number(b))})).sort((a,b)=>Number(a.zone)-Number(b.zone)||Number(a.code)-Number(b.code));
+    const places=[...placesMap.values()]
+      .map(({_sections,_sectionElectorate,...p})=>({
+        ...p,
+        sections:p.sections.sort((a,b)=>Number(a)-Number(b)),
+        sectionElectorate:[..._sectionElectorate.entries()]
+          .map(([number,electorate])=>({number,electorate}))
+          .sort((a,b)=>Number(a.number)-Number(b.number))
+      }))
+      .sort((a,b)=>Number(a.zone)-Number(b.zone)||Number(a.code)-Number(b.code));
     const neighborhoodsMap=new Map();
     for(const place of places){
       const label=place.neighborhood||'Bairro não informado';
