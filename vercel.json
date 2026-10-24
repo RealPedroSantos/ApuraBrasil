@@ -11,5 +11,9 @@
         { "key": "Referrer-Policy", "value": "same-origin" }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/neighborhood-results.js": { "maxDuration": 60 },
+    "api/polling-places.js": { "maxDuration": 60 }
+  }
 }
