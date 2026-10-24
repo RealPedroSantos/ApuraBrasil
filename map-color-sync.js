@@ -41,8 +41,8 @@
       const code = String(region.dataset.code || '');
       const name = norm(region.dataset.name || '');
       const source = byCode.get(code) || byName.get(name);
-      let fill = '';
-      if (source) {
+      let fill = region.dataset.voteColor || '';
+      if (!fill && source) {
         fill = source.style.fill || getComputedStyle(source).fill || '';
         if (!fill || fill === 'none' || fill === 'rgba(0, 0, 0, 0)') fill = '';
       }
@@ -52,7 +52,7 @@
   }
 
   let timer = null;
-  function schedule(delay = 80) {
+  function schedule(delay = 18) {
     clearTimeout(timer);
     timer = setTimeout(syncColors, delay);
   }
@@ -62,10 +62,10 @@
   observer.observe(stage, {subtree:true, childList:true});
   if (candidateList) observer.observe(candidateList, {subtree:true, childList:true, attributes:true, attributeFilter:['style','class']});
 
-  document.querySelector('.office-nav')?.addEventListener('click', () => schedule(500));
-  document.getElementById('refreshButton')?.addEventListener('click', () => schedule(700));
-  window.addEventListener('apura:election-year-changed', () => schedule(700));
-  window.addEventListener('resize', () => schedule(100), {passive:true});
+  document.querySelector('.office-nav')?.addEventListener('click', () => schedule(80));
+  document.getElementById('refreshButton')?.addEventListener('click', () => schedule(30));
+  window.addEventListener('apura:election-year-changed', () => schedule(30));
+  window.addEventListener('resize', () => schedule(30), {passive:true});
 
-  schedule(900);
+  schedule(120);
 })();
