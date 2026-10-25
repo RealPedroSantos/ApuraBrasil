@@ -28,7 +28,7 @@
     .streams-grid{min-width:0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#000;border-top:1px solid rgba(255,255,255,.2)}
     .stream-card{position:relative;min-width:0;min-height:0;overflow:hidden;background:#000;border-right:1px solid rgba(255,255,255,.18)}
     .stream-card:last-child{border-right:0}
-    .stream-card iframe{position:absolute;inset:-2px;display:block;width:calc(100% + 4px);height:calc(100% + 4px);border:0;background:#000;pointer-events:none}
+    .stream-card iframe{position:absolute;top:50%;left:50%;display:block;width:100%;height:100%;transform:translate(-50%,-50%);border:0;background:#000;pointer-events:none}
     .stream-hit{position:absolute;z-index:3;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;background:transparent;color:transparent;appearance:none;cursor:default;outline:0}
     .stream-hit:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:-3px}
     .stream-card.offline iframe{visibility:hidden}
@@ -86,6 +86,25 @@
       const clock = document.getElementById('studioClock');
       const streamCards = [...document.querySelectorAll('.stream-card[data-channel]')];
       let audibleChannel = null;
+
+      function fitStreamFrames(){
+        const targetRatio = 16 / 9;
+        streamCards.forEach(card => {
+          const iframe = card.querySelector('iframe');
+          const width = card.clientWidth;
+          const height = card.clientHeight;
+          if (!width || !height) return;
+          if (width / height > targetRatio) {
+            const frameWidth = width + 4;
+            iframe.style.width = `${frameWidth}px`;
+            iframe.style.height = `${frameWidth / targetRatio}px`;
+          } else {
+            const frameHeight = height + 4;
+            iframe.style.height = `${frameHeight}px`;
+            iframe.style.width = `${frameHeight * targetRatio}px`;
+          }
+        });
+      }
 
       function readRound(){
         const value = Number(localStorage.getItem(ROUND_KEY));
@@ -203,6 +222,7 @@
           muteAllExcept(audibleChannel);
         });
         iframe.addEventListener('load', () => {
+          fitStreamFrames();
           playerCommand(iframe, 'mute');
           playerCommand(iframe, 'playVideo');
           if (audibleChannel === card.dataset.channel) {
@@ -237,6 +257,7 @@
       }
 
       function refreshStreams(){
+        fitStreamFrames();
         streamCards.forEach(resolveStream);
       }
 
@@ -244,7 +265,9 @@
         clock.textContent = new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
       }
 
+      window.addEventListener('resize', fitStreamFrames, { passive: true });
       syncRound();
+      fitStreamFrames();
       refreshStreams();
       updateClock();
       setInterval(updateClock,1000);
