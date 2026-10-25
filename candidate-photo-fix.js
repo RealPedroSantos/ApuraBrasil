@@ -66,10 +66,15 @@
         padding:4px 8px 0!important;
         overflow:hidden!important;
         position:relative!important;
-        z-index:90!important;
+        z-index:200!important;
         transform:translateY(calc(-1 * var(--ab-race-height)))!important;
         margin-bottom:calc(-1 * var(--ab-race-height))!important;
         box-shadow:0 -5px 16px rgba(7,21,34,.08)!important;
+        background:#fff!important;
+      }
+
+      html.broadcast-tv-readable .main-grid .broadcast-resizer-v2{
+        z-index:40!important;
       }
 
       html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race > .ab-race-tv{
@@ -89,6 +94,19 @@
         height:54px!important;
         min-height:54px!important;
         max-height:54px!important;
+      }
+
+      html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric small.vote-breakdown-percentage,
+      html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric > small{
+        display:block!important;
+        font-size:clamp(15px,1.15vw,21px)!important;
+        line-height:1!important;
+        font-weight:950!important;
+        color:#263545!important;
+        letter-spacing:-.02em!important;
+        margin-top:1px!important;
+        opacity:1!important;
+        white-space:nowrap!important;
       }
 
       html.broadcast-tv-readable .ab-race-photo{
@@ -117,6 +135,10 @@
           --ab-race-height:clamp(92px,10.4167vw,118px);
           min-height:146px!important;
         }
+        html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric small.vote-breakdown-percentage,
+        html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric > small{
+          font-size:14px!important;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -133,7 +155,7 @@
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
       loadScriptOnce('/election-race-bar-tv.js','data-election-race-bar-tv');
       loadScriptOnce('/election-race-candidate-only-guard.js','data-election-race-candidate-only-guard');
-      window.__apuraBrasilBroadcastLoaderVersion='2.5.6';
+      window.__apuraBrasilBroadcastLoaderVersion='2.5.7';
     }catch{}
   }
 
