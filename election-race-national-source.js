@@ -6,10 +6,26 @@
   }catch{return;}
 
   const POLL_MS=5000;
-  const state={payload:null,leftKey:'',rightKey:'',round:0,inFlight:false,timer:null,scheduled:false};
+  const ENFORCE_MS=300;
+  const state={
+    payload:null,
+    leftKey:'',
+    rightKey:'',
+    round:0,
+    inFlight:false,
+    timer:null,
+    enforceTimer:null,
+    scheduled:false,
+    frame:0,
+    barObserver:null,
+    barTarget:null
+  };
   const fmtVotes=new Intl.NumberFormat('pt-BR');
   const fmtPct=new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const key=c=>`${String(c?.ballotName||c?.name||'').trim().toUpperCase()}|${String(c?.party||'').trim().toUpperCase()}`;
+
+  /* Sinal global: a barra do /ao-vivo é controlada exclusivamente pelo resultado nacional. */
+  window.__apuraBrasilNationalRaceBarLock=true;
 
   function currentRound(){
     const api=Number(window.ApuraBrasilRound?.get?.());
@@ -55,7 +71,10 @@
   }
 
   function choosePair(candidates,bar){
-    const list=(candidates||[]).filter(c=>Number(c?.votes||0)>=0&&c?.party&&c?.ballotName).slice().sort((a,b)=>Number(b.votes||0)-Number(a.votes||0));
+    const list=(candidates||[])
+      .filter(c=>Number(c?.votes||0)>=0&&c?.party&&c?.ballotName)
+      .slice()
+      .sort((a,b)=>Number(b.votes||0)-Number(a.votes||0));
     if(list.length<2) return null;
 
     if(state.leftKey&&state.rightKey){
@@ -86,8 +105,24 @@
     return national;
   }
 
+  function ensureBarObserver(){
+    const bar=document.getElementById('apuraElectionRaceBar');
+    if(!bar||state.barTarget===bar) return;
+    state.barObserver?.disconnect();
+    state.barTarget=bar;
+    state.barObserver=new MutationObserver(()=>scheduleApply());
+    state.barObserver.observe(bar,{
+      subtree:true,
+      childList:true,
+      characterData:true,
+      attributes:true,
+      attributeFilter:['style','src','class']
+    });
+  }
+
   function applyNational(){
     state.scheduled=false;
+    ensureBarObserver();
     if(!syncVisibility()||!state.payload) return;
     const bar=document.getElementById('apuraElectionRaceBar');
     if(!bar) return;
@@ -126,7 +161,17 @@
   function scheduleApply(){
     if(state.scheduled) return;
     state.scheduled=true;
-    queueMicrotask(applyNational);
+    if(state.frame) cancelAnimationFrame(state.frame);
+    /*
+      Executa depois das rotinas locais da barra. Se um clique no mapa tentar
+      reaplicar UF/município, o snapshot BR volta no quadro imediatamente seguinte.
+    */
+    state.frame=requestAnimationFrame(()=>{
+      state.frame=requestAnimationFrame(()=>{
+        state.frame=0;
+        applyNational();
+      });
+    });
   }
 
   async function refresh(){
@@ -134,6 +179,7 @@
     const round=currentRound();
     state.inFlight=true;
     try{
+      /* Sem UF, município, zona ou seção: esta consulta é sempre Brasil. */
       const response=await fetch(`/api/results?year=2026&office=presidente&round=${round}`,{cache:'no-store'});
       if(!response.ok) return;
       const payload=await response.json();
@@ -152,16 +198,38 @@
     }
   }
 
-  const observer=new MutationObserver(()=>scheduleApply());
-  observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+  /* Mudanças no restante da tela podem recriar/mover a barra. Nunca usamos esses dados locais. */
+  const pageObserver=new MutationObserver(()=>{
+    ensureBarObserver();
+    scheduleApply();
+  });
+  pageObserver.observe(document.documentElement,{childList:true,subtree:true});
 
   document.addEventListener('click',event=>{
-    if(event.target.closest('.office-btn[data-office],#roundSelector [data-round]')){
-      setTimeout(()=>{syncVisibility();refresh();},0);
+    /* Qualquer navegação no mapa/localidade apenas força novamente o snapshot BR. */
+    if(event.target.closest('.office-btn[data-office],#roundSelector [data-round],svg,[data-uf],[data-state],[data-region],.map-wrap,.map-panel')){
+      setTimeout(scheduleApply,0);
+      setTimeout(scheduleApply,80);
+      setTimeout(scheduleApply,250);
+      if(event.target.closest('.office-btn[data-office],#roundSelector [data-round]')){
+        setTimeout(()=>{syncVisibility();refresh();},0);
+      }
     }
   },true);
 
   refresh();
+  ensureBarObserver();
   state.timer=setInterval(refresh,POLL_MS);
-  window.__apuraBrasilNationalRaceBar={refresh,apply:applyNational};
+  /* Guarda adicional contra qualquer atualização local tardia/assíncrona. */
+  state.enforceTimer=setInterval(()=>{
+    if(state.payload&&activeOffice()==='presidente') applyNational();
+  },ENFORCE_MS);
+
+  window.__apuraBrasilNationalRaceBar={
+    locked:true,
+    scope:'BR',
+    office:'presidente',
+    refresh,
+    apply:applyNational
+  };
 })();
