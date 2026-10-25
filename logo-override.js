@@ -2,39 +2,37 @@
   'use strict';
 
   const KEY = 'apurabrasil.customLogo';
-  const DEFAULT_LOGO = '/assets/logo-apurabrasil.svg';
+  const DEFAULT_LOGO = '/assets/logo-apura-current.svg?v=20261025-0224';
   const SELECTOR = '.brand-logo, .projection-logo';
   let applying = false;
 
   function getSavedLogo() {
-    try { return localStorage.getItem(KEY) || ''; } catch { return ''; }
+    return '';
   }
 
-  function setLogoSource(img, source, custom) {
+  function setLogoSource(img, source) {
     if (!(img instanceof HTMLImageElement) || !source) return;
     if (img.getAttribute('src') !== source) img.setAttribute('src', source);
-    if (custom) img.dataset.customLogo = 'true';
-    else delete img.dataset.customLogo;
+    delete img.dataset.customLogo;
   }
 
   function applyLogo(root = document) {
     if (applying) return;
     applying = true;
     try {
-      const saved = getSavedLogo();
-      const source = saved || DEFAULT_LOGO;
+      const source = DEFAULT_LOGO;
 
       if (root instanceof HTMLImageElement && root.matches(SELECTOR)) {
-        setLogoSource(root, source, Boolean(saved));
+        setLogoSource(root, source);
       }
 
-      root.querySelectorAll?.(SELECTOR).forEach((img) => setLogoSource(img, source, Boolean(saved)));
+      root.querySelectorAll?.(SELECTOR).forEach((img) => setLogoSource(img, source));
 
       root.querySelectorAll?.('.brand-temp').forEach((placeholder) => {
         const img = document.createElement('img');
         img.className = 'brand-logo';
         img.alt = 'Apura Brasil';
-        setLogoSource(img, source, Boolean(saved));
+        setLogoSource(img, source);
         placeholder.replaceWith(img);
       });
     } finally {
@@ -42,26 +40,26 @@
     }
   }
 
+  function clearLocalOverride() {
+    try { localStorage.removeItem(KEY); } catch {}
+  }
+
   function saveLogo(source) {
     try {
       if (source) localStorage.setItem(KEY, source);
       else localStorage.removeItem(KEY);
-      applyLogo();
-      return true;
-    } catch {
-      return false;
-    }
+    } catch {}
+    applyLogo();
+    return true;
   }
 
   const observer = new MutationObserver((mutations) => {
     if (applying) return;
-    const saved = getSavedLogo();
     for (const mutation of mutations) {
       if (mutation.type === 'attributes') {
         const img = mutation.target;
-        if (img instanceof HTMLImageElement && img.matches(SELECTOR)) {
-          const expected = saved || DEFAULT_LOGO;
-          if (img.getAttribute('src') !== expected) applyLogo(img);
+        if (img instanceof HTMLImageElement && img.matches(SELECTOR) && img.getAttribute('src') !== DEFAULT_LOGO) {
+          applyLogo(img);
         }
         continue;
       }
@@ -75,6 +73,7 @@
   });
 
   function start() {
+    clearLocalOverride();
     applyLogo();
     observer.observe(document.documentElement, {
       childList: true,
@@ -87,7 +86,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 
-  window.addEventListener('storage', (event) => { if (event.key === KEY) applyLogo(); });
   window.addEventListener('pageshow', applyLogo);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) applyLogo(); });
 
