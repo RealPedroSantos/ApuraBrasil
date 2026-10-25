@@ -8,6 +8,55 @@
   if(!isBroadcastEmbed()) return;
   window.__apuraBrasilBroadcastTvTypographyInstalled=true;
 
+  function removeDuplicateBroadcastHeader(){
+    try{
+      const parentDoc=window.parent.document;
+      parentDoc.querySelector('.studio-head')?.remove();
+      const frame=parentDoc.querySelector('.broadcast-frame');
+      if(frame){
+        frame.style.setProperty('grid-template-rows','minmax(0,1fr) 33.333333%','important');
+      }
+    }catch{}
+  }
+
+  function restoreNativeSiteHeader(){
+    const shell=document.querySelector('.app-shell');
+    if(shell){
+      shell.style.setProperty('grid-template-rows','auto minmax(0,1fr)','important');
+      shell.style.setProperty('padding','0','important');
+      shell.style.setProperty('gap','0','important');
+    }
+
+    const topbar=document.querySelector('.topbar');
+    if(topbar){
+      topbar.style.setProperty('display','grid','important');
+      topbar.style.setProperty('visibility','visible','important');
+      topbar.style.setProperty('opacity','1','important');
+      topbar.style.setProperty('position','relative','important');
+      topbar.style.setProperty('z-index','30','important');
+    }
+
+    const roundSelector=document.querySelector('.round-selector');
+    if(roundSelector){
+      roundSelector.style.setProperty('display','flex','important');
+      roundSelector.style.setProperty('visibility','visible','important');
+      roundSelector.style.setProperty('opacity','1','important');
+    }
+
+    const main=document.querySelector('.main-grid');
+    if(main){
+      main.style.setProperty('padding','7px','important');
+    }
+
+    document.querySelector('.status-bar')?.style.setProperty('display','none','important');
+    document.querySelector('.mobile-app-nav')?.style.setProperty('display','none','important');
+  }
+
+  function enforceNativeHeader(){
+    removeDuplicateBroadcastHeader();
+    restoreNativeSiteHeader();
+  }
+
   const style=document.createElement('style');
   style.id='broadcastTvTypographyStyle';
   style.textContent=`
@@ -92,4 +141,11 @@
   `;
   document.head.appendChild(style);
   document.documentElement.classList.add('broadcast-tv-readable');
+
+  enforceNativeHeader();
+  requestAnimationFrame(enforceNativeHeader);
+  setTimeout(enforceNativeHeader,120);
+  setTimeout(enforceNativeHeader,450);
+  setTimeout(enforceNativeHeader,1200);
+  new MutationObserver(enforceNativeHeader).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
 })();
