@@ -1,0 +1,50 @@
+.summary-metrics.apura-vote-breakdown{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+.summary-metric.vote-breakdown-metric small{
+  display:block;
+  margin-top:1px;
+  font-size:8px;
+  line-height:1.1;
+  color:var(--muted,#6c7478);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+@media(max-aspect-ratio:4/3){
+  .summary-metrics.apura-vote-breakdown{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+html.mobile-ui .summary-metrics.apura-vote-breakdown{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:3px!important;
+  margin-top:3px!important;
+}
+
+html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric{
+  padding-top:3px!important;
+}
+
+html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric span{
+  font-size:8px!important;
+}
+
+html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric b{
+  font-size:11px!important;
+  line-height:1.05!important;
+}
+
+html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric small{
+  font-size:7px!important;
+}
+
+@media(min-width:701px) and (max-aspect-ratio:4/3){
+  .summary-metrics.apura-vote-breakdown{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+  }
+}
