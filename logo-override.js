@@ -9,6 +9,7 @@
   let globalCustom = false;
   let applying = false;
   let refreshPromise = null;
+  let resolvedOnce = false;
 
   function getLocalLogo() {
     try { return String(localStorage.getItem(LOCAL_KEY) || '').trim(); } catch { return ''; }
@@ -59,13 +60,44 @@
     }
   }
 
-  function setLogoSource(img, source) {
+  function setLogoVisible(img, visible) {
+    if (!(img instanceof HTMLImageElement)) return;
+    img.style.setProperty('visibility', visible ? 'visible' : 'hidden', 'important');
+    img.style.setProperty('opacity', visible ? '1' : '0', 'important');
+  }
+
+  function hideLogoTargets(root = document) {
+    if (root instanceof HTMLImageElement && root.matches(SELECTOR)) setLogoVisible(root, false);
+    root.querySelectorAll?.(SELECTOR).forEach(img => setLogoVisible(img, false));
+  }
+
+  function preload(source) {
+    return new Promise(resolve => {
+      if (!source) return resolve(false);
+      const img = new Image();
+      let settled = false;
+      const finish = ok => {
+        if (settled) return;
+        settled = true;
+        resolve(ok);
+      };
+      img.onload = () => finish(true);
+      img.onerror = () => finish(false);
+      img.src = source;
+      if (img.complete && img.naturalWidth > 0) finish(true);
+      setTimeout(() => finish(false), 5000);
+    });
+  }
+
+  function setLogoSource(img, source, reveal = resolvedOnce) {
     if (!(img instanceof HTMLImageElement) || !source) return;
+    if (!reveal) setLogoVisible(img, false);
     if (img.getAttribute('src') !== source) img.setAttribute('src', source);
     img.alt = 'Apura Brasil';
     if (source.includes('/assets/logo-apura-current.svg')) delete img.dataset.customLogo;
     else img.dataset.customLogo = '1';
     styleLogo(img);
+    if (reveal) setLogoVisible(img, true);
   }
 
   function removeSyntheticWordmark(root = document) {
@@ -73,19 +105,19 @@
     root.querySelectorAll?.('.mobile-wordmark-v4').forEach(node => node.remove());
   }
 
-  function applyLogo(root = document) {
+  function applyLogo(root = document, reveal = resolvedOnce) {
     if (applying) return;
     applying = true;
     try {
       const source = desiredLogo();
 
-      if (root instanceof HTMLImageElement && root.matches(SELECTOR)) setLogoSource(root, source);
-      root.querySelectorAll?.(SELECTOR).forEach(img => setLogoSource(img, source));
+      if (root instanceof HTMLImageElement && root.matches(SELECTOR)) setLogoSource(root, source, reveal);
+      root.querySelectorAll?.(SELECTOR).forEach(img => setLogoSource(img, source, reveal));
 
       root.querySelectorAll?.('.brand-temp').forEach(placeholder => {
         const img = document.createElement('img');
         img.className = 'brand-logo';
-        setLogoSource(img, source);
+        setLogoSource(img, source, reveal);
         placeholder.replaceWith(img);
       });
 
@@ -95,21 +127,33 @@
     }
   }
 
+  async function resolveAndReveal(source, custom = false) {
+    let chosen = String(source || '').trim() || DEFAULT_LOGO;
+    let ok = await preload(chosen);
+    if (!ok && chosen !== DEFAULT_LOGO) {
+      chosen = getLocalLogo() || DEFAULT_LOGO;
+      ok = await preload(chosen);
+    }
+    globalLogo = chosen;
+    globalCustom = Boolean(custom && chosen === source);
+    resolvedOnce = true;
+    applyLogo(document, true);
+    document.documentElement.classList.add('apura-logo-ready');
+    window.dispatchEvent(new CustomEvent('apura:logo-updated', { detail: { url: chosen, custom: globalCustom } }));
+    return { url: chosen, custom: globalCustom, loaded: ok };
+  }
+
   async function refreshGlobal(force = false) {
     if (refreshPromise && !force) return refreshPromise;
+    if (!resolvedOnce) hideLogoTargets();
     refreshPromise = fetch(`/api/logo?t=${Date.now()}`, { cache: 'no-store', credentials: 'same-origin' })
       .then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
-      .then(data => {
-        globalLogo = String(data?.url || DEFAULT_LOGO).trim() || DEFAULT_LOGO;
-        globalCustom = Boolean(data?.custom);
-        applyLogo();
-        window.dispatchEvent(new CustomEvent('apura:logo-updated', { detail: { url: globalLogo, custom: globalCustom } }));
-        return { url: globalLogo, custom: globalCustom };
-      })
-      .catch(error => {
+      .then(data => resolveAndReveal(String(data?.url || DEFAULT_LOGO).trim() || DEFAULT_LOGO, Boolean(data?.custom)))
+      .catch(async error => {
         console.warn('ApuraBrasil: não foi possível consultar a logo global.', error);
-        applyLogo();
-        return { url: desiredLogo(), custom: globalCustom, offline: true };
+        const fallback = getLocalLogo() || DEFAULT_LOGO;
+        const result = await resolveAndReveal(fallback, false);
+        return { ...result, offline: true };
       })
       .finally(() => { refreshPromise = null; });
     return refreshPromise;
@@ -123,7 +167,10 @@
     } catch {
       return false;
     }
-    if (!globalCustom) applyLogo();
+    if (!globalCustom && resolvedOnce) {
+      globalLogo = normalized || DEFAULT_LOGO;
+      applyLogo(document, true);
+    }
     return getLocalLogo() === normalized;
   }
 
@@ -152,29 +199,30 @@
       if (shouldApply) break;
     }
 
-    if (shouldApply) applyLogo();
+    if (shouldApply) applyLogo(document, resolvedOnce);
   });
 
   function start() {
     normalizeLegacyState();
-    applyLogo();
-    refreshGlobal();
+    hideLogoTargets();
+    removeSyntheticWordmark(document);
     observer.observe(document.documentElement, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['src', 'class']
     });
+    refreshGlobal();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 
   window.addEventListener('pageshow', () => refreshGlobal(true));
-  window.addEventListener('resize', () => applyLogo(), { passive: true });
-  window.addEventListener('orientationchange', () => applyLogo(), { passive: true });
+  window.addEventListener('resize', () => applyLogo(document, resolvedOnce), { passive: true });
+  window.addEventListener('orientationchange', () => applyLogo(document, resolvedOnce), { passive: true });
   window.addEventListener('storage', event => {
-    if (event.key === LOCAL_KEY) applyLogo();
+    if (event.key === LOCAL_KEY && !globalCustom) refreshGlobal(true);
   });
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) refreshGlobal(true);
@@ -188,12 +236,13 @@
     getLocal: getLocalLogo,
     setLocal: saveLocalLogo,
     clearLocal: clearLocalLogo,
-    apply: applyLogo,
+    apply: () => applyLogo(document, resolvedOnce),
     refresh: refreshGlobal,
     isGlobalCustom: () => globalCustom,
+    isReady: () => resolvedOnce,
     resetLocal: () => {
       const ok = clearLocalLogo();
-      applyLogo();
+      refreshGlobal(true);
       return ok;
     }
   };
