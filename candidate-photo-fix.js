@@ -52,6 +52,7 @@
       script.defer = true;
       script.dataset.broadcastLayoutControls = 'true';
       document.head.appendChild(script);
+      window.__apuraBrasilBroadcastLoaderVersion = '1.0.1';
     } catch {}
   }
 
