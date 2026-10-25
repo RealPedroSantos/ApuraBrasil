@@ -1,45 +1,156 @@
 (() => {
   'use strict';
 
-  const KEY = 'apurabrasil.customLogo';
+  const KEY = 'apurabrasil.customLogo.v2';
+  const LEGACY_KEY = 'apurabrasil.customLogo';
+  const DEFAULT_LOGO = '/assets/logo-apura-current.svg?v=20261025-official';
+  const SELECTOR = '.brand-logo, .projection-logo';
+  let applying = false;
 
   function getSavedLogo() {
-    try { return localStorage.getItem(KEY) || ''; } catch { return ''; }
+    try { return String(localStorage.getItem(KEY) || '').trim(); } catch { return ''; }
   }
 
-  function applyLogo() {
-    const saved = getSavedLogo();
-    if (!saved) return;
-
-    document.querySelectorAll('.brand-logo, .projection-logo').forEach((img) => {
-      if (!(img instanceof HTMLImageElement)) return;
-      img.src = saved;
-      img.dataset.customLogo = 'true';
-    });
-
-    document.querySelectorAll('.brand-temp').forEach((placeholder) => {
-      const img = document.createElement('img');
-      img.className = 'brand-logo';
-      img.alt = 'Apura Brasil';
-      img.src = saved;
-      img.dataset.customLogo = 'true';
-      placeholder.replaceWith(img);
-    });
+  function desiredLogo() {
+    return getSavedLogo() || DEFAULT_LOGO;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyLogo, { once: true });
-  } else {
+  function isMobileHeader() {
+    return document.documentElement.classList.contains('mobile-app-v4') ||
+      window.matchMedia?.('(max-width: 900px)')?.matches || false;
+  }
+
+  function normalizeLegacyState() {
+    try { localStorage.removeItem(LEGACY_KEY); } catch {}
+  }
+
+  function styleLogo(img) {
+    if (!(img instanceof HTMLImageElement)) return;
+
+    if (img.classList.contains('brand-logo') && isMobileHeader()) {
+      img.style.setProperty('display', 'block', 'important');
+      img.style.setProperty('width', 'clamp(118px, 38vw, 170px)', 'important');
+      img.style.setProperty('height', '42px', 'important');
+      img.style.setProperty('max-width', '100%', 'important');
+      img.style.setProperty('max-height', '42px', 'important');
+      img.style.setProperty('object-fit', 'contain', 'important');
+      img.style.setProperty('object-position', 'left center', 'important');
+      img.style.setProperty('flex', '0 1 auto', 'important');
+    } else if (img.classList.contains('brand-logo')) {
+      ['display','width','height','max-width','max-height','object-fit','object-position','flex']
+        .forEach(property => img.style.removeProperty(property));
+    }
+  }
+
+  function setLogoSource(img, source) {
+    if (!(img instanceof HTMLImageElement) || !source) return;
+    if (img.getAttribute('src') !== source) img.setAttribute('src', source);
+    img.alt = 'Apura Brasil';
+    if (source === DEFAULT_LOGO) delete img.dataset.customLogo;
+    else img.dataset.customLogo = '1';
+    styleLogo(img);
+  }
+
+  function removeSyntheticWordmark(root = document) {
+    if (root instanceof Element && root.matches?.('.mobile-wordmark-v4')) root.remove();
+    root.querySelectorAll?.('.mobile-wordmark-v4').forEach(node => node.remove());
+  }
+
+  function applyLogo(root = document) {
+    if (applying) return;
+    applying = true;
+    try {
+      const source = desiredLogo();
+
+      if (root instanceof HTMLImageElement && root.matches(SELECTOR)) {
+        setLogoSource(root, source);
+      }
+
+      root.querySelectorAll?.(SELECTOR).forEach(img => setLogoSource(img, source));
+
+      root.querySelectorAll?.('.brand-temp').forEach(placeholder => {
+        const img = document.createElement('img');
+        img.className = 'brand-logo';
+        setLogoSource(img, source);
+        placeholder.replaceWith(img);
+      });
+
+      removeSyntheticWordmark(root);
+    } finally {
+      applying = false;
+    }
+  }
+
+  function saveLogo(source) {
+    const normalized = String(source || '').trim();
+    try {
+      if (normalized) localStorage.setItem(KEY, normalized);
+      else localStorage.removeItem(KEY);
+    } catch {
+      return false;
+    }
     applyLogo();
+    return getSavedLogo() === normalized;
   }
 
-  window.addEventListener('storage', (event) => {
+  const observer = new MutationObserver(mutations => {
+    if (applying) return;
+    let shouldApply = false;
+
+    for (const mutation of mutations) {
+      if (mutation.type === 'attributes') {
+        if (mutation.target === document.documentElement ||
+            (mutation.target instanceof HTMLImageElement && mutation.target.matches(SELECTOR))) {
+          shouldApply = true;
+          break;
+        }
+      }
+
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof Element)) continue;
+        if (node.matches?.(SELECTOR) || node.querySelector?.(SELECTOR) ||
+            node.matches?.('.brand-temp,.mobile-wordmark-v4') ||
+            node.querySelector?.('.brand-temp,.mobile-wordmark-v4')) {
+          shouldApply = true;
+          break;
+        }
+      }
+      if (shouldApply) break;
+    }
+
+    if (shouldApply) applyLogo();
+  });
+
+  function start() {
+    normalizeLegacyState();
+    applyLogo();
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['src', 'class']
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
+
+  window.addEventListener('pageshow', () => applyLogo());
+  window.addEventListener('resize', () => applyLogo(), { passive: true });
+  window.addEventListener('orientationchange', () => applyLogo(), { passive: true });
+  window.addEventListener('storage', event => {
     if (event.key === KEY) applyLogo();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) applyLogo();
   });
 
   window.ApuraBrasilLogo = {
     key: KEY,
+    default: DEFAULT_LOGO,
     get: getSavedLogo,
-    apply: applyLogo
+    set: saveLogo,
+    apply: applyLogo,
+    reset: () => saveLogo('')
   };
 })();
