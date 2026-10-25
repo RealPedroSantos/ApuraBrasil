@@ -1,0 +1,185 @@
+/* Mobile map corrections: candidate widgets above the map + centered usable map viewport. */
+html.mobile-app-v4 .map-stage,
+html.mobile-app-v4 .map-stage.highlight-ready{
+  --mobile-candidate-overlay:82px;
+  --mobile-result-overlay:78px;
+}
+
+/* Candidate widgets stay on top of the map and reuse candidate-highlights.js data. */
+html.mobile-app-v4 .candidate-highlights{
+  display:grid!important;
+  position:absolute!important;
+  z-index:70!important;
+  left:7px!important;
+  right:7px!important;
+  top:7px!important;
+  bottom:auto!important;
+  width:auto!important;
+  height:var(--mobile-candidate-overlay)!important;
+  min-width:0!important;
+  min-height:0!important;
+  padding:0!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:1fr!important;
+  gap:6px!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+}
+html.mobile-app-v4 .candidate-highlights:empty{display:none!important}
+html.mobile-app-v4 .candidate-highlights .highlight-card{
+  display:grid!important;
+  grid-template-columns:46px minmax(0,1fr) auto!important;
+  grid-template-rows:1fr 1fr!important;
+  gap:2px 6px!important;
+  align-items:center!important;
+  width:auto!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  padding:6px!important;
+  border:1px solid rgba(39,64,73,.16)!important;
+  border-radius:12px!important;
+  background:rgba(255,255,255,.95)!important;
+  box-shadow:0 5px 16px rgba(23,45,53,.11)!important;
+  backdrop-filter:blur(12px)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+  overflow:hidden!important;
+  pointer-events:auto!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-card:nth-child(n+3){display:none!important}
+html.mobile-app-v4 .candidate-highlights .highlight-ring{
+  grid-column:1!important;
+  grid-row:1/3!important;
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  max-width:46px!important;
+  max-height:46px!important;
+  padding:3px!important;
+  margin:0!important;
+  align-self:center!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-ring-inner{padding:3px!important}
+html.mobile-app-v4 .candidate-highlights .highlight-info{
+  grid-column:2!important;
+  grid-row:1/3!important;
+  align-self:center!important;
+  min-width:0!important;
+  width:100%!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  overflow:hidden!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-name{
+  font-size:9px!important;
+  line-height:1.08!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-subline{margin-top:4px!important;gap:3px!important;min-width:0!important}
+html.mobile-app-v4 .candidate-highlights .highlight-party,
+html.mobile-app-v4 .candidate-highlights .highlight-number{font-size:7px!important;line-height:1!important}
+html.mobile-app-v4 .candidate-highlights .highlight-percent{
+  grid-column:3!important;
+  grid-row:1/3!important;
+  align-self:center!important;
+  width:auto!important;
+  min-width:42px!important;
+  max-width:54px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  font-size:17px!important;
+  line-height:1!important;
+  text-align:right!important;
+  letter-spacing:-.035em!important;
+  overflow:visible!important;
+}
+
+/* Reserve real visual space for the candidate widgets and the result card.
+   The SVG keeps xMidYMid, so this recenters the map in the free area instead of
+   centering it behind overlays. */
+html.mobile-app-v4 .map-canvas,
+html.mobile-app-v4 .map-stage.highlight-ready .map-canvas{
+  box-sizing:border-box!important;
+  padding:calc(var(--mobile-candidate-overlay) + 12px) 10px calc(var(--mobile-result-overlay) + 12px)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+html.mobile-app-v4 .map-canvas .vector-map{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  display:block!important;
+  margin:auto!important;
+  transform:none!important;
+}
+
+/* Drill-down maps replace #map with this host; apply the same alignment rules. */
+html.mobile-app-v4 .map-stage>.ab-drilldown-host{
+  position:absolute!important;
+  inset:0!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  padding:calc(var(--mobile-candidate-overlay) + 12px) 10px calc(var(--mobile-result-overlay) + 12px)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  border-radius:13px!important;
+  background:#e9ecea!important;
+}
+html.mobile-app-v4 .map-stage>.ab-drilldown-host>svg{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  display:block!important;
+  margin:auto!important;
+  transform:none!important;
+}
+
+/* The level badge must not sit behind the candidate cards. */
+html.mobile-app-v4 .ab-map-level{
+  top:calc(var(--mobile-candidate-overlay) + 16px)!important;
+  right:8px!important;
+  z-index:75!important;
+}
+
+/* The compact result card remains the lower overlay. */
+html.mobile-app-v4 .mobile-map-peek-v4{
+  min-height:var(--mobile-result-overlay)!important;
+  bottom:7px!important;
+}
+
+@media(max-width:390px){
+  html.mobile-app-v4 .map-stage,
+  html.mobile-app-v4 .map-stage.highlight-ready{
+    --mobile-candidate-overlay:76px;
+    --mobile-result-overlay:76px;
+  }
+  html.mobile-app-v4 .candidate-highlights{left:5px!important;right:5px!important;top:5px!important;gap:4px!important}
+  html.mobile-app-v4 .candidate-highlights .highlight-card{grid-template-columns:40px minmax(0,1fr) auto!important;padding:5px!important;gap:2px 4px!important;border-radius:10px!important}
+  html.mobile-app-v4 .candidate-highlights .highlight-ring{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;max-width:40px!important;max-height:40px!important}
+  html.mobile-app-v4 .candidate-highlights .highlight-name{font-size:8px!important}
+  html.mobile-app-v4 .candidate-highlights .highlight-percent{font-size:15px!important;min-width:36px!important;max-width:44px!important}
+  html.mobile-app-v4 .map-canvas,
+  html.mobile-app-v4 .map-stage.highlight-ready .map-canvas,
+  html.mobile-app-v4 .map-stage>.ab-drilldown-host{padding-left:7px!important;padding-right:7px!important}
+}
+
+html.mobile-app-v4.mobile-landscape .map-stage,
+html.mobile-app-v4.mobile-landscape .map-stage.highlight-ready{
+  --mobile-candidate-overlay:64px;
+  --mobile-result-overlay:66px;
+}
+html.mobile-app-v4.mobile-landscape .candidate-highlights .highlight-card{grid-template-columns:38px minmax(0,1fr) auto!important;padding:4px 6px!important}
+html.mobile-app-v4.mobile-landscape .candidate-highlights .highlight-ring{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;max-width:38px!important;max-height:38px!important}
