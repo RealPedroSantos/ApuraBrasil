@@ -57,7 +57,8 @@
       loadScriptOnce('/broadcast-layout-controls-v2.js','data-broadcast-layout-controls-v2');
       loadScriptOnce('/broadcast-tv-typography.js','data-broadcast-tv-typography');
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
-      window.__apuraBrasilBroadcastLoaderVersion='2.4.0';
+      loadScriptOnce('/election-race-bar-tv.js','data-election-race-bar-tv');
+      window.__apuraBrasilBroadcastLoaderVersion='2.5.0';
     }catch{}
   }
 
