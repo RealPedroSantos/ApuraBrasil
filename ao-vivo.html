@@ -12,67 +12,33 @@
     body{display:grid;place-items:center}
     .broadcast-frame{position:relative;width:min(100vw,177.7777778vh);height:min(100vh,56.25vw);aspect-ratio:16/9;display:grid;grid-template-rows:48px minmax(0,1fr) 33.333333%;overflow:hidden;background:var(--ink);box-shadow:0 20px 80px rgba(0,0,0,.38)}
     .studio-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:16px;padding:5px 13px;background:#071522;color:#fff;border-bottom:1px solid var(--line);z-index:3}
-    .brand{display:flex;align-items:center;gap:10px;min-width:0}
-    .brand img{display:block;width:auto;height:31px;max-width:170px;object-fit:contain;filter:brightness(0) invert(1)}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}.brand img{display:block;width:auto;height:31px;max-width:170px;object-fit:contain;filter:brightness(0) invert(1)}
     .brand-divider{width:1px;height:27px;background:rgba(255,255,255,.28)}
-    .studio-title{min-width:0;font-weight:900;letter-spacing:.01em;font-size:clamp(14px,1.08vw,20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .studio-title small{font-weight:650;color:#aebbc2;margin-left:7px}
-    .round-switch{display:flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(255,255,255,.17);border-radius:9px;background:rgba(255,255,255,.055);white-space:nowrap}
-    .round-switch button{appearance:none;border:0;border-radius:6px;background:transparent;color:#bac5cb;padding:6px 9px;font:800 10px/1 inherit;cursor:pointer}
-    .round-switch button.active{background:#fff;color:#071522}
-    .live-state{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#d8e0e4;font-size:10px;font-weight:800}
-    .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(47,155,97,.14)}
-    .clock{font-variant-numeric:tabular-nums;color:#fff}
-    .election-stage{position:relative;min-width:0;min-height:0;background:var(--paper);overflow:hidden}
-    #electionFrame{display:block;width:100%;height:100%;border:0;background:var(--paper)}
+    .studio-title{min-width:0;font-weight:900;letter-spacing:.01em;font-size:clamp(14px,1.08vw,20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.studio-title small{font-weight:650;color:#aebbc2;margin-left:7px}
+    .round-switch{display:flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(255,255,255,.17);border-radius:9px;background:rgba(255,255,255,.055);white-space:nowrap}.round-switch button{appearance:none;border:0;border-radius:6px;background:transparent;color:#bac5cb;padding:6px 9px;font:800 10px/1 inherit;cursor:pointer}.round-switch button.active{background:#fff;color:#071522}
+    .live-state{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#d8e0e4;font-size:10px;font-weight:800}.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(47,155,97,.14)}.clock{font-variant-numeric:tabular-nums;color:#fff}
+    .election-stage{position:relative;min-width:0;min-height:0;background:var(--paper);overflow:hidden}#electionFrame{display:block;width:100%;height:100%;border:0;background:var(--paper)}
     .streams-grid{min-width:0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#000;border-top:1px solid rgba(255,255,255,.2)}
-    .stream-card{position:relative;min-width:0;min-height:0;overflow:hidden;background:#000;box-shadow:inset -1px 0 rgba(255,255,255,.18)}
-    .stream-card:last-child{box-shadow:none}
-    .stream-card iframe{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000;pointer-events:none}
-    .stream-hit{position:absolute;z-index:3;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;background:transparent;color:transparent;appearance:none;cursor:default;outline:0}
-    .stream-hit:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:-3px}
-    .stream-card.offline iframe{visibility:hidden}
-    @media(max-width:900px){
-      .broadcast-frame{grid-template-rows:40px minmax(0,1fr) 33.333333%}
-      .studio-head{gap:7px;padding:4px 7px}
-      .brand img{height:26px;max-width:116px}.brand-divider{display:none}.studio-title small{display:none}
-      .round-switch button{padding:5px 7px;font-size:9px}.live-state{font-size:9px}.clock{display:none}
-    }
+    .stream-card{position:relative;min-width:0;min-height:0;overflow:hidden;background:#000;box-shadow:inset -1px 0 rgba(255,255,255,.18)}.stream-card:last-child{box-shadow:none}.stream-card iframe{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000;pointer-events:none}.stream-hit{position:absolute;z-index:3;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;background:transparent;color:transparent;appearance:none;cursor:default;outline:0}.stream-hit:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:-3px}.stream-card.offline iframe{visibility:hidden}
+    @media(max-width:900px){.broadcast-frame{grid-template-rows:40px minmax(0,1fr) 33.333333%}.studio-head{gap:7px;padding:4px 7px}.brand img{height:26px;max-width:116px}.brand-divider{display:none}.studio-title small{display:none}.round-switch button{padding:5px 7px;font-size:9px}.live-state{font-size:9px}.clock{display:none}}
     @media(max-width:560px){.studio-title{display:none}.studio-head{grid-template-columns:auto 1fr auto}.round-switch{justify-self:center}.live-state{justify-self:end}}
   </style>
 </head>
 <body>
   <main class="broadcast-frame" aria-label="Central de apuração ApuraBrasil">
     <header class="studio-head">
-      <div class="brand">
-        <img src="/assets/logo-apurabrasil.svg" alt="Apura Brasil" />
-        <span class="brand-divider" aria-hidden="true"></span>
-      </div>
+      <div class="brand"><img src="/assets/logo-apurabrasil.svg" alt="Apura Brasil" /><span class="brand-divider" aria-hidden="true"></span></div>
       <div class="studio-title">Central de Apuração <small>Presidente • Eleições 2026</small></div>
-      <div class="round-switch" role="group" aria-label="Turno da eleição">
-        <button type="button" data-round="1">1º turno</button>
-        <button type="button" data-round="2">2º turno</button>
-      </div>
+      <div class="round-switch" role="group" aria-label="Turno da eleição"><button type="button" data-round="1">1º turno</button><button type="button" data-round="2">2º turno</button></div>
       <div class="live-state"><span class="live-dot"></span><span id="dataState">AO VIVO</span><span class="clock" id="studioClock">--:--:--</span></div>
     </header>
 
-    <section class="election-stage" aria-label="Mapa e apuração ao vivo">
-      <iframe id="electionFrame" src="/" title="Mapa dinâmico e apuração de votos do ApuraBrasil"></iframe>
-    </section>
+    <section class="election-stage" aria-label="Mapa e apuração ao vivo"><iframe id="electionFrame" src="/" title="Mapa dinâmico e apuração de votos do ApuraBrasil"></iframe></section>
 
     <section class="streams-grid" aria-label="Cobertura jornalística ao vivo">
-      <article class="stream-card offline" data-channel="cnn">
-        <iframe tabindex="-1" title="CNN Brasil ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-        <button class="stream-hit" type="button" aria-label="Ouvir CNN Brasil"></button>
-      </article>
-      <article class="stream-card offline" data-channel="jovemPan">
-        <iframe tabindex="-1" title="Jovem Pan News ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-        <button class="stream-hit" type="button" aria-label="Ouvir Jovem Pan News"></button>
-      </article>
-      <article class="stream-card offline" data-channel="times">
-        <iframe tabindex="-1" title="Times Brasil CNBC ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-        <button class="stream-hit" type="button" aria-label="Ouvir Times Brasil CNBC"></button>
-      </article>
+      <article class="stream-card offline" data-channel="cnn"><iframe tabindex="-1" title="CNN Brasil ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe><button class="stream-hit" type="button" aria-label="Ouvir CNN Brasil"></button></article>
+      <article class="stream-card offline" data-channel="jovemPan"><iframe tabindex="-1" title="Jovem Pan News ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe><button class="stream-hit" type="button" aria-label="Ouvir Jovem Pan News"></button></article>
+      <article class="stream-card offline" data-channel="times"><iframe tabindex="-1" title="Times Brasil ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe><button class="stream-hit" type="button" aria-label="Ouvir Times Brasil"></button></article>
     </section>
   </main>
 
@@ -85,171 +51,91 @@
       const dataState = document.getElementById('dataState');
       const clock = document.getElementById('studioClock');
       const streamCards = [...document.querySelectorAll('.stream-card[data-channel]')];
+      const FEEDS = {
+        cnn: channel => `/api/youtube-live?channel=${encodeURIComponent(channel)}&t=${Date.now()}`,
+        jovemPan: () => `https://raw.githubusercontent.com/RealPedroSantos/ApuraBrasil/live-feed/live/jovemPan.json?t=${Date.now()}`,
+        times: () => `https://raw.githubusercontent.com/RealPedroSantos/ApuraBrasil/live-feed/live/times.json?t=${Date.now()}`
+      };
       let audibleChannel = null;
 
-      function readRound(){
-        const value = Number(localStorage.getItem(ROUND_KEY));
-        return value === 1 || value === 2 ? value : 2;
-      }
+      function readRound(){ const value = Number(localStorage.getItem(ROUND_KEY)); return value === 1 || value === 2 ? value : 2; }
+      function syncRound(){ const round=readRound(); roundButtons.forEach(button=>{ const active=Number(button.dataset.round)===round; button.classList.toggle('active',active); button.setAttribute('aria-pressed',active?'true':'false'); }); }
+      roundButtons.forEach(button=>button.addEventListener('click',()=>{ const next=Number(button.dataset.round); if((next!==1&&next!==2)||next===readRound())return; localStorage.setItem(ROUND_KEY,String(next)); syncRound(); frame.contentWindow.location.reload(); }));
 
-      function syncRound(){
-        const round = readRound();
-        roundButtons.forEach(button => {
-          const active = Number(button.dataset.round) === round;
-          button.classList.toggle('active', active);
-          button.setAttribute('aria-pressed', active ? 'true' : 'false');
-        });
+      function arrangeThreeColumns(doc){
+        const grid = doc.querySelector('.main-grid');
+        const mapPanel = doc.querySelector('.map-panel');
+        const resultsPanel = doc.querySelector('.results-panel');
+        const media = doc.querySelector('.mobile-map-bottom-results');
+        if(!grid || !mapPanel || !resultsPanel) return false;
+        let left = grid.querySelector('.broadcast-candidates-column');
+        if(!left){
+          left = doc.createElement('section');
+          left.className = 'broadcast-candidates-column';
+          left.setAttribute('aria-label','Destaques da apuração');
+          grid.insertBefore(left,mapPanel);
+        }
+        if(media && media.parentElement !== left) left.appendChild(media);
+        return Boolean(media);
       }
-
-      roundButtons.forEach(button => button.addEventListener('click', () => {
-        const next = Number(button.dataset.round);
-        if (next !== 1 && next !== 2 || next === readRound()) return;
-        localStorage.setItem(ROUND_KEY, String(next));
-        syncRound();
-        frame.contentWindow.location.reload();
-      }));
 
       function tuneEmbeddedDashboard(){
         try{
           const doc = frame.contentDocument;
-          if (!doc || !doc.head) return;
-          const normalize = () => doc.documentElement.classList.remove('mobile-ui','mobile-app-ready');
-          normalize();
-          setTimeout(normalize, 150);
-          setTimeout(normalize, 700);
-          setTimeout(normalize, 1600);
-
-          if (!doc.getElementById('broadcastEmbedStyle')) {
-            const style = doc.createElement('style');
-            style.id = 'broadcastEmbedStyle';
-            style.textContent = `
+          if(!doc || !doc.head) return;
+          const normalize=()=>doc.documentElement.classList.remove('mobile-ui','mobile-app-ready');
+          normalize(); setTimeout(normalize,150); setTimeout(normalize,700); setTimeout(normalize,1600);
+          if(!doc.getElementById('broadcastEmbedStyle')){
+            const style=doc.createElement('style');
+            style.id='broadcastEmbedStyle';
+            style.textContent=`
               html,body{width:100%!important;height:100%!important;overflow:hidden!important;background:#f4f4f2!important}
               .app-shell{width:100%!important;height:100vh!important;min-height:0!important;display:grid!important;grid-template-rows:minmax(0,1fr)!important;gap:0!important;padding:7px!important;overflow:hidden!important}
               .topbar,.status-bar,.round-selector,.mobile-app-nav{display:none!important}
-              .main-grid{position:relative!important;inset:auto!important;display:grid!important;grid-template-columns:minmax(0,58fr) minmax(430px,42fr)!important;grid-template-rows:minmax(0,1fr)!important;height:100%!important;min-height:0!important;gap:10px!important;padding:0!important;overflow:hidden!important}
+              .main-grid{position:relative!important;inset:auto!important;display:grid!important;grid-template-columns:minmax(235px,24%) minmax(0,36%) minmax(430px,40%)!important;grid-template-rows:minmax(0,1fr)!important;height:100%!important;min-height:0!important;gap:9px!important;padding:0!important;overflow:hidden!important}
+              .broadcast-candidates-column{grid-column:1!important;grid-row:1!important;display:flex!important;min-width:0!important;min-height:0!important;height:100%!important;padding:5px!important;background:#f4f4f2!important;overflow:hidden!important}
+              .map-panel{grid-column:2!important;grid-row:1!important}.results-panel{grid-column:3!important;grid-row:1!important}
               .map-panel,.results-panel{position:relative!important;inset:auto!important;display:grid!important;visibility:visible!important;opacity:1!important;transform:none!important;min-width:0!important;min-height:0!important;height:100%!important;overflow:hidden!important}
-              .map-panel{grid-template-rows:auto minmax(0,1fr)!important}
-              .map-foot{display:none!important}
-              .results-panel{grid-template-rows:auto auto minmax(0,1fr)!important;gap:7px!important}
-              .map-head{padding:0 2px 5px!important}.map-head h1{font-size:31px!important}.map-head p{margin-top:3px!important;font-size:11px!important}
-              .map-actions button,.refresh-button{min-height:36px!important;padding:5px 10px!important;font-size:11px!important}
-              .summary-box{padding:8px!important}.summary-heading{margin-bottom:5px!important}.summary-heading h2{font-size:26px!important}.summary-heading p{margin-top:2px!important;font-size:10px!important}
-              .totalization{gap:5px!important}.total-main strong{font-size:42px!important}.section-counter{padding:5px 8px!important}.section-counter strong{font-size:24px!important}
-              .details-tabs{min-height:36px!important}.detail-tab{padding:6px 4px!important;font-size:11px!important}
-              .candidate-list{gap:6px!important}.candidate-card{min-height:76px!important}.candidate-main{padding:6px 8px!important}.candidate-name{font-size:16px!important}.candidate-score strong{font-size:31px!important}.candidate-bar{height:18px!important}
-              .candidate-highlights{left:14px!important;top:12px!important;bottom:12px!important;width:168px!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;gap:6px!important;transform:none!important;overflow:hidden!important}
-              .candidate-highlights .highlight-card{display:flex!important;flex-direction:column!important;align-items:center!important;gap:3px!important;min-height:0!important}
-              .candidate-highlights .highlight-card:nth-child(n+5){display:none!important}
-              .candidate-highlights .highlight-ring{width:74px!important;min-width:74px!important}
-              .candidate-highlights .highlight-ring-inner{padding:5px!important}
-              .candidate-highlights .highlight-info{padding:4px 6px!important}
-              .candidate-highlights .highlight-name{font-size:10px!important}
-              .candidate-highlights .highlight-party,.candidate-highlights .highlight-number{font-size:9px!important}
-              .candidate-highlights .highlight-percent{font-size:27px!important;padding:2px 4px!important}
-              .map-stage.highlight-ready .map-canvas{padding-left:198px!important;padding-bottom:2.5%!important}
+              .map-panel{grid-template-rows:auto minmax(0,1fr)!important}.map-foot{display:none!important}.results-panel{grid-template-rows:auto auto minmax(0,1fr)!important;gap:7px!important}
+              .map-head{padding:0 2px 5px!important}.map-head h1{font-size:28px!important}.map-head p{display:none!important}.map-actions button,.refresh-button{min-height:32px!important;padding:4px 9px!important;font-size:10px!important}
+              .map-stage{min-height:0!important}.map-stage.highlight-ready .map-canvas,.map-canvas{padding:2px!important;width:100%!important;height:100%!important}
+              .candidate-highlights,#candidateHighlights{display:none!important}
+              .summary-box{padding:8px!important}.summary-heading{margin-bottom:5px!important}.summary-heading h2{font-size:25px!important}.summary-heading p{margin-top:2px!important;font-size:9px!important}.totalization{gap:5px!important}.total-main strong{font-size:39px!important}.section-counter{padding:5px 8px!important}.section-counter strong{font-size:22px!important}.details-tabs{min-height:34px!important}.detail-tab{padding:5px 4px!important;font-size:10px!important}.candidate-list{gap:5px!important}.candidate-card{min-height:70px!important}.candidate-main{padding:5px 7px!important}.candidate-name{font-size:15px!important}.candidate-score strong{font-size:28px!important}.candidate-bar{height:16px!important}
+              .broadcast-candidates-column .mobile-map-bottom-results{position:relative!important;inset:auto!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;display:grid!important;grid-template-rows:auto minmax(0,1fr)!important;gap:8px!important;padding:8px!important;margin:0!important;border:0!important;border-radius:0!important;background:#f4f4f2!important;box-shadow:none!important;overflow:hidden!important}
+              .broadcast-candidates-column .mobile-map-count{display:grid!important;grid-template-columns:1fr!important;gap:5px!important;padding:4px 5px 8px!important;border-bottom:1px solid #dfe4e6!important}.broadcast-candidates-column .mobile-map-count>div{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px!important}.broadcast-candidates-column .mobile-map-count span{font-size:9px!important}.broadcast-candidates-column .mobile-map-count strong{font-size:17px!important}.broadcast-candidates-column .mobile-map-count b{font-size:31px!important;justify-self:end!important}
+              .broadcast-candidates-column .mobile-map-candidate-strip{display:grid!important;grid-auto-flow:row!important;grid-auto-rows:minmax(105px,auto)!important;grid-auto-columns:unset!important;grid-template-columns:1fr!important;gap:8px!important;overflow-x:hidden!important;overflow-y:auto!important;padding:0 2px!important;scroll-snap-type:y proximity!important}
+              .broadcast-candidates-column .mobile-map-candidate{width:100%!important;min-width:0!important;min-height:105px!important;display:grid!important;grid-template-columns:70px minmax(0,1fr)!important;grid-template-rows:auto auto!important;gap:7px 10px!important;padding:11px!important;border:1px solid #d5dbdd!important;border-radius:14px!important;background:#fff!important;box-shadow:0 4px 13px rgba(15,35,43,.07)!important}
+              .broadcast-candidates-column .mobile-map-candidate-photo{grid-column:1!important;grid-row:1/3!important;width:68px!important;height:68px!important;border-width:4px!important}.broadcast-candidates-column .mobile-map-candidate-body{grid-column:2!important;grid-row:1!important}.broadcast-candidates-column .mobile-map-candidate-name{font-size:14px!important;line-height:1.05!important}.broadcast-candidates-column .mobile-map-candidate-meta{font-size:9px!important}.broadcast-candidates-column .mobile-map-candidate-party{font-size:9px!important;min-height:18px!important;padding:3px 6px!important}.broadcast-candidates-column .mobile-map-candidate-bottom{grid-column:2!important;grid-row:2!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:7px!important;padding-top:5px!important}.broadcast-candidates-column .mobile-map-candidate-votes{font-size:9px!important}.broadcast-candidates-column .mobile-map-candidate-percent{font-size:30px!important;line-height:.9!important;min-width:0!important}.broadcast-candidates-column .mobile-map-swipe-hint{display:none!important}.broadcast-candidates-column .mobile-map-office-prompt{height:100%!important}
+              .map-stage>.ab-drilldown-host{bottom:0!important}
             `;
             doc.head.appendChild(style);
           }
-        } catch(e) {}
+          let attempts=0;
+          const place=()=>{ if(arrangeThreeColumns(doc)||attempts++>20)return; setTimeout(place,120); };
+          place();
+        }catch(e){}
       }
 
-      function mirrorFeedState(){
-        try{
-          const childText = frame.contentDocument?.getElementById('feedStatus')?.textContent?.trim();
-          dataState.textContent = childText && childText !== 'Conectando' ? childText.toUpperCase() : 'AO VIVO';
-        } catch(e){ dataState.textContent = 'AO VIVO'; }
-      }
+      function mirrorFeedState(){ try{ const childText=frame.contentDocument?.getElementById('feedStatus')?.textContent?.trim(); dataState.textContent=childText&&childText!=='Conectando'?childText.toUpperCase():'AO VIVO'; }catch(e){dataState.textContent='AO VIVO';} }
+      frame.addEventListener('load',()=>{ tuneEmbeddedDashboard(); setTimeout(tuneEmbeddedDashboard,350); setTimeout(tuneEmbeddedDashboard,1200); setTimeout(mirrorFeedState,1000); });
 
-      frame.addEventListener('load', () => {
-        tuneEmbeddedDashboard();
-        setTimeout(tuneEmbeddedDashboard, 350);
-        setTimeout(tuneEmbeddedDashboard, 1200);
-        setTimeout(mirrorFeedState, 1000);
-      });
-
-      function playerUrl(videoId){
-        const origin = encodeURIComponent(window.location.origin);
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&enablejsapi=1&origin=${origin}`;
-      }
-
-      function playerCommand(iframe, func){
-        try{
-          iframe.contentWindow?.postMessage(JSON.stringify({
-            event: 'command',
-            func,
-            args: []
-          }), 'https://www.youtube.com');
-        } catch(e) {}
-      }
-
-      function muteAllExcept(channel){
-        streamCards.forEach(card => {
-          const iframe = card.querySelector('iframe');
-          if (card.dataset.channel === channel && !card.classList.contains('offline')) {
-            playerCommand(iframe, 'playVideo');
-            playerCommand(iframe, 'unMute');
-          } else {
-            playerCommand(iframe, 'mute');
-          }
-        });
-      }
-
-      streamCards.forEach(card => {
-        const hit = card.querySelector('.stream-hit');
-        const iframe = card.querySelector('iframe');
-        hit.addEventListener('click', () => {
-          if (card.classList.contains('offline')) return;
-          audibleChannel = card.dataset.channel;
-          muteAllExcept(audibleChannel);
-        });
-        iframe.addEventListener('load', () => {
-          playerCommand(iframe, 'mute');
-          playerCommand(iframe, 'playVideo');
-          if (audibleChannel === card.dataset.channel) {
-            setTimeout(() => muteAllExcept(audibleChannel), 250);
-          }
-        });
-      });
+      function playerUrl(videoId){ const origin=encodeURIComponent(window.location.origin); return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&enablejsapi=1&origin=${origin}`; }
+      function playerCommand(iframe,func){ try{ iframe.contentWindow?.postMessage(JSON.stringify({event:'command',func,args:[]}),'https://www.youtube.com'); }catch(e){} }
+      function muteAllExcept(channel){ streamCards.forEach(card=>{ const iframe=card.querySelector('iframe'); if(card.dataset.channel===channel&&!card.classList.contains('offline')){playerCommand(iframe,'playVideo');playerCommand(iframe,'unMute');}else playerCommand(iframe,'mute'); }); }
+      streamCards.forEach(card=>{ const hit=card.querySelector('.stream-hit'); const iframe=card.querySelector('iframe'); hit.addEventListener('click',()=>{if(card.classList.contains('offline'))return; audibleChannel=card.dataset.channel; muteAllExcept(audibleChannel);}); iframe.addEventListener('load',()=>{playerCommand(iframe,'mute');playerCommand(iframe,'playVideo');if(audibleChannel===card.dataset.channel)setTimeout(()=>muteAllExcept(audibleChannel),250);}); });
 
       async function resolveStream(card){
-        const channel = card.dataset.channel;
-        const iframe = card.querySelector('iframe');
+        const channel=card.dataset.channel, iframe=card.querySelector('iframe');
         try{
-          const response = await fetch(`/api/youtube-live?channel=${encodeURIComponent(channel)}&t=${Date.now()}`, { cache: 'no-store' });
-          const payload = await response.json();
-          if (!response.ok || !payload?.ok || !payload.live || !payload.videoId) {
-            card.classList.add('offline');
-            if (iframe.dataset.videoId) {
-              iframe.dataset.videoId = '';
-              iframe.removeAttribute('src');
-            }
-            if (audibleChannel === channel) audibleChannel = null;
-            return;
-          }
-
-          card.classList.remove('offline');
-          if (iframe.dataset.videoId === payload.videoId) return;
-          iframe.dataset.videoId = payload.videoId;
-          iframe.src = playerUrl(payload.videoId);
-        } catch(e) {
-          card.classList.add('offline');
-        }
+          const feed=FEEDS[channel]; if(!feed)throw new Error('feed ausente');
+          const response=await fetch(feed(channel),{cache:'no-store'}); const payload=await response.json();
+          if(!response.ok||!payload?.ok||!payload.live||!payload.videoId){ card.classList.add('offline'); if(iframe.dataset.videoId){iframe.dataset.videoId='';iframe.removeAttribute('src');} if(audibleChannel===channel)audibleChannel=null; return; }
+          card.classList.remove('offline'); if(iframe.dataset.videoId===payload.videoId)return; iframe.dataset.videoId=payload.videoId; iframe.src=playerUrl(payload.videoId);
+        }catch(e){ card.classList.add('offline'); }
       }
-
-      function refreshStreams(){
-        streamCards.forEach(resolveStream);
-      }
-
-      function updateClock(){
-        clock.textContent = new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
-      }
-
-      syncRound();
-      refreshStreams();
-      updateClock();
-      setInterval(updateClock,1000);
-      setInterval(mirrorFeedState,2500);
-      setInterval(refreshStreams,20000);
+      function refreshStreams(){streamCards.forEach(resolveStream)}
+      function updateClock(){clock.textContent=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date())}
+      syncRound(); refreshStreams(); updateClock(); setInterval(updateClock,1000); setInterval(mirrorFeedState,2500); setInterval(refreshStreams,20000);
     })();
   </script>
 </body>
