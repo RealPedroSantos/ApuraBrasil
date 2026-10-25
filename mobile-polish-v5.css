@@ -1,0 +1,258 @@
+/* ApuraBrasil mobile v5 — final candidate hierarchy, safe numbers, elected state. */
+
+/* Map candidate widgets: photo | content, with percent BELOW party/number. */
+html.mobile-app-v4 .candidate-highlights .highlight-card{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr)!important;
+  grid-template-rows:auto auto auto!important;
+  column-gap:8px!important;
+  row-gap:2px!important;
+  align-items:center!important;
+  padding:7px 8px!important;
+  overflow:hidden!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-ring{
+  grid-column:1!important;
+  grid-row:1/4!important;
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  max-width:48px!important;
+  max-height:48px!important;
+  align-self:center!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-info{
+  grid-column:2!important;
+  grid-row:1/3!important;
+  min-width:0!important;
+  width:100%!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-name{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  padding-right:0!important;
+  font-size:9.5px!important;
+  line-height:1.08!important;
+  font-weight:950!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-subline{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:4px!important;
+  margin-top:4px!important;
+  min-width:0!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-party{
+  flex:0 0 auto!important;
+  font-size:7.5px!important;
+  padding:2px 4px!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-number{
+  flex:0 0 auto!important;
+  font-size:7.5px!important;
+  white-space:nowrap!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-percent{
+  grid-column:2!important;
+  grid-row:3!important;
+  justify-self:start!important;
+  align-self:end!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  padding:0!important;
+  margin:1px 0 0!important;
+  border:0!important;
+  background:transparent!important;
+  font-size:20px!important;
+  line-height:.95!important;
+  text-align:left!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  font-variant-numeric:tabular-nums!important;
+  letter-spacing:-.04em!important;
+}
+
+/* Winner semantics on map widgets. */
+html.mobile-app-v4 .candidate-highlights .highlight-card.is-elected{
+  background:linear-gradient(135deg,#effaf2 0%,#e4f6e9 100%)!important;
+  border:1.5px solid #16964d!important;
+  box-shadow:0 5px 18px rgba(22,150,77,.14)!important;
+}
+html.mobile-app-v4 .candidate-highlights .highlight-card.is-elected .highlight-percent{
+  color:#0d5f33!important;
+}
+html.mobile-app-v4 .highlight-elected-badge{
+  position:absolute!important;
+  top:6px!important;
+  right:7px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:17px!important;
+  padding:2px 5px!important;
+  border-radius:999px!important;
+  background:#168447!important;
+  color:#fff!important;
+  font-size:6.8px!important;
+  line-height:1!important;
+  font-weight:950!important;
+  letter-spacing:.03em!important;
+  white-space:nowrap!important;
+}
+html.mobile-app-v4 .highlight-card.is-elected .highlight-name{padding-right:48px!important}
+
+/* Results screen: reserve real width for the score, never crop on the right edge. */
+html.mobile-app-v4 .candidate-card{
+  grid-template-columns:64px minmax(0,1fr) 108px!important;
+  min-height:84px!important;
+  overflow:hidden!important;
+}
+html.mobile-app-v4 .candidate-score{
+  min-width:0!important;
+  width:100%!important;
+  max-width:none!important;
+  padding:7px 10px 7px 4px!important;
+  box-sizing:border-box!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  text-align:right!important;
+  overflow:visible!important;
+}
+html.mobile-app-v4 .candidate-score strong{
+  display:block!important;
+  width:auto!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:27px!important;
+  line-height:.92!important;
+  letter-spacing:-.05em!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  font-variant-numeric:tabular-nums!important;
+}
+html.mobile-app-v4 .candidate-score small{
+  display:block!important;
+  margin-top:5px!important;
+  max-width:100%!important;
+  color:#66757b!important;
+  font-size:8.5px!important;
+  line-height:1!important;
+  font-weight:850!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.mobile-app-v4 .candidate-score .candidate-status{
+  display:block!important;
+  margin-top:4px!important;
+  max-width:100%!important;
+  font-size:7px!important;
+  line-height:1!important;
+  text-align:right!important;
+}
+html.mobile-app-v4 .candidate-main{
+  min-width:0!important;
+  padding:7px 6px 7px 8px!important;
+}
+html.mobile-app-v4 .candidate-name{
+  min-width:0!important;
+  max-width:100%!important;
+  padding:0!important;
+  font-size:13px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.mobile-app-v4 .candidate-subline{
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  min-height:20px!important;
+  margin-top:4px!important;
+}
+html.mobile-app-v4 .candidate-number{white-space:nowrap!important}
+html.mobile-app-v4 .candidate-bar{margin-top:6px!important;height:14px!important}
+html.mobile-app-v4 .candidate-bar span{font-size:0!important;text-shadow:none!important;padding:0!important}
+
+/* Stronger global elected treatment for cards. */
+.candidate-card.is-elected{
+  background:linear-gradient(135deg,#f0fbf3 0%,#e4f6e9 100%)!important;
+  border-color:#16964d!important;
+  box-shadow:inset 4px 0 0 #168447,0 2px 10px rgba(22,132,71,.09)!important;
+}
+.candidate-card.is-elected .candidate-main,
+.candidate-card.is-elected .candidate-score{background:transparent!important}
+.candidate-card.is-elected .candidate-score strong{color:#0b5f32!important}
+.elected-badge{
+  border-radius:999px!important;
+  background:#168447!important;
+  border-color:#116b3b!important;
+  box-shadow:none!important;
+}
+
+/* Map result summary winner marker. */
+html.mobile-app-v4 .mobile-map-peek-candidates span.is-elected{
+  color:#12653a!important;
+  font-weight:850!important;
+}
+html.mobile-app-v4 .mobile-map-peek-candidates span.is-elected::before{
+  content:'✓';
+  display:inline-grid;
+  place-items:center;
+  width:14px;
+  height:14px;
+  margin-right:3px;
+  border-radius:50%;
+  background:#168447;
+  color:#fff;
+  font-size:8px;
+  font-weight:950;
+}
+html.mobile-app-v4 .mobile-map-peek-candidates .peek-elected-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:14px;
+  margin-left:3px;
+  padding:1px 4px;
+  border-radius:999px;
+  background:#168447;
+  color:#fff;
+  font-size:6px;
+  font-style:normal;
+  font-weight:950;
+  letter-spacing:.03em;
+}
+
+@media(max-width:390px){
+  html.mobile-app-v4 .candidate-highlights .highlight-card{
+    grid-template-columns:42px minmax(0,1fr)!important;
+    column-gap:6px!important;
+    padding:6px!important;
+  }
+  html.mobile-app-v4 .candidate-highlights .highlight-ring{
+    width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;max-width:42px!important;max-height:42px!important;
+  }
+  html.mobile-app-v4 .candidate-highlights .highlight-name{font-size:8.5px!important}
+  html.mobile-app-v4 .candidate-highlights .highlight-party,
+  html.mobile-app-v4 .candidate-highlights .highlight-number{font-size:7px!important}
+  html.mobile-app-v4 .candidate-highlights .highlight-percent{font-size:18px!important}
+  html.mobile-app-v4 .highlight-elected-badge{font-size:6px!important;padding:2px 4px!important;right:5px!important}
+  html.mobile-app-v4 .highlight-card.is-elected .highlight-name{padding-right:42px!important}
+  html.mobile-app-v4 .candidate-card{grid-template-columns:58px minmax(0,1fr) 98px!important}
+  html.mobile-app-v4 .candidate-score{padding-right:7px!important}
+  html.mobile-app-v4 .candidate-score strong{font-size:24px!important}
+  html.mobile-app-v4 .candidate-score small{font-size:7.5px!important}
+}
