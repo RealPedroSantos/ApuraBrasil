@@ -7,10 +7,8 @@
     if (!(img instanceof HTMLImageElement)) return;
     const raw = img.getAttribute('src') || '';
     if (!raw.includes(PRESIDENT_ELECTION)) return;
-
     const fixed = raw.replace(/(\/ele2026\/6257\/fotos\/)(?:ac|al|ap|am|ba|ce|df|es|go|ma|mt|ms|mg|pa|pb|pr|pe|pi|rj|rn|rs|ro|rr|sc|sp|se|to|zz)(\/)/i, '$1br$2');
     if (fixed === raw) return;
-
     img.removeAttribute('onerror');
     img.setAttribute('src', fixed);
     img.dataset.photoScopeFixed = 'br';
@@ -36,39 +34,30 @@
   });
 
   scan();
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['src']
-  });
+  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src']});
 
-  function isBroadcastEmbed() {
-    try {
-      return window.parent !== window && window.parent.location.pathname.startsWith('/ao-vivo');
-    } catch {
-      return false;
-    }
+  function isBroadcastEmbed(){
+    try{return window.parent!==window&&window.parent.location.pathname.startsWith('/ao-vivo')}catch{return false}
   }
 
-  function loadScriptOnce(src, dataAttribute) {
-    const selector = `script[${dataAttribute}]`;
-    if (document.querySelector(selector)) return;
-    const script = document.createElement('script');
-    script.src = src;
-    script.defer = true;
-    script.setAttribute(dataAttribute, 'true');
+  function loadScriptOnce(src,dataAttribute){
+    if(document.querySelector(`script[${dataAttribute}]`)) return;
+    const script=document.createElement('script');
+    script.src=src;
+    script.defer=true;
+    script.setAttribute(dataAttribute,'true');
     document.head.appendChild(script);
   }
 
-  function loadBroadcastEnhancements() {
-    try {
-      if (!isBroadcastEmbed()) return;
-      document.querySelectorAll('script[data-broadcast-layout-controls]').forEach(node => node.remove());
-      loadScriptOnce('/broadcast-layout-controls-v2.js', 'data-broadcast-layout-controls-v2');
-      loadScriptOnce('/broadcast-tv-typography.js', 'data-broadcast-tv-typography');
-      window.__apuraBrasilBroadcastLoaderVersion = '2.1.0';
-    } catch {}
+  function loadBroadcastEnhancements(){
+    try{
+      if(!isBroadcastEmbed()) return;
+      document.querySelectorAll('script[data-broadcast-layout-controls]').forEach(node=>node.remove());
+      loadScriptOnce('/broadcast-layout-controls-v2.js','data-broadcast-layout-controls-v2');
+      loadScriptOnce('/broadcast-tv-typography.js','data-broadcast-tv-typography');
+      loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
+      window.__apuraBrasilBroadcastLoaderVersion='2.2.0';
+    }catch{}
   }
 
   loadBroadcastEnhancements();
