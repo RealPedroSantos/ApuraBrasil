@@ -17,12 +17,35 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage,
 html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready{
   position:relative!important;
   overflow:hidden!important;
+  background:#f7f7f5!important;
 }
 
+/* The map owns only the area above the media card. This prevents the SVG
+   from ever rendering behind the card and keeps it visually centered. */
 html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas,
 html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready .map-canvas{
-  inset:0!important;
-  padding:10px 8px 138px!important;
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  bottom:142px!important;
+  width:auto!important;
+  height:auto!important;
+  padding:8px 8px 10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#f7f7f5!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas .vector-map,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready .map-canvas .vector-map{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  display:block!important;
 }
 
 html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-bottom-results{
@@ -218,7 +241,8 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-bottom-emp
 @media(max-width:390px){
   html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas,
   html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready .map-canvas{
-    padding-bottom:146px!important;
+    bottom:146px!important;
+    padding:7px 6px 9px!important;
   }
 
   html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-bottom-results{
