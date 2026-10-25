@@ -73,15 +73,52 @@
       });
     }
 
+    function restoreViewport(snapshot) {
+      if (!snapshot) return;
+      requestAnimationFrame(() => {
+        if (Math.abs(window.scrollY - snapshot.y) > 2) window.scrollTo(snapshot.x, snapshot.y);
+      });
+    }
+
+    function refreshCurrentContext(previousRound, source='selector') {
+      const viewport = {x:window.scrollX || 0, y:window.scrollY || 0};
+      const activeTab = document.querySelector('.detail-tab.active')?.dataset.tab || null;
+      const activeOffice = document.querySelector('.office-btn[data-office].active')?.dataset.office || null;
+      const mapLevel = String(document.querySelector('.ab-map-level')?.textContent || '').trim() || null;
+
+      window.dispatchEvent(new CustomEvent('apura:round-changing', {
+        detail:{round:currentRound, previousRound, source, viewport, activeTab, activeOffice, mapLevel}
+      }));
+
+      const refreshButton = document.getElementById('refreshButton');
+      if (refreshButton) refreshButton.click();
+      else window.dispatchEvent(new CustomEvent('apura:refresh-current-result', {detail:{round:currentRound}}));
+
+      restoreViewport(viewport);
+      setTimeout(() => restoreViewport(viewport), 80);
+      setTimeout(() => {
+        restoreViewport(viewport);
+        window.dispatchEvent(new CustomEvent('apura:round-changed', {
+          detail:{round:currentRound, previousRound, source, viewport, activeTab, activeOffice, mapLevel}
+        }));
+      }, 260);
+    }
+
+    function setRound(next, source='selector') {
+      next = Number(next);
+      if (next !== 1 && next !== 2) return false;
+      if (next === currentRound) return false;
+      const previousRound = currentRound;
+      saveRound(next);
+      sync();
+      refreshCurrentContext(previousRound, source);
+      return true;
+    }
+
     wrap.addEventListener('click', event => {
       const button = event.target.closest('[data-round]');
       if (!button) return;
-      const next = Number(button.dataset.round);
-      if (next !== 1 && next !== 2) return;
-      if (next === currentRound) return;
-      saveRound(next);
-      sync();
-      window.location.reload();
+      setRound(Number(button.dataset.round), 'selector');
     });
 
     document.querySelectorAll('.office-btn[data-office]').forEach(button => {
@@ -95,13 +132,14 @@
     });
 
     sync();
+
+    window.ApuraBrasilRound = {
+      get: () => currentRound,
+      set: (round) => setRound(Number(round), 'api'),
+      refresh: () => refreshCurrentContext(currentRound, 'api-refresh')
+    };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildSelector, {once:true});
   else buildSelector();
-
-  window.ApuraBrasilRound = {
-    get: () => currentRound,
-    set: (round) => { saveRound(Number(round)); window.location.reload(); }
-  };
 })();
