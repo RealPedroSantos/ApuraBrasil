@@ -36,7 +36,7 @@
       shell.style.setProperty('height', '100vh', 'important');
       shell.style.setProperty('min-height', '0', 'important');
       shell.style.setProperty('display', 'grid', 'important');
-      shell.style.setProperty('grid-template-rows', 'auto minmax(0,1fr)', 'important');
+      shell.style.setProperty('grid-template-rows', 'auto minmax(0,1fr) auto', 'important');
       shell.style.setProperty('gap', '0', 'important');
       shell.style.setProperty('padding', '0', 'important');
       shell.style.setProperty('overflow', 'hidden', 'important');
@@ -64,6 +64,12 @@
       roundSelector.style.setProperty('display', 'flex', 'important');
       roundSelector.style.setProperty('visibility', 'visible', 'important');
       roundSelector.style.setProperty('opacity', '1', 'important');
+    }
+
+    const main = document.querySelector('.main-grid');
+    if (main) {
+      main.style.setProperty('height', 'auto', 'important');
+      main.style.setProperty('min-height', '0', 'important');
     }
 
     document.querySelector('.status-bar')?.style.setProperty('display', 'none', 'important');
