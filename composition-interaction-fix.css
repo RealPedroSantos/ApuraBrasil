@@ -1,0 +1,13 @@
+/* Hover inspeciona sem apagar o plenário. A redução de opacidade fica reservada a seleção explícita. */
+.chamber-card:not(:has(.legend-item.ab-active)) .chamber-visual .ab-seat{
+  opacity:1!important;
+  filter:none!important;
+}
+.chamber-card:not(:has(.legend-item.ab-active)) .chamber-legend .legend-item{
+  opacity:1!important;
+}
+
+/* Seleção explícita continua evidente, sem flicker nas transições. */
+.chamber-card:has(.legend-item.ab-active) .chamber-visual .ab-seat{
+  transition:opacity .12s ease,filter .12s ease,r .12s ease,stroke .12s ease!important;
+}
