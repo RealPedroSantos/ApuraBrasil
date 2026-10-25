@@ -1,0 +1,244 @@
+/* Final mobile viewport correction — keeps the app inside the real phone viewport at 100% zoom. */
+
+html.mobile-ui.mobile-app-ready,
+html.mobile-ui.mobile-app-ready body,
+html.mobile-ui.mobile-app-ready .app-shell,
+html.mobile-ui.mobile-app-ready .topbar,
+html.mobile-ui.mobile-app-ready .main-grid,
+html.mobile-ui.mobile-app-ready .map-panel,
+html.mobile-ui.mobile-app-ready .results-panel,
+html.mobile-ui.mobile-app-ready .mobile-app-nav{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+
+html.mobile-ui.mobile-app-ready,
+html.mobile-ui.mobile-app-ready body{
+  overflow-x:hidden!important;
+  background:#f7f7f5!important;
+}
+
+html.mobile-ui.mobile-app-ready *{
+  box-sizing:border-box;
+}
+
+/* Header stays inside the viewport. */
+html.mobile-ui.mobile-app-ready .topbar{
+  grid-template-columns:minmax(96px,.78fr) minmax(0,1.22fr)!important;
+  gap:0 9px!important;
+  padding-left:12px!important;
+  padding-right:12px!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready .brand{
+  min-width:0!important;
+  max-width:100%!important;
+}
+
+html.mobile-ui.mobile-app-ready .brand-logo{
+  max-width:100%!important;
+  height:auto!important;
+  max-height:34px!important;
+}
+
+html.mobile-ui.mobile-app-ready .round-selector{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+}
+
+html.mobile-ui.mobile-app-ready .round-selector button{
+  min-width:0!important;
+  padding-left:6px!important;
+  padding-right:6px!important;
+}
+
+html.mobile-ui.mobile-app-ready .office-nav{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  padding-right:14px!important;
+  scroll-padding-inline:2px 14px!important;
+}
+
+/* Map panel and stage use exactly the same background as the application. */
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-panel,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready .map-canvas,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas > *,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .vector-map,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .vector-map svg{
+  background:#f7f7f5!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  border-color:#e1e4e4!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready .map-canvas{
+  left:0!important;
+  right:0!important;
+  width:auto!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .vector-map,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .vector-map svg{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  display:block!important;
+}
+
+/* Bottom media card always fits inside the stage. */
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-bottom-results{
+  left:8px!important;
+  right:8px!important;
+  width:auto!important;
+  max-width:calc(100% - 16px)!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-count,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate{
+  grid-template-columns:32px minmax(0,1fr) 58px!important;
+  column-gap:4px!important;
+  padding:5px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-photo{
+  width:32px!important;
+  height:32px!important;
+  border-width:2px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-name{
+  font-size:8px!important;
+  line-height:1.02!important;
+  -webkit-line-clamp:2!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-meta{
+  gap:3px!important;
+  font-size:6.5px!important;
+  overflow:visible!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-party{
+  min-height:13px!important;
+  padding:2px 4px!important;
+  font-size:6.5px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-votes{
+  font-size:7px!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-percent{
+  width:58px!important;
+  padding-left:1px!important;
+  font-size:17px!important;
+  letter-spacing:-.045em!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+/* Keep title/actions aligned without forcing horizontal overflow. */
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-head{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-titles{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-actions{
+  flex:0 0 auto!important;
+  min-width:0!important;
+}
+
+@media(max-width:430px){
+  html.mobile-ui.mobile-app-ready .topbar{
+    grid-template-columns:minmax(88px,.72fr) minmax(0,1.28fr)!important;
+    gap:0 8px!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready .brand-logo{
+    max-height:30px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready .round-selector button{
+    font-size:12px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready .office-nav{
+    gap:20px!important;
+    padding-right:12px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready .office-btn{
+    font-size:12px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-panel{
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-bottom-results{
+    left:6px!important;
+    right:6px!important;
+    max-width:calc(100% - 12px)!important;
+    gap:5px!important;
+    padding:6px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate{
+    grid-template-columns:30px minmax(0,1fr) 54px!important;
+    column-gap:3px!important;
+    padding:4px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-photo{
+    width:30px!important;
+    height:30px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-percent{
+    width:54px!important;
+    font-size:16px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-votes{
+    font-size:6.6px!important;
+  }
+}
