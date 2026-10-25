@@ -282,3 +282,34 @@ html:not(.mobile-ui) .map-stage > .ab-drilldown-host{
     grid-auto-columns:minmax(290px,calc((100% - 18px) / 3))!important;
   }
 }
+
+/* Central ao vivo: o mesmo Media Card original, em lista vertical. */
+html:not(.mobile-ui) .broadcast-candidates-column .mobile-map-candidate-strip{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  grid-auto-flow:row!important;
+  grid-auto-columns:unset!important;
+  grid-template-columns:1fr!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  scroll-snap-type:none!important;
+  overscroll-behavior-x:auto!important;
+  overscroll-behavior-y:contain!important;
+}
+
+html:not(.mobile-ui) .broadcast-candidates-column .mobile-map-candidate.mobile-map-carousel-card{
+  flex:0 0 82px!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:82px!important;
+  max-height:82px!important;
+  scroll-snap-align:none!important;
+}
+
+@media(min-width:1500px){
+  html:not(.mobile-ui) .broadcast-candidates-column .mobile-map-candidate-strip{
+    grid-auto-columns:unset!important;
+  }
+}
