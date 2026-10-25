@@ -78,6 +78,64 @@
     return strip;
   }
 
+  function parseMetricNumber(value){
+    const normalized=String(value||'')
+      .replace(/\./g,'')
+      .replace(/\s+/g,'')
+      .replace(',','.')
+      .replace(/[^0-9.-]/g,'');
+    const number=Number(normalized);
+    return Number.isFinite(number)?number:0;
+  }
+
+  function formatMetricPercent(value){
+    const safe=Number.isFinite(value)?value:0;
+    return `${safe.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}%`;
+  }
+
+  function metricByLabel(root,labelStart){
+    const normalized=labelStart.toLocaleLowerCase('pt-BR');
+    return [...root.querySelectorAll('.summary-metric')].find(metric=>{
+      const label=metric.querySelector('span')?.textContent?.trim().toLocaleLowerCase('pt-BR')||'';
+      return label.startsWith(normalized);
+    })||null;
+  }
+
+  function setMetricPercent(metric,value){
+    if(!metric) return;
+    let percent=metric.querySelector('small');
+    if(!percent){
+      percent=document.createElement('small');
+      metric.appendChild(percent);
+    }
+    percent.classList.add('broadcast-metric-percent');
+    percent.textContent=formatMetricPercent(value);
+  }
+
+  function decorateSummaryPercentages(root){
+    if(!root) return;
+    const turnoutMetric=metricByLabel(root,'comparecimento');
+    const abstentionsMetric=metricByLabel(root,'abstenções');
+    const validMetric=metricByLabel(root,'válidos');
+    const blankMetric=metricByLabel(root,'brancos');
+    const nullMetric=metricByLabel(root,'nulos');
+
+    const turnout=parseMetricNumber(turnoutMetric?.querySelector('b')?.textContent);
+    const abstentions=parseMetricNumber(abstentionsMetric?.querySelector('b')?.textContent);
+    const valid=parseMetricNumber(validMetric?.querySelector('b')?.textContent);
+    const blank=parseMetricNumber(blankMetric?.querySelector('b')?.textContent);
+    const nullVotes=parseMetricNumber(nullMetric?.querySelector('b')?.textContent);
+
+    const electorate=turnout+abstentions;
+    const countedVotes=valid+blank+nullVotes;
+
+    setMetricPercent(turnoutMetric,electorate>0?(turnout/electorate)*100:0);
+    setMetricPercent(abstentionsMetric,electorate>0?(abstentions/electorate)*100:0);
+    setMetricPercent(validMetric,countedVotes>0?(valid/countedVotes)*100:0);
+    setMetricPercent(blankMetric,countedVotes>0?(blank/countedVotes)*100:0);
+    setMetricPercent(nullMetric,countedVotes>0?(nullVotes/countedVotes)*100:0);
+  }
+
   function relocateSummaryMetrics(){
     const strip=ensureSummaryStrip();
     if(!strip) return false;
@@ -89,10 +147,12 @@
       if(current&&current!==source) current.remove();
       source.classList.add('broadcast-summary-metrics');
       source.setAttribute('aria-label','Comparecimento, abstenções, válidos, brancos e nulos');
+      decorateSummaryPercentages(source);
       strip.replaceChildren(source);
       return true;
     }
 
+    if(current) decorateSummaryPercentages(current);
     return !!current;
   }
 
@@ -118,15 +178,14 @@
       letter-spacing:.015em!important
     }
 
-    /* Faixa horizontal entre a apuração e os canais, conforme a referência do usuário. */
     html.broadcast-tv-readable .broadcast-summary-strip{
       position:relative!important;
       z-index:25!important;
       width:100%!important;
       min-width:0!important;
-      height:clamp(54px,4.4vw,68px)!important;
-      min-height:54px!important;
-      max-height:68px!important;
+      height:clamp(58px,4.7vw,74px)!important;
+      min-height:58px!important;
+      max-height:74px!important;
       padding:0 8px!important;
       margin:0!important;
       background:#fff!important;
@@ -160,7 +219,7 @@
       display:grid!important;
       grid-template-columns:minmax(0,1fr) auto!important;
       grid-template-rows:auto auto!important;
-      column-gap:10px!important;
+      column-gap:14px!important;
       align-content:center!important;
       align-items:end!important;
     }
@@ -178,7 +237,7 @@
     html.broadcast-tv-readable .broadcast-summary-strip .summary-metric span{
       grid-column:1/-1!important;
       display:block!important;
-      font-size:clamp(13px,.9vw,17px)!important;
+      font-size:clamp(14px,.95vw,18px)!important;
       line-height:1!important;
       font-weight:900!important;
       letter-spacing:.01em!important;
@@ -192,7 +251,7 @@
       grid-column:1!important;
       display:block!important;
       margin-top:3px!important;
-      font-size:clamp(20px,1.42vw,28px)!important;
+      font-size:clamp(22px,1.55vw,31px)!important;
       line-height:.92!important;
       font-weight:950!important;
       color:#11191c!important;
@@ -200,20 +259,20 @@
       white-space:nowrap!important;
     }
 
-    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric small{
+    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric small,
+    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric .broadcast-metric-percent{
       grid-column:2!important;
       align-self:end!important;
       display:block!important;
       margin:0 0 1px!important;
-      font-size:clamp(12px,.82vw,16px)!important;
-      line-height:1!important;
-      font-weight:900!important;
-      color:#59666b!important;
+      font-size:clamp(16px,1.15vw,22px)!important;
+      line-height:.95!important;
+      font-weight:950!important;
+      color:#33454c!important;
       font-variant-numeric:tabular-nums!important;
       white-space:nowrap!important;
     }
 
-    /* Enquanto uma atualização recria o resumo na direita, ele fica oculto até ser movido para a faixa. */
     html.broadcast-tv-readable .results-panel .summary-metrics,
     html.broadcast-tv-readable .broadcast-candidates-column .summary-metrics{
       display:none!important;
@@ -244,11 +303,12 @@
     html.broadcast-tv-readable .mobile-map-candidate-body{min-width:0!important}
 
     @media(max-width:1200px){
-      html.broadcast-tv-readable .broadcast-summary-strip{height:54px!important;min-height:54px!important}
-      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric{padding:5px 8px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip{height:58px!important;min-height:58px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric{padding:5px 8px!important;column-gap:8px!important}
       html.broadcast-tv-readable .broadcast-summary-strip .summary-metric span{font-size:12px!important}
-      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric b{font-size:18px!important}
-      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric small{font-size:11px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric b{font-size:19px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric small,
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric .broadcast-metric-percent{font-size:14px!important}
     }
   `;
   document.head.appendChild(style);
