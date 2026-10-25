@@ -19,6 +19,19 @@ function videoIdFromUrl(value) {
   return null;
 }
 
+function extractCanonicalVideoId(html) {
+  const patterns = [
+    /<link[^>]+rel="canonical"[^>]+href="https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})"/i,
+    /<meta[^>]+property="og:url"[^>]+content="https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})"/i,
+    /"canonicalUrl":"\/watch\?v=([A-Za-z0-9_-]{11})"/
+  ];
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match && VIDEO_ID_RE.test(match[1])) return match[1];
+  }
+  return null;
+}
+
 function extractChannelId(html) {
   const patterns = [
     /"channelId":"(UC[A-Za-z0-9_-]{22})"/,
@@ -80,10 +93,8 @@ function extractWatchOwner(html, expectedVideoId) {
   return channelMatch[1];
 }
 
-function watchClaimsLive(html) {
-  return html.includes('"isLiveNow":true') ||
-    html.includes('"style":"BADGE_STYLE_TYPE_LIVE_NOW"') ||
-    html.includes('"isLiveContent":true');
+function watchIsLiveNow(html) {
+  return html.includes('"isLiveNow":true');
 }
 
 async function fetchYouTube(url, redirect = 'follow') {
@@ -103,7 +114,7 @@ async function validateLiveCandidate(videoId, expectedChannelId) {
     if (!response.ok) return false;
     const html = await response.text();
     const owner = extractWatchOwner(html, videoId);
-    return owner === expectedChannelId && watchClaimsLive(html);
+    return owner === expectedChannelId && watchIsLiveNow(html);
   } catch {
     return false;
   }
@@ -131,10 +142,15 @@ async function resolveChannel(handle) {
       return { videoId: redirectedId, live: true, source: 'official-live-redirect', channelId: expectedChannelId };
     }
 
+    const canonicalId = extractCanonicalVideoId(html);
+    if (canonicalId && await validateLiveCandidate(canonicalId, expectedChannelId)) {
+      return { videoId: canonicalId, live: true, source: 'official-live-canonical', channelId: expectedChannelId };
+    }
+
     const candidates = collectLiveCandidates(html);
     for (const videoId of candidates) {
       if (await validateLiveCandidate(videoId, expectedChannelId)) {
-        return { videoId, live: true, source: 'validated-channel-live', channelId: expectedChannelId };
+        return { videoId, live: true, source: 'validated-live-now', channelId: expectedChannelId };
       }
     }
   }
@@ -153,7 +169,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const result = await resolveChannel(channel.handle);
-    res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+    res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=20');
     res.status(200).json({
       ok: true,
       channel: key,
