@@ -4,7 +4,9 @@
   const narrow = () => window.matchMedia?.('(max-width: 900px)').matches || window.innerWidth <= 900;
   const tabletLike = () => coarse() && window.innerWidth <= 1180;
 
-  let activeView = 'map';
+  const requestedView = new URLSearchParams(location.search).get('mobileView');
+  const validViews = new Set(['map', 'results', 'places', 'zones']);
+  let activeView = validViews.has(requestedView) ? requestedView : 'map';
   let raf = 0;
 
   function applyMode() {
@@ -94,8 +96,7 @@
   }
 
   function setMobileView(view, userInitiated = false) {
-    const valid = new Set(['map', 'results', 'places', 'zones']);
-    if (!valid.has(view)) view = 'map';
+    if (!validViews.has(view)) view = 'map';
 
     activeView = view;
     if (root.classList.contains('mobile-ui')) root.dataset.mobileView = view;
@@ -125,6 +126,10 @@
     ensureV2Styles();
     ensureBottomNav();
     applyMode();
+
+    if (validViews.has(requestedView)) {
+      requestAnimationFrame(() => setMobileView(requestedView, false));
+    }
 
     document.addEventListener('click', (event) => {
       if (!root.classList.contains('mobile-ui')) return;
