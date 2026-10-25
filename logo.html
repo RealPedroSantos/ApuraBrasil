@@ -4,111 +4,157 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#f4f4f2" />
+  <meta name="referrer" content="no-referrer" />
   <title>ApuraBrasil — Configurar logo</title>
   <style>
-    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#f2f2ef;color:#101417}body{min-height:100vh;display:grid;place-items:center;padding:24px}.panel{width:min(820px,100%);background:#fff;border:1px solid #c8cdcf;padding:24px}.head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}.head h1{margin:0;font-size:28px}.back{color:#101417;text-decoration:none;border:1px solid #bfc5c7;padding:9px 14px;background:#f7f7f5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{border:1px solid #d3d7d8;background:#f7f7f5;padding:18px}.card h2{margin:0 0 12px;font-size:18px}.field{display:flex;flex-direction:column;gap:7px;margin-top:12px}.field label{font-weight:800;font-size:13px}.field input{width:100%;border:1px solid #bfc5c7;background:#fff;padding:11px;font-size:14px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.button{border:0;background:#243f49;color:#fff;font-weight:800;padding:10px 14px;cursor:pointer}.button:disabled{opacity:.55;cursor:wait}.button.secondary{background:#e7e9e9;color:#101417;border:1px solid #bfc5c7}.preview{min-height:210px;display:grid;place-items:center;background:#ececea;border:1px dashed #bcc2c4;padding:20px;overflow:hidden}.preview img{display:block;max-width:100%;max-height:170px;object-fit:contain}.preview .empty{color:#6a7377;font-size:14px}.status{margin-top:16px;min-height:22px;font-weight:700;font-size:13px}.status.ok{color:#187745}.status.bad{color:#b42318}.note{margin-top:18px;font-size:12px;line-height:1.5;color:#5c666a;border-top:1px solid #ddd;padding-top:14px}@media(max-width:700px){body{padding:12px}.panel{padding:16px}.grid{grid-template-columns:1fr}.head{align-items:flex-start}.head h1{font-size:23px}}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#f2f2ef;color:#101417}body{min-height:100vh;display:grid;place-items:center;padding:24px}.panel{width:min(760px,100%);background:#fff;border:1px solid #c8cdcf;padding:24px}.head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}.head h1{margin:0;font-size:28px}.back{color:#101417;text-decoration:none;border:1px solid #bfc5c7;padding:9px 14px;background:#f7f7f5}.card{border:1px solid #d3d7d8;background:#f7f7f5;padding:18px}.card h2{margin:0 0 12px;font-size:18px}.field{display:flex;flex-direction:column;gap:7px;margin-top:12px}.field label{font-weight:800;font-size:13px}.field input{width:100%;border:1px solid #bfc5c7;background:#fff;padding:11px;font-size:14px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.button{border:0;background:#243f49;color:#fff;font-weight:800;padding:10px 14px;cursor:pointer}.button:disabled{opacity:.5;cursor:not-allowed}.button.secondary{background:#e7e9e9;color:#101417;border:1px solid #bfc5c7}.preview{min-height:220px;display:grid;place-items:center;background:#ececea;border:1px dashed #bcc2c4;padding:20px;overflow:hidden}.preview img{display:block;max-width:100%;max-height:175px;object-fit:contain}.preview .empty{color:#6a7377;font-size:14px}.status{margin-top:16px;min-height:22px;font-weight:700;font-size:13px}.status.ok{color:#187745}.status.bad{color:#b42318}.status.info{color:#4e5c62}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;background:#e8f5ec;color:#176c3c}.note{margin-top:18px;font-size:12px;line-height:1.5;color:#5c666a;border-top:1px solid #ddd;padding-top:14px}@media(max-width:700px){body{padding:12px}.panel{padding:16px}.head{align-items:flex-start}.head h1{font-size:23px}}
   </style>
 </head>
 <body>
   <main class="panel">
     <div class="head">
-      <div><div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#687277">CONFIGURAÇÃO</div><h1>Logo do ApuraBrasil</h1></div>
+      <div><div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#687277">CONFIGURAÇÃO GLOBAL</div><h1>Logo do ApuraBrasil</h1></div>
       <a class="back" href="/">Voltar ao sistema</a>
     </div>
 
-    <div class="grid">
-      <section class="card">
-        <h2>Enviar arquivo</h2>
-        <p style="margin:0;color:#5f696d;font-size:13px">PNG, SVG, JPG ou WebP. O arquivo será salvo e aplicado neste navegador/dispositivo.</p>
-        <div class="field">
-          <label for="fileInput">Escolher logo</label>
-          <input id="fileInput" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" />
-        </div>
-        <div class="actions">
-          <button id="saveFile" class="button" type="button">Salvar e aplicar</button>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>Usar link da imagem</h2>
-        <p style="margin:0;color:#5f696d;font-size:13px">Cole uma URL direta da logo, por exemplo um PNG ou SVG publicado na internet.</p>
-        <div class="field">
-          <label for="urlInput">URL da logo</label>
-          <input id="urlInput" type="url" placeholder="https://exemplo.com/logo.png" />
-        </div>
-        <div class="actions">
-          <button id="saveUrl" class="button" type="button">Salvar e aplicar</button>
-        </div>
-      </section>
-    </div>
-
-    <section style="margin-top:22px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px"><strong>Prévia</strong><button id="restore" class="button secondary" type="button">Restaurar logo padrão</button></div>
-      <div id="preview" class="preview"><div class="empty">Carregando logo…</div></div>
-      <div id="status" class="status"></div>
+    <section class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <h2 style="margin:0">Enviar logo oficial</h2>
+        <span class="badge">Mac + iPhone + todos os aparelhos</span>
+      </div>
+      <p style="margin:10px 0 0;color:#5f696d;font-size:13px;line-height:1.45">PNG, SVG, JPG ou WebP. Ao publicar, a imagem é armazenada no Vercel Blob e passa a ser a logo global do site.</p>
+      <div class="field">
+        <label for="fileInput">Escolher logo</label>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" />
+      </div>
+      <div class="actions">
+        <button id="saveFile" class="button" type="button">Publicar globalmente</button>
+        <button id="restore" class="button secondary" type="button">Restaurar logo padrão</button>
+      </div>
     </section>
 
-    <div class="note">A logo personalizada desta tela fica salva neste navegador/dispositivo. A logo padrão oficial do sistema continua centralizada em <code>/assets/logo-apura-current.svg</code>.</div>
+    <section style="margin-top:22px">
+      <strong>Logo em uso no site</strong>
+      <div id="preview" class="preview" style="margin-top:9px"><div class="empty">Carregando logo global…</div></div>
+      <div id="status" class="status info"></div>
+    </section>
+
+    <div class="note">A publicação global é protegida por uma chave administrativa. Visitantes do site podem carregar a logo, mas não podem substituí-la.</div>
   </main>
 
   <script src="/logo-override.js"></script>
   <script>
     (() => {
+      const SESSION_KEY='apurabrasil.logoAdminKey';
       const fileInput=document.getElementById('fileInput');
-      const urlInput=document.getElementById('urlInput');
       const preview=document.getElementById('preview');
       const status=document.getElementById('status');
       const saveFile=document.getElementById('saveFile');
-      const saveUrl=document.getElementById('saveUrl');
       const restore=document.getElementById('restore');
       const api=()=>window.ApuraBrasilLogo;
-      const show=(message,ok=true)=>{status.textContent=message;status.className='status '+(ok?'ok':'bad')};
+      const show=(message,type='info')=>{status.textContent=message;status.className='status '+type};
       const escapeAttr=value=>String(value||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-      const draw=(src)=>{preview.innerHTML=src?`<img src="${escapeAttr(src)}" alt="Prévia da logo ApuraBrasil">`:'<div class="empty">Nenhuma logo disponível.</div>'};
-      const effectiveLogo=()=>api()?.get?.() || api()?.default || '/assets/logo-apura-current.svg';
-      const verifySaved=expected=>api()?.get?.()===expected;
+      const draw=src=>{preview.innerHTML=src?`<img src="${escapeAttr(src)}" alt="Logo ApuraBrasil">`:'<div class="empty">Nenhuma logo disponível.</div>'};
 
-      function initialize(){
-        draw(effectiveLogo());
+      function captureAdminKey(){
+        const url=new URL(location.href);
+        const provided=url.searchParams.get('key');
+        if(provided){
+          try{sessionStorage.setItem(SESSION_KEY,provided)}catch{}
+          url.searchParams.delete('key');
+          history.replaceState(null,'',url.pathname+(url.search?url.search:'')+(url.hash||''));
+        }
       }
 
-      saveUrl.addEventListener('click',()=>{
-        const value=urlInput.value.trim();
-        if(!/^https?:\/\//i.test(value)){show('Cole uma URL válida começando com http:// ou https://',false);return}
-        const saved=api()?.set?.(value);
-        if(!saved || !verifySaved(value)){show('Não foi possível salvar a logo neste navegador.',false);return}
-        draw(value);
-        show('Logo salva e aplicada neste dispositivo. Ao voltar ao sistema, esta mesma logo será usada.');
-      });
+      function adminKey(){
+        try{return String(sessionStorage.getItem(SESSION_KEY)||'')}catch{return ''}
+      }
+
+      function setBusy(busy){
+        saveFile.disabled=busy||!adminKey();
+        restore.disabled=busy||!adminKey();
+        fileInput.disabled=busy||!adminKey();
+      }
+
+      async function publishDataUrl(dataUrl,{migrating=false}={}){
+        if(!adminKey()){show('Acesso administrativo não identificado. Abra esta página pelo link administrativo.', 'bad');return false}
+        setBusy(true);
+        show(migrating?'Publicando no Vercel Blob a logo que já estava salva neste Mac…':'Enviando e publicando a logo global…','info');
+        try{
+          const response=await fetch('/api/logo',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','X-Logo-Admin-Key':adminKey()},
+            body:JSON.stringify({dataUrl})
+          });
+          const data=await response.json().catch(()=>({}));
+          if(!response.ok||!data?.ok) throw new Error(data?.error||`HTTP ${response.status}`);
+          api()?.clearLocal?.();
+          await api()?.refresh?.(true);
+          draw(data.url||api()?.current?.()||api()?.default);
+          show('Logo publicada globalmente. Mac, iPhone e demais dispositivos passarão a usar esta imagem.','ok');
+          return true;
+        }catch(error){
+          console.error(error);
+          show(error?.message==='unauthorized'?'Chave administrativa inválida.':'Não foi possível publicar a logo global.','bad');
+          return false;
+        }finally{
+          setBusy(false);
+        }
+      }
+
+      async function initialize(){
+        captureAdminKey();
+        const localCandidate=api()?.getLocal?.()||'';
+        setBusy(false);
+
+        const globalState=await api()?.refresh?.(true);
+        draw(globalState?.url||api()?.current?.()||api()?.default);
+
+        if(!adminKey()){
+          show('Modo somente leitura. Use o link administrativo para trocar a logo global.','info');
+          setBusy(false);
+          return;
+        }
+
+        if(/^data:image\/(png|jpeg|svg\+xml|webp);base64,/i.test(localCandidate)){
+          const migrated=await publishDataUrl(localCandidate,{migrating:true});
+          if(migrated) return;
+        }
+
+        show('Pronto para publicar uma nova logo global.','ok');
+      }
 
       saveFile.addEventListener('click',()=>{
         const file=fileInput.files?.[0];
-        if(!file){show('Escolha um arquivo de imagem primeiro.',false);return}
-        if(!/^image\/(png|jpeg|svg\+xml|webp)$/i.test(file.type)){show('Formato não suportado. Use PNG, SVG, JPG ou WebP.',false);return}
-        if(file.size>2*1024*1024){show('Use um arquivo de até 2 MB.',false);return}
+        if(!file){show('Escolha um arquivo de imagem primeiro.','bad');return}
+        if(!/^image\/(png|jpeg|svg\+xml|webp)$/i.test(file.type)){show('Formato não suportado. Use PNG, SVG, JPG ou WebP.','bad');return}
+        if(file.size>2*1024*1024){show('Use um arquivo de até 2 MB.','bad');return}
 
-        saveFile.disabled=true;
-        show('Lendo e salvando a logo…');
         const reader=new FileReader();
-        reader.onload=()=>{
-          const value=String(reader.result||'');
-          const saved=api()?.set?.(value);
-          saveFile.disabled=false;
-          if(!saved || !verifySaved(value)){show('O navegador não conseguiu armazenar esse arquivo.',false);return}
-          draw(value);
-          show('Logo salva e aplicada neste dispositivo. Ao voltar ao sistema, esta mesma logo será usada.');
-        };
-        reader.onerror=()=>{saveFile.disabled=false;show('Não foi possível ler o arquivo.',false)};
+        reader.onload=()=>publishDataUrl(String(reader.result||''));
+        reader.onerror=()=>show('Não foi possível ler o arquivo.','bad');
         reader.readAsDataURL(file);
       });
 
-      restore.addEventListener('click',()=>{
-        const reset=api()?.reset?.();
-        if(reset===false){show('Não foi possível restaurar a logo.',false);return}
-        urlInput.value='';
-        fileInput.value='';
-        draw(effectiveLogo());
-        show('Logo personalizada removida. A logo padrão oficial foi restaurada.');
+      restore.addEventListener('click',async()=>{
+        if(!adminKey()){show('Acesso administrativo não identificado.','bad');return}
+        setBusy(true);
+        show('Restaurando a logo padrão…','info');
+        try{
+          const response=await fetch('/api/logo',{method:'DELETE',headers:{'X-Logo-Admin-Key':adminKey()}});
+          const data=await response.json().catch(()=>({}));
+          if(!response.ok||!data?.ok) throw new Error(data?.error||`HTTP ${response.status}`);
+          api()?.clearLocal?.();
+          await api()?.refresh?.(true);
+          draw(api()?.current?.()||api()?.default);
+          fileInput.value='';
+          show('Logo padrão oficial restaurada globalmente.','ok');
+        }catch(error){
+          console.error(error);
+          show('Não foi possível restaurar a logo padrão.','bad');
+        }finally{
+          setBusy(false);
+        }
       });
 
       if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initialize,{once:true});
