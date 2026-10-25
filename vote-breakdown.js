@@ -19,8 +19,30 @@
     return Number.isFinite(raw) && raw >= 0 ? raw : fallbackPercentage(value, votes);
   }
 
+  function ratioPercentage(rawValue, numerator, denominator) {
+    const raw = Number(rawValue);
+    if (Number.isFinite(raw) && raw >= 0) return raw;
+    const den = Number(denominator || 0);
+    return den > 0 ? (Number(numerator || 0) / den) * 100 : 0;
+  }
+
   function removeLegacyMobileBreakdown() {
     document.querySelectorAll('#resultSummary .mobile-vote-breakdown').forEach((node) => node.remove());
+  }
+
+  function setMetricPercentage(summary, label, percentage) {
+    const normalized = String(label || '').trim().toLowerCase();
+    const metric = [...summary.querySelectorAll('.summary-metric')].find((node) => {
+      return (node.querySelector('span')?.textContent?.trim().toLowerCase() || '') === normalized;
+    });
+    if (!metric) return;
+    let small = metric.querySelector('small.vote-breakdown-percentage');
+    if (!small) {
+      small = document.createElement('small');
+      small.className = 'vote-breakdown-percentage';
+      metric.appendChild(small);
+    }
+    small.textContent = pct(percentage);
   }
 
   function applySummaryBreakdown(result) {
@@ -31,8 +53,28 @@
     }
 
     const votes = result.votes || {};
+    const electorate = result.electorate || {};
+
+    const turnout = Number(electorate.turnout || 0);
+    const abstentions = Number(electorate.abstentions || 0);
+    const electorateTotal = Math.max(0, turnout + abstentions);
+
+    const valid = Number(votes.valid || 0);
     const blank = Number(votes.blank || 0);
     const nullVotes = Number(votes.null || 0);
+    const voteTotal = Math.max(0, valid + blank + nullVotes);
+
+    const turnoutPercentage = ratioPercentage(
+      electorate.turnoutPercentage ?? electorate.attendancePercentage,
+      turnout,
+      electorateTotal
+    );
+    const abstentionPercentage = ratioPercentage(
+      electorate.abstentionPercentage ?? electorate.abstentionsPercentage,
+      abstentions,
+      electorateTotal
+    );
+    const validPercentage = ratioPercentage(votes.validPercentage, valid, voteTotal);
     const blankPercentage = resolvedPercentage(votes.blankPercentage, votes, blank);
     const nullPercentage = resolvedPercentage(votes.nullPercentage, votes, nullVotes);
 
@@ -46,13 +88,17 @@
     });
     if (combined) combined.remove();
 
+    setMetricPercentage(summary, 'Comparecimento', turnoutPercentage);
+    setMetricPercentage(summary, 'Abstenções', abstentionPercentage);
+    setMetricPercentage(summary, 'Válidos', validPercentage);
+
     const blankMetric = document.createElement('div');
     blankMetric.className = 'summary-metric vote-breakdown-metric vote-blank';
-    blankMetric.innerHTML = `<span>Brancos</span><b>${fmt(blank)}</b><small>${pct(blankPercentage)}</small>`;
+    blankMetric.innerHTML = `<span>Brancos</span><b>${fmt(blank)}</b><small class="vote-breakdown-percentage">${pct(blankPercentage)}</small>`;
 
     const nullMetric = document.createElement('div');
     nullMetric.className = 'summary-metric vote-breakdown-metric vote-null';
-    nullMetric.innerHTML = `<span>Nulos</span><b>${fmt(nullVotes)}</b><small>${pct(nullPercentage)}</small>`;
+    nullMetric.innerHTML = `<span>Nulos</span><b>${fmt(nullVotes)}</b><small class="vote-breakdown-percentage">${pct(nullPercentage)}</small>`;
 
     summary.append(blankMetric, nullMetric);
   }
@@ -162,9 +208,7 @@
   const summaryTarget = document.getElementById('resultSummary');
   if (summaryTarget) {
     const summaryObserver = new MutationObserver(() => {
-      if (lastResult && !summaryTarget.querySelector('.vote-breakdown-metric')) {
-        queueMicrotask(() => applySummaryBreakdown(lastResult));
-      }
+      if (lastResult) queueMicrotask(() => applySummaryBreakdown(lastResult));
     });
     summaryObserver.observe(summaryTarget, { childList: true, subtree: true });
   }
