@@ -30,6 +30,10 @@ function pick(obj, ...keys) {
   return '';
 }
 
+function secureUrl(value) {
+  return String(value || '').trim().replace(/^http:\/\//i, 'https://');
+}
+
 function normalize(item) {
   return {
     code: pick(item, 'CodigoParlamentar', 'codigoParlamentar'),
@@ -37,8 +41,8 @@ function normalize(item) {
     fullName: pick(item, 'NomeCompletoParlamentar', 'nomeCompletoParlamentar'),
     party: pick(item, 'SiglaPartidoParlamentar', 'siglaPartidoParlamentar'),
     uf: pick(item, 'UfParlamentar', 'UFParlamentar', 'ufParlamentar').toUpperCase(),
-    photoUrl: pick(item, 'UrlFotoParlamentar', 'URLFotoParlamentar', 'urlFotoParlamentar'),
-    pageUrl: pick(item, 'UrlPaginaParlamentar', 'URLPaginaParlamentar', 'urlPaginaParlamentar'),
+    photoUrl: secureUrl(pick(item, 'UrlFotoParlamentar', 'URLFotoParlamentar', 'urlFotoParlamentar')),
+    pageUrl: secureUrl(pick(item, 'UrlPaginaParlamentar', 'URLPaginaParlamentar', 'urlPaginaParlamentar')),
   };
 }
 
