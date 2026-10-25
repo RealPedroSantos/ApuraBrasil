@@ -18,41 +18,48 @@ function videoIdFromUrl(value) {
   return null;
 }
 
-function extractChannelId(html) {
-  const patterns = [
-    /"channelId":"(UC[A-Za-z0-9_-]{22})"/,
-    /"externalId":"(UC[A-Za-z0-9_-]{22})"/,
-    /itemprop="channelId" content="(UC[A-Za-z0-9_-]{22})"/
-  ];
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
+function nearestVideoId(html, markerIndex, radius = 12000) {
+  const start = Math.max(0, markerIndex - radius);
+  const end = Math.min(html.length, markerIndex + 5000);
+  const slice = html.slice(start, end);
+  const before = slice.slice(0, Math.max(0, markerIndex - start));
+  const beforeIds = [...before.matchAll(/"videoId":"([A-Za-z0-9_-]{11})"/g)];
+  if (beforeIds.length) return beforeIds.at(-1)[1];
+  const anyId = slice.match(/"videoId":"([A-Za-z0-9_-]{11})"/);
+  return anyId ? anyId[1] : null;
 }
 
 function extractLiveVideoId(html) {
-  const marker = '"isLiveNow":true';
-  let index = html.indexOf(marker);
-  while (index >= 0) {
-    const start = Math.max(0, index - 9000);
-    const end = Math.min(html.length, index + 5000);
-    const slice = html.slice(start, end);
-    const ids = [...slice.matchAll(/"videoId":"([A-Za-z0-9_-]{11})"/g)];
-    if (ids.length) {
-      const beforeMarker = slice.slice(0, Math.max(0, index - start));
-      const beforeIds = [...beforeMarker.matchAll(/"videoId":"([A-Za-z0-9_-]{11})"/g)];
-      const candidate = (beforeIds.at(-1) || ids[0])?.[1];
+  const markers = [
+    '"isLiveNow":true',
+    '"isLive":true',
+    '"isLiveContent":true',
+    '"style":"LIVE"',
+    '"style":"BADGE_STYLE_TYPE_LIVE_NOW"',
+    '"label":"AO VIVO"',
+    '"label":"LIVE"',
+    '"text":"AO VIVO"',
+    '"text":"LIVE"'
+  ];
+
+  let best = null;
+  for (const marker of markers) {
+    let index = html.indexOf(marker);
+    while (index >= 0) {
+      const candidate = nearestVideoId(html, index);
       if (candidate) return candidate;
+      best = best || candidate;
+      index = html.indexOf(marker, index + marker.length);
     }
-    index = html.indexOf(marker, index + marker.length);
   }
-  return null;
+  return best;
 }
 
-function extractFirstVideoId(html) {
-  const match = html.match(/"videoId":"([A-Za-z0-9_-]{11})"/);
-  return match ? match[1] : null;
+function pageClaimsLive(html) {
+  return html.includes('"isLiveNow":true') ||
+    html.includes('"isLiveContent":true') ||
+    html.includes('"style":"BADGE_STYLE_TYPE_LIVE_NOW"') ||
+    html.includes('"style":"LIVE"');
 }
 
 async function fetchYouTube(url) {
@@ -66,50 +73,29 @@ async function fetchYouTube(url) {
   });
 }
 
-async function latestFromFeed(channelId) {
-  if (!channelId) return null;
-  try {
-    const response = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`, {
-      headers: { 'user-agent': 'Mozilla/5.0', accept: 'application/xml,text/xml,*/*' }
-    });
-    if (!response.ok) return null;
-    const xml = await response.text();
-    const match = xml.match(/<yt:videoId>([A-Za-z0-9_-]{11})<\/yt:videoId>/);
-    return match ? match[1] : null;
-  } catch {
-    return null;
-  }
-}
-
 async function resolveChannel(handle) {
-  const liveUrl = `https://www.youtube.com/@${handle}/live`;
-  const response = await fetchYouTube(liveUrl);
-  if (!response.ok) throw new Error(`YouTube respondeu ${response.status}`);
+  const candidates = [
+    `https://www.youtube.com/@${handle}/live`,
+    `https://www.youtube.com/@${handle}/streams`
+  ];
 
-  const html = await response.text();
-  const urlVideoId = videoIdFromUrl(response.url);
-  const liveVideoId = extractLiveVideoId(html);
+  for (const url of candidates) {
+    const response = await fetchYouTube(url);
+    if (!response.ok) continue;
 
-  if (liveVideoId) {
-    return { videoId: liveVideoId, live: true, source: 'live-marker' };
+    const html = await response.text();
+    const liveVideoId = extractLiveVideoId(html);
+    if (liveVideoId) {
+      return { videoId: liveVideoId, live: true, source: url.endsWith('/live') ? 'live-page' : 'streams-page' };
+    }
+
+    const redirectedVideoId = videoIdFromUrl(response.url);
+    if (redirectedVideoId && pageClaimsLive(html)) {
+      return { videoId: redirectedVideoId, live: true, source: 'live-redirect' };
+    }
   }
 
-  if (urlVideoId && html.includes('"isLiveNow":true')) {
-    return { videoId: urlVideoId, live: true, source: 'live-url' };
-  }
-
-  const channelId = extractChannelId(html);
-  const latestFeedId = await latestFromFeed(channelId);
-  if (latestFeedId) {
-    return { videoId: latestFeedId, live: false, source: 'latest-feed' };
-  }
-
-  const pageVideoId = urlVideoId || extractFirstVideoId(html);
-  if (pageVideoId) {
-    return { videoId: pageVideoId, live: false, source: 'latest-page' };
-  }
-
-  throw new Error('Nenhum vídeo público encontrado para este canal.');
+  return { videoId: null, live: false, source: 'offline' };
 }
 
 module.exports = async function handler(req, res) {
@@ -123,7 +109,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const result = await resolveChannel(channel.handle);
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, s-maxage=45, stale-while-revalidate=90');
     res.status(200).json({ ok: true, channel: key, handle: channel.handle, ...result });
   } catch (error) {
     res.setHeader('Cache-Control', 'no-store');
