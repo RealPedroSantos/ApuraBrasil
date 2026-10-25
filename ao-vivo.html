@@ -28,7 +28,10 @@
     .streams-grid{min-width:0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#000;border-top:1px solid rgba(255,255,255,.2)}
     .stream-card{position:relative;min-width:0;min-height:0;overflow:hidden;background:#000;border-right:1px solid rgba(255,255,255,.18)}
     .stream-card:last-child{border-right:0}
-    .stream-card iframe{display:block;width:100%;height:100%;border:0;background:#000}
+    .stream-card iframe{position:absolute;inset:-2px;display:block;width:calc(100% + 4px);height:calc(100% + 4px);border:0;background:#000;pointer-events:none}
+    .stream-hit{position:absolute;z-index:3;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;background:transparent;color:transparent;appearance:none;cursor:default;outline:0}
+    .stream-hit:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:-3px}
+    .stream-card.offline iframe{visibility:hidden}
     @media(max-width:900px){
       .broadcast-frame{grid-template-rows:40px minmax(0,1fr) 27%}
       .studio-head{gap:7px;padding:4px 7px}
@@ -58,14 +61,17 @@
     </section>
 
     <section class="streams-grid" aria-label="Cobertura jornalística ao vivo">
-      <article class="stream-card" data-channel="cnn">
-        <iframe title="CNN Brasil ao vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <article class="stream-card offline" data-channel="cnn">
+        <iframe tabindex="-1" title="CNN Brasil ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <button class="stream-hit" type="button" aria-label="Ouvir CNN Brasil"></button>
       </article>
-      <article class="stream-card" data-channel="jovemPan">
-        <iframe title="Jovem Pan News ao vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <article class="stream-card offline" data-channel="jovemPan">
+        <iframe tabindex="-1" title="Jovem Pan News ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <button class="stream-hit" type="button" aria-label="Ouvir Jovem Pan News"></button>
       </article>
-      <article class="stream-card" data-channel="times">
-        <iframe title="Times Brasil CNBC ao vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <article class="stream-card offline" data-channel="times">
+        <iframe tabindex="-1" title="Times Brasil CNBC ao vivo" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <button class="stream-hit" type="button" aria-label="Ouvir Times Brasil CNBC"></button>
       </article>
     </section>
   </main>
@@ -79,6 +85,7 @@
       const dataState = document.getElementById('dataState');
       const clock = document.getElementById('studioClock');
       const streamCards = [...document.querySelectorAll('.stream-card[data-channel]')];
+      let audibleChannel = null;
 
       function readRound(){
         const value = Number(localStorage.getItem(ROUND_KEY));
@@ -162,20 +169,71 @@
 
       function playerUrl(videoId){
         const origin = encodeURIComponent(window.location.origin);
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${origin}`;
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&enablejsapi=1&origin=${origin}`;
       }
+
+      function playerCommand(iframe, func){
+        try{
+          iframe.contentWindow?.postMessage(JSON.stringify({
+            event: 'command',
+            func,
+            args: []
+          }), 'https://www.youtube.com');
+        } catch(e) {}
+      }
+
+      function muteAllExcept(channel){
+        streamCards.forEach(card => {
+          const iframe = card.querySelector('iframe');
+          if (card.dataset.channel === channel && !card.classList.contains('offline')) {
+            playerCommand(iframe, 'playVideo');
+            playerCommand(iframe, 'unMute');
+          } else {
+            playerCommand(iframe, 'mute');
+          }
+        });
+      }
+
+      streamCards.forEach(card => {
+        const hit = card.querySelector('.stream-hit');
+        const iframe = card.querySelector('iframe');
+        hit.addEventListener('click', () => {
+          if (card.classList.contains('offline')) return;
+          audibleChannel = card.dataset.channel;
+          muteAllExcept(audibleChannel);
+        });
+        iframe.addEventListener('load', () => {
+          playerCommand(iframe, 'mute');
+          playerCommand(iframe, 'playVideo');
+          if (audibleChannel === card.dataset.channel) {
+            setTimeout(() => muteAllExcept(audibleChannel), 250);
+          }
+        });
+      });
 
       async function resolveStream(card){
         const channel = card.dataset.channel;
         const iframe = card.querySelector('iframe');
         try{
-          const response = await fetch(`/api/youtube-live?channel=${encodeURIComponent(channel)}`, { cache: 'no-store' });
+          const response = await fetch(`/api/youtube-live?channel=${encodeURIComponent(channel)}&t=${Date.now()}`, { cache: 'no-store' });
           const payload = await response.json();
-          if (!response.ok || !payload?.ok || !payload.videoId) return;
+          if (!response.ok || !payload?.ok || !payload.live || !payload.videoId) {
+            card.classList.add('offline');
+            if (iframe.dataset.videoId) {
+              iframe.dataset.videoId = '';
+              iframe.removeAttribute('src');
+            }
+            if (audibleChannel === channel) audibleChannel = null;
+            return;
+          }
+
+          card.classList.remove('offline');
           if (iframe.dataset.videoId === payload.videoId) return;
           iframe.dataset.videoId = payload.videoId;
           iframe.src = playerUrl(payload.videoId);
-        } catch(e) {}
+        } catch(e) {
+          card.classList.add('offline');
+        }
       }
 
       function refreshStreams(){
@@ -191,7 +249,7 @@
       updateClock();
       setInterval(updateClock,1000);
       setInterval(mirrorFeedState,2500);
-      setInterval(refreshStreams,60000);
+      setInterval(refreshStreams,45000);
     })();
   </script>
 </body>
