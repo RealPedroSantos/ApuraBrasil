@@ -1,0 +1,29 @@
+/* Mobile app white canvas override — loaded last on purpose. */
+html.mobile-ui.mobile-app-ready,
+html.mobile-ui.mobile-app-ready body,
+html.mobile-ui.mobile-app-ready .app-shell,
+html.mobile-ui.mobile-app-ready .main-grid,
+html.mobile-ui.mobile-app-ready .map-panel,
+html.mobile-ui.mobile-app-ready .results-panel,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-panel,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready .map-canvas,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas > *,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .vector-map,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .vector-map svg,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drilldown-host,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drilldown-host svg{
+  background:#ffffff!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready{
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .ab-map-loading{
+  background:rgba(255,255,255,.88)!important;
+}
