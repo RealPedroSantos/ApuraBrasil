@@ -17,6 +17,7 @@
   const round=()=>Number(window.ApuraBrasilRound?.get?.()||1);
   const color=party=>{const k=String(party||'').toUpperCase();if(COLORS[k])return COLORS[k];let h=0;for(const c of k)h=(h*31+c.charCodeAt(0))%360;return `hsl(${h||205} 62% 46%)`;};
   const initials=n=>String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  const normalizePhotoUrl=url=>String(url||'').replace(/(\/ele2026\/6257\/fotos\/)(?:ac|al|ap|am|ba|ce|df|es|go|ma|mt|ms|mg|pa|pb|pr|pe|pi|rj|rn|rs|ro|rr|sc|sp|se|to|zz)(\/)/i,'$1br$2');
   async function api(url){const r=await fetch(url,{headers:{Accept:'application/json'}});const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.detail||j.error||`HTTP ${r.status}`);return j;}
 
   function context(){
@@ -54,7 +55,7 @@
     if(status)status.textContent=`${n.name} • TSE • ${fmt(n.sections.totalized)} seções • ${fmt(n.places)} locais de votação`;
     if(summary)summary.innerHTML=`<div class="totalization neighborhood-totalization"><div class="total-head"><div class="total-main"><small>Seções do bairro totalizadas</small><strong>${pct(n.sections.percentage)}</strong><span class="history-result-badge">TSE • SEÇÃO</span></div><div class="total-state"><b>${n.sections.percentage>=100?'ENCERRADA':'EM ANDAMENTO'}</b><span>TSE ${esc(data.neighborhoods.generatedTime||'')}</span></div></div><div class="section-counters"><div class="section-counter done"><span>APURADAS</span><strong>${fmt(n.sections.totalized)}</strong><small>de ${fmt(n.sections.total)} seções</small></div><div class="section-counter pending"><span>FALTAM APURAR</span><strong>${fmt(Math.max(0,n.sections.total-n.sections.totalized))}</strong><small>${pct(100-n.sections.percentage)} restantes</small></div></div><div class="total-progress"><i style="width:${Math.max(0,Math.min(100,n.sections.percentage))}%"></i></div><div class="summary-metrics"><div class="summary-metric"><span>Comparecimento</span><b>${fmt(n.electorate.turnout)}</b></div><div class="summary-metric"><span>Eleitorado no cadastro TSE</span><b>${fmt(n.electorate.total)}</b></div><div class="summary-metric"><span>Válidos</span><b>${fmt(n.votes.valid)}</b></div><div class="summary-metric"><span>Brancos + nulos</span><b>${fmt((n.votes.blank||0)+(n.votes.null||0))}</b></div></div><div class="neighborhood-source-note">Votos somados pelas seções e locais de votação oficiais associados a ${esc(n.name)}.</div></div>`;
     const limit=data.context.office.startsWith('deputado')?80:20;
-    if(list)list.innerHTML=cands.length?cands.slice(0,limit).map((c,i)=>{const col=color(c.party),w=Math.max(0,Math.min(100,Number(c.percentage||0))),display=c.ballotName||c.name||'Candidato',photo=c.photoUrl?`<img src="${esc(c.photoUrl)}" alt="Foto de ${esc(display)}" loading="lazy" onload="this.parentElement.classList.add('photo-loaded')" onerror="this.remove()">`:'';return `<article class="candidate-card" style="animation-delay:${Math.min(i*20,160)}ms"><div class="candidate-avatar">${photo}<span class="avatar-fallback">${esc(initials(display))}</span></div><div class="candidate-main"><div class="candidate-name">${esc(display)}</div><div class="candidate-subline"><span class="party-chip" style="background:${col}">${esc(c.party||'—')}</span><span class="candidate-number">Nº ${esc(c.number||'—')}</span></div><div class="candidate-bar"><i style="width:${w}%;background:${col}"></i><span>${fmt(c.votes)} votos</span></div></div><div class="candidate-score"><strong>${pct(c.percentage)}</strong><small>${fmt(c.votes)} votos</small></div></article>`;}).join(''):'<div class="empty-state">Nenhum voto computado neste bairro para o cargo selecionado.</div>';
+    if(list)list.innerHTML=cands.length?cands.slice(0,limit).map((c,i)=>{const col=color(c.party),w=Math.max(0,Math.min(100,Number(c.percentage||0))),display=c.ballotName||c.name||'Candidato',photoUrl=normalizePhotoUrl(c.photoUrl),photo=photoUrl?`<img src="${esc(photoUrl)}" alt="Foto de ${esc(display)}" loading="lazy" onload="this.parentElement.classList.add('photo-loaded')" onerror="this.remove()">`:'';return `<article class="candidate-card" style="animation-delay:${Math.min(i*20,160)}ms"><div class="candidate-avatar">${photo}<span class="avatar-fallback">${esc(initials(display))}</span></div><div class="candidate-main"><div class="candidate-name">${esc(display)}</div><div class="candidate-subline"><span class="party-chip" style="background:${col}">${esc(c.party||'—')}</span><span class="candidate-number">Nº ${esc(c.number||'—')}</span></div><div class="candidate-bar"><i style="width:${w}%;background:${col}"></i><span>${fmt(c.votes)} votos</span></div></div><div class="candidate-score"><strong>${pct(c.percentage)}</strong><small>${fmt(c.votes)} votos</small></div></article>`;}).join(''):'<div class="empty-state">Nenhum voto computado neste bairro para o cargo selecionado.</div>';
   }
 
   async function load(force=false){
@@ -79,8 +80,15 @@
   });
   document.getElementById('refreshButton')?.addEventListener('click',()=>{if(level()==='Bairros TSE')schedule(400,true);},true);
   window.addEventListener('apura:election-year-changed',()=>schedule(100,true));
-  const stage=document.getElementById('mapStage');if(stage)new MutationObserver(()=>{if(level()==='Bairros TSE')schedule(25);else selected='';}).observe(stage,{subtree:true,childList:true});
-  const badge=document.querySelector('.ab-map-level');if(badge)new MutationObserver(()=>schedule(20)).observe(badge,{subtree:true,childList:true,characterData:true});
+
+  // O nível do mapa é a fonte de verdade. Não observar o mapStage inteiro:
+  // candidateHighlights também vive nele e suas atualizações não significam troca de bairro.
+  const badge=document.querySelector('.ab-map-level');
+  if(badge)new MutationObserver(()=>{
+    if(level()==='Bairros TSE')schedule(20);
+    else selected='';
+  }).observe(badge,{subtree:true,childList:true,characterData:true});
+
   const style=document.createElement('style');style.textContent='.ab-drilldown-region{transition:fill .055s ease,opacity .08s ease,filter .08s ease,stroke-width .08s ease!important}.neighborhood-source-note{margin-top:6px;font-size:9px;color:#64748b;text-align:right}';document.head.appendChild(style);
   schedule(80);
 })();

@@ -12,6 +12,7 @@
   };
 
   const cleanNumber = (text) => String(text || '').replace(/^Nº\s*/i,'').trim();
+  const normalizePhotoUrl = (url) => String(url || '').replace(/(\/ele2026\/6257\/fotos\/)(?:ac|al|ap|am|ba|ce|df|es|go|ma|mt|ms|mg|pa|pb|pr|pe|pi|rj|rn|rs|ro|rr|sc|sp|se|to|zz)(\/)/i,'$1br$2');
   let lastSignature = '';
 
   function cardData(card) {
@@ -22,7 +23,7 @@
     const chip = card.querySelector('.party-chip');
     const color = chip ? getComputedStyle(chip).backgroundColor : '#165dff';
     const img = card.querySelector('.candidate-avatar img');
-    const photoSrc = img?.getAttribute('src') || '';
+    const photoSrc = normalizePhotoUrl(img?.getAttribute('src') || '');
     return {name,party,number,score,color,photoSrc};
   }
 
@@ -31,8 +32,6 @@
     const data = cards.map(cardData);
     const signature = data.map(item => [item.name,item.party,item.number,item.score,item.photoSrc].join('\u001f')).join('\u001e');
 
-    // Evita um ciclo de re-render entre candidateList -> destaques -> mapStage -> resultados por bairro.
-    // Mudanças puramente visuais (hover, classe, estilo) não devem recriar imagens/cards.
     if (signature === lastSignature) return;
     lastSignature = signature;
 
@@ -68,8 +67,6 @@
     timer = setTimeout(render,40);
   };
 
-  // Só alterações de conteúdo e da URL da foto podem mudar os destaques.
-  // Observar class/style criava um feedback infinito com os módulos do mapa.
   new MutationObserver(schedule).observe(list,{
     childList:true,
     subtree:true,
