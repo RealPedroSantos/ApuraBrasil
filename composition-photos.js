@@ -85,9 +85,11 @@
     img.referrerPolicy = 'no-referrer';
     img.addEventListener('error', () => {
       img.remove();
+      badge.classList.remove('has-photo');
       badge.textContent = fallback;
     }, { once: true });
     badge.textContent = '';
+    badge.classList.add('has-photo');
     badge.appendChild(img);
     img.src = photoUrl;
   }
