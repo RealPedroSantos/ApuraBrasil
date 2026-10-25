@@ -124,7 +124,10 @@
       : `${count}<div class="mobile-map-office-prompt"><strong>${escapeHtml(office.label)}</strong><span>Ainda não há votos computados para este recorte.</span></div>`;
 
     const strip = target.querySelector('.mobile-map-candidate-strip');
-    if (strip) strip.scrollLeft = 0;
+    if (strip) {
+      strip.scrollLeft = 0;
+      strip.addEventListener('click', event => event.stopPropagation());
+    }
   }
 
   function handleResultEvent(event) {
