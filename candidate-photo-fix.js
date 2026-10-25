@@ -65,6 +65,11 @@
         gap:0!important;
         padding:4px 8px 0!important;
         overflow:hidden!important;
+        position:relative!important;
+        z-index:90!important;
+        transform:translateY(calc(-1 * var(--ab-race-height)))!important;
+        margin-bottom:calc(-1 * var(--ab-race-height))!important;
+        box-shadow:0 -5px 16px rgba(7,21,34,.08)!important;
       }
 
       html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race > .ab-race-tv{
@@ -110,7 +115,7 @@
       loadScriptOnce('/broadcast-tv-typography.js','data-broadcast-tv-typography');
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
       loadScriptOnce('/election-race-bar-tv.js','data-election-race-bar-tv');
-      window.__apuraBrasilBroadcastLoaderVersion='2.5.3';
+      window.__apuraBrasilBroadcastLoaderVersion='2.5.4';
     }catch{}
   }
 
