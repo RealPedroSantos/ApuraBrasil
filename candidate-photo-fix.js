@@ -46,13 +46,14 @@
   function loadBroadcastControls() {
     try {
       if (window.parent === window || !window.parent.location.pathname.startsWith('/ao-vivo')) return;
-      if (document.querySelector('script[data-broadcast-layout-controls]')) return;
+      if (document.querySelector('script[data-broadcast-layout-controls-v2]')) return;
+      document.querySelectorAll('script[data-broadcast-layout-controls]').forEach(node => node.remove());
       const script = document.createElement('script');
-      script.src = '/broadcast-layout-controls.js';
+      script.src = '/broadcast-layout-controls-v2.js';
       script.defer = true;
-      script.dataset.broadcastLayoutControls = 'true';
+      script.dataset.broadcastLayoutControlsV2 = 'true';
       document.head.appendChild(script);
-      window.__apuraBrasilBroadcastLoaderVersion = '1.0.1';
+      window.__apuraBrasilBroadcastLoaderVersion = '2.0.0';
     } catch {}
   }
 
