@@ -50,12 +50,12 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate.
   width:100%!important;
   min-width:0!important;
   max-width:none!important;
-  min-height:78px!important;
+  min-height:82px!important;
   display:grid!important;
   grid-template-columns:36px minmax(0,1fr)!important;
   grid-template-rows:minmax(36px,1fr) auto!important;
   column-gap:6px!important;
-  row-gap:4px!important;
+  row-gap:5px!important;
   align-items:center!important;
   padding:6px!important;
   border:1px solid #d5dadd!important;
@@ -159,16 +159,19 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-
   font-size:6.5px!important;
 }
 
+/* The lower row is intentionally split into secondary information (votes)
+   and the primary KPI (percentage). The KPI owns enough width for 100,00%. */
 html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-bottom{
   grid-column:1/-1!important;
   grid-row:2!important;
   width:100%!important;
   min-width:0!important;
+  min-height:28px!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-columns:minmax(0,1fr) minmax(70px,max-content)!important;
   align-items:end!important;
-  gap:5px!important;
-  padding-top:3px!important;
+  gap:4px!important;
+  padding-top:4px!important;
   border-top:1px solid #eef0f0!important;
 }
 
@@ -181,7 +184,8 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-
   overflow:hidden!important;
   text-overflow:ellipsis!important;
   white-space:nowrap!important;
-  font-size:6.8px!important;
+  padding-bottom:1px!important;
+  font-size:6.7px!important;
   line-height:1!important;
   font-weight:850!important;
   color:#58676c!important;
@@ -194,7 +198,7 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-
   transform:none!important;
   width:auto!important;
   max-width:none!important;
-  min-width:58px!important;
+  min-width:70px!important;
   padding:0!important;
   margin:0!important;
   justify-self:end!important;
@@ -203,9 +207,9 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-
   text-overflow:clip!important;
   white-space:nowrap!important;
   text-align:right!important;
-  font-size:17px!important;
-  line-height:.9!important;
-  letter-spacing:-.045em!important;
+  font-size:clamp(22px,6.1vw,26px)!important;
+  line-height:.82!important;
+  letter-spacing:-.055em!important;
   font-weight:950!important;
   font-variant-numeric:tabular-nums!important;
   color:#101719!important;
@@ -261,7 +265,7 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-office-pro
 }
 
 html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drilldown-host{
-  bottom:154px!important;
+  bottom:158px!important;
 }
 
 @media(max-width:390px){
@@ -273,7 +277,7 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drill
   html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate.mobile-map-carousel-card{
     grid-template-columns:31px minmax(0,1fr)!important;
     column-gap:4px!important;
-    min-height:76px!important;
+    min-height:80px!important;
     padding:5px!important;
   }
 
@@ -287,16 +291,21 @@ html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drill
     font-size:7.7px!important;
   }
 
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-bottom{
+    grid-template-columns:minmax(0,1fr) minmax(61px,max-content)!important;
+    min-height:25px!important;
+  }
+
   html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-percent{
-    min-width:51px!important;
-    font-size:15px!important;
+    min-width:61px!important;
+    font-size:clamp(20px,6vw,23px)!important;
   }
 
   html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-votes{
-    font-size:6.2px!important;
+    font-size:6.1px!important;
   }
 
   html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drilldown-host{
-    bottom:156px!important;
+    bottom:160px!important;
   }
 }
