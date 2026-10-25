@@ -3,126 +3,121 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>ApuraBrasil — Simulação das casas legislativas</title>
+  <meta name="theme-color" content="#f3f4f1">
+  <title>ApuraBrasil — Composição oficial</title>
   <style>.brand-logo,.projection-logo{visibility:hidden!important;opacity:0!important}</style>
-  <script src="/mobile-mode.js"></script>
-  <script src="/refresh-policy.js"></script>
-  <link rel="stylesheet" href="/composicao.css">
-  <link rel="stylesheet" href="/mobile-ui.css">
-  <link rel="stylesheet" href="/composicao-fixes.css">
-  <link rel="stylesheet" href="/composicao-mobile-v2.css">
-  <link rel="stylesheet" href="/composition-photos.css">
-  <link rel="stylesheet" href="/composition-interaction-fix.css">
-  <link rel="stylesheet" href="/composition-mobile-nav.css">
+  <link rel="stylesheet" href="/composicao-official-v3.css">
 </head>
 <body>
-<div class="projection-app">
-  <header class="projection-top">
-    <img src="/assets/logo-apurabrasil.svg" alt="Apura Brasil" class="projection-logo" />
-    <div class="projection-title"><span>COMPOSIÇÃO</span><strong>Simulação das casas legislativas</strong></div>
-    <a href="/" class="back-link">Voltar à apuração</a>
+<div class="co-app">
+  <header class="co-top">
+    <img class="projection-logo" alt="Apura Brasil">
+    <div class="co-heading">
+      <span class="co-kicker">COMPOSIÇÃO OFICIAL</span>
+      <strong>Casas legislativas • Eleições 2026</strong>
+    </div>
+    <a class="co-back" href="/">Voltar à apuração</a>
   </header>
 
-  <section class="projection-controls">
-    <div class="control-group house-control">
-      <label>Casa</label>
-      <div class="segmented">
-        <button class="mode active" data-office="deputado-federal">Câmara</button>
-        <button class="mode" data-office="senador">Senado</button>
-        <button class="mode" data-office="congresso">Congresso</button>
-        <button class="mode" data-office="deputado-estadual">Assembleia</button>
-      </div>
+  <section class="co-toolbar" aria-label="Filtros da composição">
+    <div class="co-tabs" role="tablist" aria-label="Casa legislativa">
+      <button class="co-tab active" type="button" data-house="deputado-federal">Câmara</button>
+      <button class="co-tab" type="button" data-house="senador">Senado</button>
+      <button class="co-tab" type="button" data-house="congresso">Congresso</button>
+      <button class="co-tab" type="button" data-house="deputado-estadual">Assembleia</button>
     </div>
-
-    <div class="control-group simulation-control">
-      <label>Modo</label>
-      <div class="segmented simulation-segmented">
-        <button class="simulation-mode active" data-simulation="live">Projeção</button>
-        <button class="simulation-mode" data-simulation="scenario">Criar cenário</button>
-        <button class="simulation-mode" data-simulation="forecast">Probabilidade</button>
-      </div>
-    </div>
-
-    <div class="control-group uf-control">
-      <label>Abrangência</label>
-      <select id="ufSelect"><option value="BR">Brasil</option></select>
-    </div>
-    <button id="refreshProjection" class="refresh">Atualizar</button>
+    <select id="ufSelect" class="co-scope" aria-label="Abrangência"></select>
+    <button id="refreshComposition" class="co-refresh" type="button">Atualizar</button>
   </section>
 
-  <main class="projection-main">
-    <section class="composition-panel">
-      <div class="panel-head">
-        <div>
-          <span class="eyebrow">SIMULADOR ELEITORAL 2026</span>
-          <h1 id="compositionTitle">Câmara dos Deputados • Brasil</h1>
-        </div>
-        <div class="projection-meta">
-          <span class="simulation-badge">SIMULAÇÃO</span>
-          <div id="projectionProgress" class="projection-progress">Preparando...</div>
-        </div>
-      </div>
+  <main class="co-main">
+    <div class="co-notice">
+      <div><b>Somente dados oficiais.</b> Esta página não transforma percentual de votos em cadeira, não estima eleitos e não usa probabilidade. Um nome só entra na lista de eleitos quando o próprio resultado do TSE traz status oficial de eleito.</div>
+    </div>
+    <div id="coStatus" class="co-status loading">Consultando os dados oficiais…</div>
 
-      <div id="seatSummary" class="seat-summary"></div>
-
-      <section id="scenarioPanel" class="scenario-panel hidden">
-        <div class="scenario-head">
+    <section class="co-hero">
+      <article class="co-card co-overview">
+        <div class="co-overview-head">
           <div>
-            <span class="eyebrow">CENÁRIO MANUAL</span>
-            <strong>Altere a força eleitoral</strong>
-            <small id="scenarioNote"></small>
+            <span class="co-kicker">ELEIÇÕES 2026</span>
+            <h1 id="compositionTitle">Câmara dos Deputados • Brasil</h1>
+            <p id="compositionSubtitle" class="co-subtitle">Carregando resultados oficiais…</p>
           </div>
-          <button id="resetScenario" type="button" class="reset-scenario">Zerar alterações</button>
+          <span class="co-source-badge">TSE OFICIAL</span>
         </div>
-        <div id="scenarioControls" class="scenario-controls"></div>
-      </section>
+        <div id="coSummary" class="co-summary"></div>
+      </article>
 
-      <div id="chamberArea" class="chamber-area">
-        <div class="chamber-card">
-          <div class="chamber-head">
-            <div><span class="eyebrow">PLENÁRIO PROJETADO</span><strong id="chamberTitle">Câmara dos Deputados</strong></div>
-            <div id="chamberCount" class="chamber-count">—</div>
-          </div>
-          <div id="chamberVisual" class="chamber-visual" aria-label="Simulação visual das cadeiras"></div>
-          <div id="chamberLegend" class="chamber-legend"></div>
+      <aside class="co-card co-integrity">
+        <span class="co-kicker">INTEGRIDADE DOS DADOS</span>
+        <h2>O que esta tela considera</h2>
+        <div class="co-checks">
+          <div class="co-check">Status de eleito vem do resultado oficial do TSE, nunca de percentual ou posição na lista.</div>
+          <div class="co-check">Cadeiras ainda sem definição oficial permanecem sem nome; não são preenchidas por projeção.</div>
+          <div class="co-check">No Senado, os parlamentares em exercício vêm diretamente dos Dados Abertos do Senado Federal.</div>
         </div>
-        <div id="secondaryChamberCard" class="chamber-card secondary-chamber hidden">
-          <div class="chamber-head">
-            <div><span class="eyebrow">PLENÁRIO PROJETADO</span><strong id="secondaryChamberTitle">Senado Federal</strong></div>
-            <div id="secondaryChamberCount" class="chamber-count">—</div>
-          </div>
-          <div id="secondaryChamberVisual" class="chamber-visual" aria-label="Simulação visual das cadeiras do Senado"></div>
-          <div id="secondaryChamberLegend" class="chamber-legend"></div>
-        </div>
-      </div>
-
-      <div class="party-section-head">
-        <span class="eyebrow">DISTRIBUIÇÃO</span>
-        <strong>Composição por partido</strong>
-      </div>
-      <div id="partyComposition" class="party-composition"></div>
+        <p id="integrityText">Preparando recortes oficiais…</p>
+      </aside>
     </section>
 
-    <section class="projected-panel">
-      <div class="panel-head">
-        <div><span class="eyebrow">NOMES EM FAIXA</span><h2 id="namesTitle">Projetados neste momento</h2></div>
+    <section class="co-grid">
+      <article class="co-card co-section">
+        <div class="co-section-head">
+          <div>
+            <span class="co-kicker">DISTRIBUIÇÃO</span>
+            <h2 id="partyTitle">Distribuição por partido</h2>
+            <p>Contagem apenas dos nomes oficialmente confirmados no recorte selecionado.</p>
+          </div>
+        </div>
+        <div id="partyList" class="co-party-list"><div class="co-empty">Carregando composição…</div></div>
+      </article>
+
+      <article class="co-card co-section">
+        <div class="co-section-head">
+          <div>
+            <span class="co-kicker">NOMES OFICIAIS</span>
+            <h2 id="membersTitle">Eleitos oficialmente</h2>
+            <p>Fotos das urnas são carregadas pelas URLs oficiais do TSE quando disponíveis.</p>
+          </div>
+        </div>
+        <div id="memberList" class="co-members"><div class="co-empty">Carregando resultados oficiais…</div></div>
+        <button id="showMore" class="co-more" type="button" hidden>Mostrar mais</button>
+      </article>
+    </section>
+
+    <section id="currentSenateSection" class="co-card co-section co-senate-current" hidden>
+      <div class="co-section-head">
+        <div>
+          <span class="co-kicker">SENADO FEDERAL</span>
+          <h2>Senadores em exercício</h2>
+          <p>Lista separada da eleição de 2026, consultada nos Dados Abertos do Senado.</p>
+        </div>
+        <span id="currentSenateCount" class="co-source-badge">—</span>
       </div>
-      <div id="projectedList" class="projected-list"></div>
+      <div id="currentSenateList" class="co-current-list"></div>
     </section>
   </main>
 
-  <footer class="projection-footer">
-    <span id="modeDisclaimer">Projeção matemática com os votos parciais disponíveis. Não equivale à proclamação oficial de eleitos.</span>
-    <span id="projectionClock">--:--:--</span>
+  <footer class="co-footer">
+    Fonte eleitoral: Tribunal Superior Eleitoral (TSE). Senadores em exercício: Senado Federal — Dados Abertos. A interface preserva a diferença entre resultado oficial, mandato em exercício e cadeira ainda não definida; não há inferência de eleição por percentual de votos.
   </footer>
 </div>
+
+<section id="moreSheet" class="co-more-sheet" aria-label="Mais opções" hidden>
+  <strong>Composição oficial</strong>
+  <button id="sheetRefresh" type="button">Atualizar dados oficiais</button>
+  <a href="/">Voltar à apuração</a>
+</section>
+<nav class="co-mobile-nav" aria-label="Menu principal">
+  <a href="/?mobileView=map" aria-label="Mapa"><svg viewBox="0 0 24 24"><path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2Z"/><path d="M8 4v13M16 7v13"/></svg><span>Mapa</span></a>
+  <a href="/?mobileView=results" aria-label="Resultados"><svg viewBox="0 0 24 24"><path d="M5 19V9M12 19V5M19 19v-7"/><path d="M3 19h18"/></svg><span>Resultados</span></a>
+  <a href="/?mobileView=places" aria-label="Localidades"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Localidades</span></a>
+  <a href="/?mobileView=zones" aria-label="Seções"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><path d="M7 3v4M12 10v4M17 17v4"/></svg><span>Seções</span></a>
+  <button id="moreButton" class="active" type="button" aria-label="Mais"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span>Mais</span></button>
+</nav>
+
 <script src="/logo-override.js" defer></script>
-<script src="/composition-photos.js" defer></script>
-<script src="/legislative-simulator.js" defer></script>
-<script src="/composicao.js" defer></script>
-<script src="/composicao-enhancements.js" defer></script>
-<script src="/seat-compact.js" defer></script>
-<script src="/composition-interaction-fix.js" defer></script>
-<script src="/composition-mobile-nav.js" defer></script>
+<script src="/composicao-official-v3.js" defer></script>
 </body>
 </html>
