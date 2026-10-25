@@ -60,8 +60,8 @@ function collectLiveCandidates(html) {
   for (const marker of markers) {
     let markerIndex = html.indexOf(marker);
     while (markerIndex >= 0) {
-      const start = Math.max(0, markerIndex - 7000);
-      const end = Math.min(html.length, markerIndex + 5000);
+      const start = Math.max(0, markerIndex - 4500);
+      const end = Math.min(html.length, markerIndex + 2500);
       const slice = html.slice(start, end);
       for (const match of slice.matchAll(/"videoId":"([A-Za-z0-9_-]{11})"/g)) {
         const absoluteIndex = start + match.index;
@@ -78,7 +78,7 @@ function collectLiveCandidates(html) {
     if (seen.has(item.id)) continue;
     seen.add(item.id);
     result.push(item.id);
-    if (result.length >= 18) break;
+    if (result.length >= 12) break;
   }
   return result;
 }
@@ -93,8 +93,25 @@ function extractWatchOwner(html, expectedVideoId) {
   return channelMatch[1];
 }
 
-function watchIsLiveNow(html) {
-  return html.includes('"isLiveNow":true');
+function watchLooksCurrentlyLive(html) {
+  if (html.includes('"isLiveNow":true')) return true;
+  if (html.includes('"style":"BADGE_STYLE_TYPE_LIVE_NOW"')) return true;
+  if (html.includes('"liveStreamability"')) return true;
+
+  const detailsIndex = html.indexOf('"videoDetails":');
+  if (detailsIndex < 0) return false;
+  const details = html.slice(detailsIndex, detailsIndex + 30000);
+  if (!details.includes('"isLiveContent":true')) return false;
+
+  const broadcastIndex = html.indexOf('"liveBroadcastDetails":');
+  if (broadcastIndex >= 0) {
+    const broadcast = html.slice(broadcastIndex, broadcastIndex + 4000);
+    if (broadcast.includes('"endTimestamp"')) return false;
+    if (broadcast.includes('"isLiveNow":false')) return false;
+    if (broadcast.includes('"startTimestamp"')) return true;
+  }
+
+  return false;
 }
 
 async function fetchYouTube(url, redirect = 'follow') {
@@ -114,7 +131,7 @@ async function validateLiveCandidate(videoId, expectedChannelId) {
     if (!response.ok) return false;
     const html = await response.text();
     const owner = extractWatchOwner(html, videoId);
-    return owner === expectedChannelId && watchIsLiveNow(html);
+    return owner === expectedChannelId && watchLooksCurrentlyLive(html);
   } catch {
     return false;
   }
@@ -150,7 +167,7 @@ async function resolveChannel(handle) {
     const candidates = collectLiveCandidates(html);
     for (const videoId of candidates) {
       if (await validateLiveCandidate(videoId, expectedChannelId)) {
-        return { videoId, live: true, source: 'validated-live-now', channelId: expectedChannelId };
+        return { videoId, live: true, source: 'validated-current-live', channelId: expectedChannelId };
       }
     }
   }
