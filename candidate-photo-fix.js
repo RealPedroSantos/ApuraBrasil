@@ -115,7 +115,8 @@
       loadScriptOnce('/broadcast-tv-typography.js','data-broadcast-tv-typography');
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
       loadScriptOnce('/election-race-bar-tv.js','data-election-race-bar-tv');
-      window.__apuraBrasilBroadcastLoaderVersion='2.5.4';
+      loadScriptOnce('/election-race-candidate-only-guard.js','data-election-race-candidate-only-guard');
+      window.__apuraBrasilBroadcastLoaderVersion='2.5.5';
     }catch{}
   }
 
