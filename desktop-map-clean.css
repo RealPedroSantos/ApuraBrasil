@@ -1,0 +1,119 @@
+/* Desktop map cleanup — mirror the clean mobile map composition. */
+
+html:not(.mobile-ui) .geo-search-wrap,
+html:not(.mobile-ui) .map-intel-panel,
+html:not(.mobile-ui) #candidateHighlights,
+html:not(.mobile-ui) .candidate-highlights,
+html:not(.mobile-ui) .election-timeline{
+  display:none!important;
+}
+
+html:not(.mobile-ui),
+html:not(.mobile-ui) body,
+html:not(.mobile-ui) .app-shell,
+html:not(.mobile-ui) .main-grid,
+html:not(.mobile-ui) .map-panel,
+html:not(.mobile-ui) .map-stage,
+html:not(.mobile-ui) .map-stage.highlight-ready,
+html:not(.mobile-ui) .map-canvas,
+html:not(.mobile-ui) .map-canvas > *,
+html:not(.mobile-ui) .vector-map,
+html:not(.mobile-ui) .vector-map svg,
+html:not(.mobile-ui) .map-stage > .ab-drilldown-host,
+html:not(.mobile-ui) .map-stage > .ab-drilldown-host svg{
+  background:#ffffff!important;
+}
+
+html:not(.mobile-ui) .map-panel{
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  gap:6px!important;
+}
+
+html:not(.mobile-ui) .map-head{
+  min-width:0!important;
+  align-items:flex-end!important;
+}
+
+html:not(.mobile-ui) .map-head p,
+html:not(.mobile-ui) #mapSubtitle{
+  display:none!important;
+}
+
+html:not(.mobile-ui) .map-stage,
+html:not(.mobile-ui) .map-stage.highlight-ready{
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+
+html:not(.mobile-ui) .map-canvas,
+html:not(.mobile-ui) .map-stage.highlight-ready .map-canvas{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:hidden!important;
+}
+
+/* dashboard-map-v1.js renders the visible SVG in this host. Keep its drawing area
+   above the shared mediacard and center the geography exactly like the mobile app. */
+html:not(.mobile-ui) .map-stage > .ab-drilldown-host{
+  position:absolute!important;
+  z-index:2!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  bottom:112px!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+
+html:not(.mobile-ui) .map-stage > .ab-drilldown-host svg{
+  position:relative!important;
+  width:94%!important;
+  height:94%!important;
+  max-width:94%!important;
+  max-height:94%!important;
+  margin:auto!important;
+  display:block!important;
+  overflow:visible!important;
+}
+
+html:not(.mobile-ui) .ab-map-loading{
+  background:rgba(255,255,255,.86)!important;
+}
+
+html:not(.mobile-ui) .mobile-map-bottom-results{
+  z-index:20!important;
+}
+
+/* Wide desktop: use a little more of the available geography area without
+   allowing the SVG to touch the media card or the map edges. */
+@media(min-width:1400px){
+  html:not(.mobile-ui) .map-stage > .ab-drilldown-host svg{
+    width:96%!important;
+    height:96%!important;
+    max-width:96%!important;
+    max-height:96%!important;
+  }
+}
