@@ -14,7 +14,7 @@
 }
 
 .mobile-vote-breakdown{
-  display:none;
+  display:none!important;
 }
 
 @media(max-aspect-ratio:4/3){
@@ -23,43 +23,9 @@
   }
 }
 
-/* Preserve the original app-like mobile layout. The desktop metrics row stays hidden
-   on phones/tablets; white/null votes are rendered in a compact line in .total-state. */
+/* No app mobile os dados de brancos e nulos ficam nos dois cards finais da lista. */
 html.mobile-ui .summary-metrics.apura-vote-breakdown{
   display:none!important;
-}
-
-html.mobile-ui .mobile-vote-breakdown{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:7px;
-  max-width:100%;
-  font-size:8px;
-  line-height:1.1;
-  color:var(--muted,#6c7478);
-  white-space:nowrap;
-}
-
-html.mobile-ui .mobile-vote-breakdown span{
-  display:inline-flex;
-  align-items:baseline;
-  gap:3px;
-}
-
-html.mobile-ui .mobile-vote-breakdown b{
-  color:var(--text,#101518);
-  font-size:9px;
-  font-weight:900;
-}
-
-html.mobile-ui.mobile-portrait .mobile-vote-breakdown{
-  gap:5px;
-  font-size:7px;
-}
-
-html.mobile-ui.mobile-portrait .mobile-vote-breakdown b{
-  font-size:8px;
 }
 
 @media(min-width:701px) and (max-aspect-ratio:4/3){
