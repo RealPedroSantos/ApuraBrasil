@@ -4,11 +4,11 @@
   const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
   const UF_NAMES = {AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
   const cache = new Map();
-  const state = { house:'deputado-federal', uf:'BR', visible:40, generation:0 };
+  const state = { house:'deputado-federal', uf:'BR', visible:40, generation:0, lastCandidates:[], lastMembersTitle:'Eleitos oficialmente' };
 
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const norm = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
   const number = value => Number(value || 0) || 0;
 
@@ -29,16 +29,15 @@
   function scopeLabel(uf=state.uf) { return uf === 'BR' ? 'Brasil' : (UF_NAMES[uf] || uf); }
 
   async function fetchJson(url, force=false) {
-    const key = url;
-    if (!force && cache.has(key)) return cache.get(key);
+    if (!force && cache.has(url)) return cache.get(url);
     const promise = fetch(url, { cache: force ? 'no-store' : 'default', credentials:'same-origin' })
       .then(async response => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data?.error || `HTTP ${response.status}`);
         return data;
       })
-      .catch(error => { cache.delete(key); throw error; });
-    cache.set(key, promise);
+      .catch(error => { cache.delete(url); throw error; });
+    cache.set(url, promise);
     return promise;
   }
 
@@ -79,10 +78,10 @@
     return { office, uf, targets, results:valid, failures, candidates, finalCount, groupSeatTotal };
   }
 
-  async function loadCurrentSenators(force=false) {
+  async function loadCurrentSenators(uf, force=false) {
     const data = await fetchJson('/api/senators', force);
     const all = Array.isArray(data?.senators) ? data.senators : [];
-    return state.uf === 'BR' ? all : all.filter(s => String(s.uf).toUpperCase() === state.uf);
+    return uf === 'BR' ? all : all.filter(s => String(s.uf).toUpperCase() === uf);
   }
 
   function aggregateParties(candidates) {
@@ -94,11 +93,11 @@
     return [...map.entries()].map(([party,seats]) => ({party,seats})).sort((a,b)=>b.seats-a.seats || a.party.localeCompare(b.party,'pt-BR'));
   }
 
-  function titleFor(house) {
-    if (house === 'senador') return `Senado Federal • ${scopeLabel()}`;
-    if (house === 'congresso') return `Congresso Nacional • ${scopeLabel()}`;
-    if (house === 'deputado-estadual') return `Assembleia Legislativa • ${scopeLabel()}`;
-    return `Câmara dos Deputados • ${scopeLabel()}`;
+  function titleFor(house, uf=state.uf) {
+    if (house === 'senador') return `Senado Federal • ${scopeLabel(uf)}`;
+    if (house === 'congresso') return `Congresso Nacional • ${scopeLabel(uf)}`;
+    if (house === 'deputado-estadual') return `Assembleia Legislativa • ${scopeLabel(uf)}`;
+    return `Câmara dos Deputados • ${scopeLabel(uf)}`;
   }
 
   function officeName(office) {
@@ -127,14 +126,25 @@
     const photo = String(candidate.photoUrl || '').trim();
     const name = candidate.ballotName || candidate.name || 'Nome não informado';
     const meta = [candidate.party, uf, officeName(candidate._office)].filter(Boolean).join(' • ');
-    return `<article class="co-person"><div class="co-photo">${photo ? `<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove();this.parentElement.textContent='${esc(uf)}'">` : esc(uf)}</div><div class="co-person-main"><strong class="co-person-name">${esc(name)}</strong><span class="co-person-meta">${esc(meta)}</span><span class="co-person-status">ELEITO — STATUS OFICIAL TSE</span></div></article>`;
+    const img = photo ? `<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : esc(uf);
+    return `<article class="co-person"><div class="co-photo">${img}</div><div class="co-person-main"><strong class="co-person-name">${esc(name)}</strong><span class="co-person-meta">${esc(meta)}</span><span class="co-person-status">ELEITO — STATUS OFICIAL TSE</span></div></article>`;
   }
 
   function renderMembers(candidates, title='Eleitos oficialmente') {
+    state.lastCandidates = candidates;
+    state.lastMembersTitle = title;
     $('#membersTitle').textContent = title;
     const sorted = [...candidates].sort((a,b)=>String(a._uf).localeCompare(String(b._uf)) || number(b.votes)-number(a.votes) || String(a.ballotName||a.name).localeCompare(String(b.ballotName||b.name),'pt-BR'));
     const visible = sorted.slice(0,state.visible);
     $('#memberList').innerHTML = visible.length ? visible.map(candidateCard).join('') : '<div class="co-empty">Nenhum nome com status oficial de eleito foi retornado pelo TSE neste recorte.</div>';
+    $('#memberList').querySelectorAll('img').forEach(img => img.addEventListener('error', () => {
+      const box = img.parentElement;
+      const card = img.closest('.co-person');
+      const meta = card?.querySelector('.co-person-meta')?.textContent || '';
+      const uf = UFS.find(code => meta.includes(`• ${code}`) || meta.startsWith(`${code} •`)) || '';
+      img.remove();
+      if (box && !box.textContent.trim()) box.textContent = uf;
+    }, {once:true}));
     const more = $('#showMore');
     more.hidden = sorted.length <= visible.length;
     more.dataset.total = String(sorted.length);
@@ -153,16 +163,14 @@
 
   function updateScopeControl() {
     const select = $('#ufSelect');
-    if (!select.options.length) {
-      select.innerHTML = '<option value="BR">Brasil</option>' + UFS.map(uf => `<option value="${uf}">${esc(UF_NAMES[uf])}</option>`).join('');
-    }
+    if (!select.options.length) select.innerHTML = '<option value="BR">Brasil</option>' + UFS.map(uf => `<option value="${uf}">${esc(UF_NAMES[uf])}</option>`).join('');
     if (state.house === 'deputado-estadual' && state.uf === 'BR') state.uf = 'AC';
     select.value = state.uf;
     select.querySelector('option[value="BR"]').disabled = state.house === 'deputado-estadual';
   }
 
-  function updateHeading(subtitle) {
-    $('#compositionTitle').textContent = titleFor(state.house);
+  function updateHeading(subtitle, house=state.house, uf=state.uf) {
+    $('#compositionTitle').textContent = titleFor(house,uf);
     $('#compositionSubtitle').textContent = subtitle;
   }
 
@@ -175,13 +183,13 @@
     $('#integrityText').textContent = `${loaded}/${requested} recortes oficiais carregados${finals ? ` • ${finals} marcados como finais pelo TSE` : ''}${failed ? ` • ${failed} indisponíveis` : ''}.`;
   }
 
-  async function renderChamber(force) {
-    const data = await loadOffice('deputado-federal', state.uf, force);
-    const expected = state.uf === 'BR' ? 513 : (data.groupSeatTotal || null);
-    const confirmed = data.candidates.length;
-    updateHeading('Somente candidatos com status oficial de eleito retornado pelo TSE. Nenhuma cadeira é inferida por percentual de votos.');
+  async function renderChamber(force, generation, uf) {
+    const data = await loadOffice('deputado-federal', uf, force);
+    if (generation !== state.generation) return;
+    const expected = uf === 'BR' ? 513 : (data.groupSeatTotal || null);
+    updateHeading('Somente candidatos com status oficial de eleito retornado pelo TSE. Nenhuma cadeira é inferida por percentual de votos.','deputado-federal',uf);
     renderMetrics([
-      {label:'Eleitos confirmados',value:confirmed,note:'status oficial TSE'},
+      {label:'Eleitos confirmados',value:data.candidates.length,note:'status oficial TSE'},
       {label:'Total da casa/recorte',value:expected || '—',note:expected ? 'referência oficial/resultados' : 'aguardando total oficial'},
       {label:'UFs carregadas',value:`${data.results.length}/${data.targets.length}`,note:`${data.finalCount} resultados finais`}
     ]);
@@ -189,48 +197,45 @@
     renderMembers(data.candidates,'Deputados federais eleitos oficialmente');
     renderCurrentSenators([]);
     renderLoadIntegrity([data]);
-    return data;
   }
 
-  async function renderSenate(force) {
-    const [data,current] = await Promise.all([loadOffice('senador', state.uf, force), loadCurrentSenators(force)]);
-    const expected = expectedSeats('senador',state.uf);
-    updateHeading('A eleição de 2026 renova 2/3 do Senado. Abaixo, os vencedores só aparecem quando o TSE os marca oficialmente como eleitos; os senadores em exercício são consultados separadamente no Senado Federal.');
+  async function renderSenate(force, generation, uf) {
+    const [data,current] = await Promise.all([loadOffice('senador', uf, force), loadCurrentSenators(uf, force)]);
+    if (generation !== state.generation) return;
+    const expected = expectedSeats('senador',uf);
+    updateHeading('A eleição de 2026 renova 2/3 do Senado. Os vencedores só aparecem quando o TSE os marca oficialmente como eleitos; os senadores em exercício são consultados separadamente no Senado Federal.','senador',uf);
     renderMetrics([
       {label:'Eleitos em 2026',value:data.candidates.length,note:'status oficial TSE'},
-      {label:'Vagas de 2026',value:expected,note:state.uf==='BR'?'54 vagas em disputa':'2 vagas no estado'},
+      {label:'Vagas de 2026',value:expected,note:uf==='BR'?'54 vagas em disputa':'2 vagas no estado'},
       {label:'Em exercício hoje',value:current.length,note:'Dados Abertos do Senado'}
     ]);
     renderParties(data.candidates,'Partidos dos eleitos em 2026');
     renderMembers(data.candidates,'Senadores eleitos oficialmente em 2026');
     renderCurrentSenators(current);
     renderLoadIntegrity([data]);
-    return data;
   }
 
-  async function renderCongress(force) {
-    const [chamber,senate] = await Promise.all([
-      loadOffice('deputado-federal',state.uf,force),
-      loadOffice('senador',state.uf,force)
-    ]);
+  async function renderCongress(force, generation, uf) {
+    const [chamber,senate] = await Promise.all([loadOffice('deputado-federal',uf,force),loadOffice('senador',uf,force)]);
+    if (generation !== state.generation) return;
     const combined = [...chamber.candidates,...senate.candidates];
-    updateHeading('Visão conjunta apenas dos eleitos oficialmente confirmados em 2026. Câmara e Senado continuam sendo casas distintas; não calculamos uma “maioria do Congresso” combinando as duas.');
+    updateHeading('Visão conjunta apenas dos eleitos oficialmente confirmados em 2026. Câmara e Senado continuam sendo casas distintas; não calculamos uma “maioria do Congresso” combinando as duas.','congresso',uf);
     renderMetrics([
-      {label:'Deputados eleitos',value:chamber.candidates.length,note:state.uf==='BR'?'de 513 cadeiras da Câmara':'no recorte selecionado'},
-      {label:'Senadores eleitos',value:senate.candidates.length,note:state.uf==='BR'?'de 54 vagas em 2026':'de 2 vagas no estado'},
+      {label:'Deputados eleitos',value:chamber.candidates.length,note:uf==='BR'?'de 513 cadeiras da Câmara':'no recorte selecionado'},
+      {label:'Senadores eleitos',value:senate.candidates.length,note:uf==='BR'?'de 54 vagas em 2026':'de 2 vagas no estado'},
       {label:'Confirmados no recorte',value:combined.length,note:'soma descritiva, não maioria'}
     ]);
     renderParties(combined,'Partidos entre os eleitos confirmados em 2026');
     renderMembers(combined,'Eleitos oficialmente em 2026');
     renderCurrentSenators([]);
     renderLoadIntegrity([chamber,senate]);
-    return {chamber,senate};
   }
 
-  async function renderAssembly(force) {
-    const data = await loadOffice('deputado-estadual',state.uf,force);
+  async function renderAssembly(force, generation, uf) {
+    const data = await loadOffice('deputado-estadual',uf,force);
+    if (generation !== state.generation) return;
     const total = data.groupSeatTotal || null;
-    updateHeading('Assembleia do estado selecionado. A lista considera somente candidatos com status oficial de eleito retornado pelo TSE.');
+    updateHeading('Assembleia do estado selecionado. A lista considera somente candidatos com status oficial de eleito retornado pelo TSE.','deputado-estadual',uf);
     renderMetrics([
       {label:'Eleitos confirmados',value:data.candidates.length,note:'status oficial TSE'},
       {label:'Cadeiras no resultado',value:total || '—',note:total?'total reportado nos grupos do TSE':'sem total consolidado'},
@@ -240,25 +245,25 @@
     renderMembers(data.candidates,'Deputados estaduais/distritais eleitos');
     renderCurrentSenators([]);
     renderLoadIntegrity([data]);
-    return data;
   }
 
-  async function render(force=false) {
+  async function render(force=false, resetVisible=true) {
     const generation = ++state.generation;
-    state.visible = 40;
+    const house = state.house;
+    const uf = state.uf;
+    if (resetVisible) state.visible = 40;
+    state.lastCandidates = [];
     updateScopeControl();
     setStatus('Consultando os dados oficiais…','loading');
     $('#memberList').innerHTML = '<div class="co-empty">Carregando resultados oficiais…</div>';
     $('#partyList').innerHTML = '<div class="co-empty">Carregando composição…</div>';
     $('#currentSenateSection').hidden = true;
     try {
-      if (force) {
-        [...cache.keys()].forEach(key => { if (key.startsWith('/api/results') || key === '/api/senators') cache.delete(key); });
-      }
-      if (state.house === 'senador') await renderSenate(force);
-      else if (state.house === 'congresso') await renderCongress(force);
-      else if (state.house === 'deputado-estadual') await renderAssembly(force);
-      else await renderChamber(force);
+      if (force) [...cache.keys()].forEach(key => { if (key.startsWith('/api/results') || key === '/api/senators') cache.delete(key); });
+      if (house === 'senador') await renderSenate(force,generation,uf);
+      else if (house === 'congresso') await renderCongress(force,generation,uf);
+      else if (house === 'deputado-estadual') await renderAssembly(force,generation,uf);
+      else await renderChamber(force,generation,uf);
       if (generation !== state.generation) return;
       setStatus(`Atualizado com fontes oficiais • ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
     } catch (error) {
@@ -276,19 +281,22 @@
       state.house = button.dataset.house;
       $$('.co-tab').forEach(item => item.classList.toggle('active', item === button));
       updateScopeControl();
-      render(false);
+      render(false,true);
     }));
-    $('#ufSelect').addEventListener('change', event => { state.uf = event.target.value; render(false); });
-    $('#refreshComposition').addEventListener('click', () => render(true));
-    $('#showMore').addEventListener('click', () => { state.visible += 40; render(false); });
+    $('#ufSelect').addEventListener('change', event => { state.uf = event.target.value; render(false,true); });
+    $('#refreshComposition').addEventListener('click', () => render(true,true));
+    $('#showMore').addEventListener('click', () => {
+      state.visible += 40;
+      renderMembers(state.lastCandidates,state.lastMembersTitle);
+    });
     $('#moreButton').addEventListener('click', () => { const sheet=$('#moreSheet'); sheet.hidden=!sheet.hidden; });
-    $('#sheetRefresh').addEventListener('click', () => { $('#moreSheet').hidden=true; render(true); });
+    $('#sheetRefresh').addEventListener('click', () => { $('#moreSheet').hidden=true; render(true,true); });
   }
 
   function init() {
     updateScopeControl();
     bindControls();
-    render(false);
+    render(false,true);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
