@@ -2,27 +2,27 @@
   'use strict';
 
   if (window.__apuraBrasilBroadcastTvTypographyInstalled) return;
+
   function isBroadcastEmbed(){
     try{return window.parent!==window&&window.parent.location.pathname.startsWith('/ao-vivo')}catch{return false}
   }
+
   if(!isBroadcastEmbed()) return;
   window.__apuraBrasilBroadcastTvTypographyInstalled=true;
 
   function removeDuplicateBroadcastHeader(){
     try{
       const parentDoc=window.parent.document;
-      parentDoc.querySelector('.studio-head')?.remove();
+      parentDoc.querySelectorAll('.studio-head,.broadcast-office-switch').forEach(node=>node.remove());
       const frame=parentDoc.querySelector('.broadcast-frame');
-      if(frame){
-        frame.style.setProperty('grid-template-rows','minmax(0,1fr) 33.333333%','important');
-      }
+      if(frame) frame.style.setProperty('grid-template-rows','minmax(0,1fr) 33.333333%','important');
     }catch{}
   }
 
   function restoreNativeSiteHeader(){
     const shell=document.querySelector('.app-shell');
     if(shell){
-      shell.style.setProperty('grid-template-rows','auto minmax(0,1fr)','important');
+      shell.style.setProperty('grid-template-rows','auto minmax(0,1fr) auto','important');
       shell.style.setProperty('padding','0','important');
       shell.style.setProperty('gap','0','important');
     }
@@ -36,6 +36,13 @@
       topbar.style.setProperty('z-index','30','important');
     }
 
+    const officeNav=document.querySelector('.office-nav');
+    if(officeNav){
+      officeNav.style.setProperty('display','flex','important');
+      officeNav.style.setProperty('visibility','visible','important');
+      officeNav.style.setProperty('opacity','1','important');
+    }
+
     const roundSelector=document.querySelector('.round-selector');
     if(roundSelector){
       roundSelector.style.setProperty('display','flex','important');
@@ -45,6 +52,8 @@
 
     const main=document.querySelector('.main-grid');
     if(main){
+      main.style.setProperty('height','auto','important');
+      main.style.setProperty('min-height','0','important');
       main.style.setProperty('padding','7px','important');
     }
 
@@ -52,18 +61,35 @@
     document.querySelector('.mobile-app-nav')?.style.setProperty('display','none','important');
   }
 
-  function relocateSummaryMetrics(){
-    const mediaCard=document.querySelector('.broadcast-candidates-column .mobile-map-bottom-results');
-    if(!mediaCard)return false;
+  function ensureSummaryStrip(){
+    const shell=document.querySelector('.app-shell');
+    const main=document.querySelector('.main-grid');
+    if(!shell||!main) return null;
 
-    const source=[...document.querySelectorAll('.summary-metrics')].find(node=>!node.closest('.broadcast-candidates-column'));
-    const current=mediaCard.querySelector('.broadcast-summary-metrics');
+    let strip=shell.querySelector(':scope > .broadcast-summary-strip');
+    if(!strip){
+      strip=document.createElement('section');
+      strip.className='broadcast-summary-strip';
+      strip.setAttribute('aria-label','Resumo da votação');
+      main.insertAdjacentElement('afterend',strip);
+    }else if(strip.previousElementSibling!==main){
+      main.insertAdjacentElement('afterend',strip);
+    }
+    return strip;
+  }
+
+  function relocateSummaryMetrics(){
+    const strip=ensureSummaryStrip();
+    if(!strip) return false;
+
+    const current=strip.querySelector('.summary-metrics');
+    const source=[...document.querySelectorAll('.summary-metrics')].find(node=>!node.closest('.broadcast-summary-strip'));
 
     if(source){
-      if(current&&current!==source)current.remove();
+      if(current&&current!==source) current.remove();
       source.classList.add('broadcast-summary-metrics');
-      source.setAttribute('aria-label','Comparecimento, abstenções e votos');
-      mediaCard.appendChild(source);
+      source.setAttribute('aria-label','Comparecimento, abstenções, válidos, brancos e nulos');
+      strip.replaceChildren(source);
       return true;
     }
 
@@ -87,80 +113,109 @@
     html.broadcast-tv-readable .section-counter span,
     html.broadcast-tv-readable .section-counter small{
       font-size:clamp(12px,.82vw,15px)!important;
-      line-height:1.15!important;font-weight:800!important;letter-spacing:.015em!important
+      line-height:1.15!important;
+      font-weight:800!important;
+      letter-spacing:.015em!important
     }
 
-    /* A coluna esquerda vira uma pilha: cabeçalho, media cards e métricas. */
-    html.broadcast-tv-readable .broadcast-candidates-column .mobile-map-bottom-results{
-      grid-template-rows:auto auto auto minmax(0,1fr)!important;
-      align-content:start!important;
-    }
-    html.broadcast-tv-readable .broadcast-candidates-column .mobile-map-candidate-strip{
-      height:auto!important;
-      min-height:0!important;
-      max-height:44vh!important;
-      flex:0 0 auto!important;
-      overflow-y:auto!important;
-    }
-
-    /* Comparecimento / Abstenções / Válidos / Brancos / Nulos — agora abaixo dos Media Cards. */
-    html.broadcast-tv-readable .broadcast-summary-metrics{
+    /* Faixa horizontal entre a apuração e os canais, conforme a referência do usuário. */
+    html.broadcast-tv-readable .broadcast-summary-strip{
+      position:relative!important;
+      z-index:25!important;
       width:100%!important;
-      display:grid!important;
-      grid-template-columns:repeat(2,minmax(0,1fr))!important;
-      gap:7px!important;
-      margin:2px 0 0!important;
-      padding:9px 2px 1px!important;
-      border-top:1px solid #d9dfe1!important;
-      align-items:stretch!important;
-    }
-    html.broadcast-tv-readable .broadcast-summary-metrics .summary-metric{
       min-width:0!important;
-      min-height:58px!important;
-      padding:8px 10px!important;
-      border:1px solid #d8dddf!important;
-      border-radius:10px!important;
+      height:clamp(54px,4.4vw,68px)!important;
+      min-height:54px!important;
+      max-height:68px!important;
+      padding:0 8px!important;
+      margin:0!important;
       background:#fff!important;
-      display:flex!important;
-      flex-direction:column!important;
-      justify-content:center!important;
+      border-top:2px solid #c6ced1!important;
+      border-bottom:1px solid #dfe4e6!important;
+      box-shadow:0 -1px 0 rgba(7,21,34,.04),0 2px 5px rgba(7,21,34,.05)!important;
+      overflow:hidden!important;
     }
-    html.broadcast-tv-readable .broadcast-summary-metrics .summary-metric span{
-      display:block!important;
-      font-size:clamp(14px,1vw,18px)!important;
-      line-height:1.05!important;
-      font-weight:850!important;
-      letter-spacing:.005em!important;
-      color:#4d5b61!important;
-      white-space:normal!important;
-      overflow:visible!important;
-      text-overflow:clip!important;
+
+    html.broadcast-tv-readable .broadcast-summary-strip .broadcast-summary-metrics{
+      width:100%!important;
+      height:100%!important;
+      display:grid!important;
+      grid-template-columns:repeat(5,minmax(0,1fr))!important;
+      gap:0!important;
+      margin:0!important;
+      padding:0!important;
+      align-items:stretch!important;
+      background:transparent!important;
     }
-    html.broadcast-tv-readable .broadcast-summary-metrics .summary-metric b{
+
+    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric{
+      position:relative!important;
+      min-width:0!important;
+      min-height:0!important;
+      padding:6px clamp(10px,1.15vw,20px)!important;
+      margin:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:transparent!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
+      grid-template-rows:auto auto!important;
+      column-gap:10px!important;
+      align-content:center!important;
+      align-items:end!important;
+    }
+
+    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric:not(:last-child)::after{
+      content:'';
+      position:absolute;
+      top:18%;
+      right:0;
+      bottom:18%;
+      width:1px;
+      background:#d9dfe1;
+    }
+
+    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric span{
+      grid-column:1/-1!important;
       display:block!important;
-      margin-top:4px!important;
-      font-size:clamp(21px,1.55vw,29px)!important;
-      line-height:.95!important;
+      font-size:clamp(13px,.9vw,17px)!important;
+      line-height:1!important;
+      font-weight:900!important;
+      letter-spacing:.01em!important;
+      color:#506066!important;
+      white-space:nowrap!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+    }
+
+    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric b{
+      grid-column:1!important;
+      display:block!important;
+      margin-top:3px!important;
+      font-size:clamp(20px,1.42vw,28px)!important;
+      line-height:.92!important;
       font-weight:950!important;
       color:#11191c!important;
       font-variant-numeric:tabular-nums!important;
       white-space:nowrap!important;
-      overflow:visible!important;
-      text-overflow:clip!important;
     }
-    html.broadcast-tv-readable .broadcast-summary-metrics .summary-metric.vote-breakdown-metric small{
+
+    html.broadcast-tv-readable .broadcast-summary-strip .summary-metric small{
+      grid-column:2!important;
+      align-self:end!important;
       display:block!important;
-      margin-top:4px!important;
-      font-size:clamp(13px,.9vw,17px)!important;
+      margin:0 0 1px!important;
+      font-size:clamp(12px,.82vw,16px)!important;
       line-height:1!important;
       font-weight:900!important;
       color:#59666b!important;
       font-variant-numeric:tabular-nums!important;
+      white-space:nowrap!important;
     }
 
-    /* Regra de segurança: se uma atualização recriar as métricas à direita, elas ficam ocultas
-       até o observador movê-las novamente para a coluna esquerda. */
-    html.broadcast-tv-readable .results-panel .summary-metrics{
+    /* Enquanto uma atualização recria o resumo na direita, ele fica oculto até ser movido para a faixa. */
+    html.broadcast-tv-readable .results-panel .summary-metrics,
+    html.broadcast-tv-readable .broadcast-candidates-column .summary-metrics{
       display:none!important;
     }
 
@@ -189,9 +244,11 @@
     html.broadcast-tv-readable .mobile-map-candidate-body{min-width:0!important}
 
     @media(max-width:1200px){
-      html.broadcast-tv-readable .broadcast-summary-metrics .summary-metric span{font-size:14px!important}
-      html.broadcast-tv-readable .broadcast-summary-metrics .summary-metric b{font-size:20px!important}
-      html.broadcast-tv-readable .broadcast-summary-metrics .summary-metric.vote-breakdown-metric small{font-size:13px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip{height:54px!important;min-height:54px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric{padding:5px 8px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric span{font-size:12px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric b{font-size:18px!important}
+      html.broadcast-tv-readable .broadcast-summary-strip .summary-metric small{font-size:11px!important}
     }
   `;
   document.head.appendChild(style);
