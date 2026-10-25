@@ -9,36 +9,70 @@
     results:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9M12 19V5M19 19v-7"/><path d="M3 19h18"/></svg>',
     places:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
     zones:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h16"/><path d="M7 3v4M12 10v4M17 17v4"/></svg>',
-    composition:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 16h12M8 13h8M10 10h4"/><circle cx="6" cy="7" r="1.5"/><circle cx="10" cy="5" r="1.5"/><circle cx="14" cy="5" r="1.5"/><circle cx="18" cy="7" r="1.5"/></svg>'
+    more:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
   };
 
-  function href(view) {
-    if (view === 'composition') return '/composicao';
+  function mainHref(view) {
     return `/?mobileView=${encodeURIComponent(view)}`;
+  }
+
+  function closeSheet() {
+    root.classList.remove('composition-more-open');
+    syncMore();
+  }
+
+  function syncMore() {
+    const open = root.classList.contains('composition-more-open');
+    document.querySelector('.composition-bottom-nav [data-target="more"]')?.classList.toggle('is-active', true);
+    const sheet = document.querySelector('.composition-more-sheet');
+    if (sheet) sheet.hidden = !open || !isMobile();
   }
 
   function ensure() {
     if (!document.querySelector('.projection-app') || document.querySelector('.composition-bottom-nav')) return;
+
     const nav = document.createElement('nav');
     nav.className = 'composition-bottom-nav';
-    nav.setAttribute('aria-label', 'Navegação principal');
-    const entries = [
-      ['map','Mapa'],
-      ['results','Resultados'],
-      ['places','Localidades'],
-      ['zones','Seções'],
-      ['composition','Composição']
-    ];
-    nav.innerHTML = entries.map(([view,label]) => `<a href="${href(view)}" class="${view === 'composition' ? 'is-active' : ''}" ${view === 'composition' ? 'aria-current="page"' : ''}>${icons[view]}<span>${label}</span></a>`).join('');
-    document.body.appendChild(nav);
+    nav.setAttribute('aria-label', 'Menu principal');
+    nav.innerHTML = [
+      ['map','Mapa'],['results','Resultados'],['places','Localidades'],['zones','Seções']
+    ].map(([view,label]) => `<a href="${mainHref(view)}" data-target="${view}">${icons[view]}<span>${label}</span></a>`).join('') +
+      `<button type="button" data-target="more" class="is-active" aria-current="page" aria-label="Mais">${icons.more}<span>Mais</span></button>`;
+
+    const sheet = document.createElement('section');
+    sheet.className = 'composition-more-sheet';
+    sheet.setAttribute('aria-label', 'Mais opções');
+    sheet.hidden = true;
+    sheet.innerHTML = '<strong>Composição</strong><button type="button" data-action="refresh">Atualizar projeção</button><a href="/?mobileView=map">Voltar à apuração</a>';
+
+    nav.addEventListener('click', event => {
+      const more = event.target.closest('[data-target="more"]');
+      if (!more) return;
+      root.classList.toggle('composition-more-open');
+      syncMore();
+    });
+
+    sheet.addEventListener('click', event => {
+      const action = event.target.closest('[data-action]')?.dataset.action;
+      if (action === 'refresh') {
+        document.getElementById('refreshProjection')?.click();
+        closeSheet();
+      }
+    });
+
+    document.body.append(sheet, nav);
     sync();
   }
 
   function sync() {
+    const mobile = isMobile();
     const nav = document.querySelector('.composition-bottom-nav');
+    const sheet = document.querySelector('.composition-more-sheet');
     if (!nav) return;
-    nav.hidden = !isMobile();
-    document.body.classList.toggle('has-composition-bottom-nav', isMobile());
+    nav.hidden = !mobile;
+    if (!mobile) root.classList.remove('composition-more-open');
+    if (sheet) sheet.hidden = !mobile || !root.classList.contains('composition-more-open');
+    document.body.classList.toggle('has-composition-bottom-nav', mobile);
   }
 
   function init() {
