@@ -10,7 +10,7 @@
     *{box-sizing:border-box}
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050a0e;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
     body{display:grid;place-items:center}
-    .broadcast-frame{position:relative;width:min(100vw,177.7777778vh);height:min(100vh,56.25vw);aspect-ratio:16/9;display:grid;grid-template-rows:48px minmax(0,1fr) 25.5%;overflow:hidden;background:var(--ink);box-shadow:0 20px 80px rgba(0,0,0,.38)}
+    .broadcast-frame{position:relative;width:min(100vw,177.7777778vh);height:min(100vh,56.25vw);aspect-ratio:16/9;display:grid;grid-template-rows:48px minmax(0,1fr) 33.333333%;overflow:hidden;background:var(--ink);box-shadow:0 20px 80px rgba(0,0,0,.38)}
     .studio-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:16px;padding:5px 13px;background:#071522;color:#fff;border-bottom:1px solid var(--line);z-index:3}
     .brand{display:flex;align-items:center;gap:10px;min-width:0}
     .brand img{display:block;width:auto;height:31px;max-width:170px;object-fit:contain;filter:brightness(0) invert(1)}
@@ -26,14 +26,14 @@
     .election-stage{position:relative;min-width:0;min-height:0;background:var(--paper);overflow:hidden}
     #electionFrame{display:block;width:100%;height:100%;border:0;background:var(--paper)}
     .streams-grid{min-width:0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#000;border-top:1px solid rgba(255,255,255,.2)}
-    .stream-card{position:relative;min-width:0;min-height:0;overflow:hidden;background:#000;border-right:1px solid rgba(255,255,255,.18)}
-    .stream-card:last-child{border-right:0}
-    .stream-card iframe{position:absolute;top:50%;left:50%;display:block;width:100%;height:100%;transform:translate(-50%,-50%);border:0;background:#000;pointer-events:none}
+    .stream-card{position:relative;min-width:0;min-height:0;overflow:hidden;background:#000;box-shadow:inset -1px 0 rgba(255,255,255,.18)}
+    .stream-card:last-child{box-shadow:none}
+    .stream-card iframe{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000;pointer-events:none}
     .stream-hit{position:absolute;z-index:3;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;background:transparent;color:transparent;appearance:none;cursor:default;outline:0}
     .stream-hit:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:-3px}
     .stream-card.offline iframe{visibility:hidden}
     @media(max-width:900px){
-      .broadcast-frame{grid-template-rows:40px minmax(0,1fr) 27%}
+      .broadcast-frame{grid-template-rows:40px minmax(0,1fr) 33.333333%}
       .studio-head{gap:7px;padding:4px 7px}
       .brand img{height:26px;max-width:116px}.brand-divider{display:none}.studio-title small{display:none}
       .round-switch button{padding:5px 7px;font-size:9px}.live-state{font-size:9px}.clock{display:none}
@@ -86,25 +86,6 @@
       const clock = document.getElementById('studioClock');
       const streamCards = [...document.querySelectorAll('.stream-card[data-channel]')];
       let audibleChannel = null;
-
-      function fitStreamFrames(){
-        const targetRatio = 16 / 9;
-        streamCards.forEach(card => {
-          const iframe = card.querySelector('iframe');
-          const width = card.clientWidth;
-          const height = card.clientHeight;
-          if (!width || !height) return;
-          if (width / height > targetRatio) {
-            const frameWidth = width + 4;
-            iframe.style.width = `${frameWidth}px`;
-            iframe.style.height = `${frameWidth / targetRatio}px`;
-          } else {
-            const frameHeight = height + 4;
-            iframe.style.height = `${frameHeight}px`;
-            iframe.style.width = `${frameHeight * targetRatio}px`;
-          }
-        });
-      }
 
       function readRound(){
         const value = Number(localStorage.getItem(ROUND_KEY));
@@ -222,7 +203,6 @@
           muteAllExcept(audibleChannel);
         });
         iframe.addEventListener('load', () => {
-          fitStreamFrames();
           playerCommand(iframe, 'mute');
           playerCommand(iframe, 'playVideo');
           if (audibleChannel === card.dataset.channel) {
@@ -257,7 +237,6 @@
       }
 
       function refreshStreams(){
-        fitStreamFrames();
         streamCards.forEach(resolveStream);
       }
 
@@ -265,14 +244,12 @@
         clock.textContent = new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
       }
 
-      window.addEventListener('resize', fitStreamFrames, { passive: true });
       syncRound();
-      fitStreamFrames();
       refreshStreams();
       updateClock();
       setInterval(updateClock,1000);
       setInterval(mirrorFeedState,2500);
-      setInterval(refreshStreams,45000);
+      setInterval(refreshStreams,20000);
     })();
   </script>
 </body>
