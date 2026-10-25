@@ -86,6 +86,10 @@
         max-height:54px!important;
       }
 
+      html.broadcast-tv-readable .broadcast-candidates-column .mobile-map-bottom-results:has(> .ab-broadcast-media-fallback) .mobile-map-candidate-strip .mobile-map-candidate:nth-child(n+3){
+        display:none!important;
+      }
+
       @media(max-width:1100px){
         html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race{
           --ab-race-height:clamp(92px,10.4167vw,118px);
@@ -106,7 +110,7 @@
       loadScriptOnce('/broadcast-tv-typography.js','data-broadcast-tv-typography');
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
       loadScriptOnce('/election-race-bar-tv.js','data-election-race-bar-tv');
-      window.__apuraBrasilBroadcastLoaderVersion='2.5.2';
+      window.__apuraBrasilBroadcastLoaderVersion='2.5.3';
     }catch{}
   }
 
