@@ -5,7 +5,8 @@
 
   const root=document.documentElement;
   const views=new Set(['map','results','places','zones']);
-  let activeView='map';
+  const requestedView=new URLSearchParams(location.search).get('mobileView');
+  let activeView=views.has(requestedView)?requestedView:'map';
   let raf=0;
   let peekRaf=0;
 
@@ -18,11 +19,8 @@
     more:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
   };
 
-  function ensureWordmark(){
-    const brand=document.querySelector('.brand');
-    if(!brand||brand.querySelector('.mobile-wordmark-v4'))return;
-    const mark=document.createElement('span');mark.className='mobile-wordmark-v4';mark.textContent='ApuraBrasil';
-    brand.appendChild(mark);
+  function removeSyntheticWordmark(){
+    document.querySelectorAll('.mobile-wordmark-v4').forEach(node=>node.remove());
   }
 
   function activateTab(name){
@@ -133,12 +131,14 @@
     root.classList.toggle('mobile-portrait',mobile&&innerHeight>=innerWidth);
     root.classList.toggle('mobile-landscape',mobile&&innerHeight<innerWidth);
     root.dataset.uiMode=mobile?'mobile':'desktop';
-    if(mobile){root.dataset.mobileView=activeView;ensureWordmark();ensureNav();ensureMoreSheet();ensurePeek();syncNav();updatePeek();}
+    removeSyntheticWordmark();
+    if(mobile){root.dataset.mobileView=activeView;ensureNav();ensureMoreSheet();ensurePeek();syncNav();updatePeek();}
     else{root.classList.remove('mobile-more-open','mobile-history-open-v4');delete root.dataset.mobileView;}
   }
 
   function init(){
     apply();bindPeekUpdates();
+    if(views.has(requestedView))requestAnimationFrame(()=>setView(requestedView,false));
     document.addEventListener('click',event=>{
       if(!root.classList.contains('mobile-app-v4'))return;
       const tab=event.target.closest('.detail-tab[data-tab]');if(!tab)return;
