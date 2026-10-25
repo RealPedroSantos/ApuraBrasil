@@ -1,0 +1,302 @@
+/* Dynamic mobile map media-card carousel. Loaded after legacy mobile map styles. */
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-bottom-results.mobile-map-carousel-ready{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  gap:5px!important;
+  padding:7px!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-bottom-results.mobile-map-carousel-ready .mobile-map-count{
+  grid-column:1!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:0 3px 5px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-strip{
+  grid-column:1!important;
+  width:100%!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:calc((100% - 7px) / 2)!important;
+  gap:7px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scroll-snap-type:x mandatory!important;
+  scroll-padding-inline:0!important;
+  overscroll-behavior-x:contain!important;
+  touch-action:pan-x!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:none!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-strip::-webkit-scrollbar{
+  display:none!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-strip .mobile-map-carousel-card{
+  scroll-snap-align:start!important;
+  scroll-snap-stop:normal!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate.mobile-map-carousel-card{
+  position:relative!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  min-height:78px!important;
+  display:grid!important;
+  grid-template-columns:36px minmax(0,1fr)!important;
+  grid-template-rows:minmax(36px,1fr) auto!important;
+  column-gap:6px!important;
+  row-gap:4px!important;
+  align-items:center!important;
+  padding:6px!important;
+  border:1px solid #d5dadd!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate.mobile-map-carousel-card.is-elected{
+  border-color:#20a75d!important;
+  box-shadow:inset 0 0 0 1px rgba(32,167,93,.12)!important;
+  background:linear-gradient(180deg,rgba(32,167,93,.045),#fff 42%)!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-elected-badge{
+  position:absolute!important;
+  z-index:3!important;
+  top:5px!important;
+  right:5px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  height:15px!important;
+  padding:0 5px!important;
+  border-radius:999px!important;
+  background:#20a75d!important;
+  color:#fff!important;
+  font-size:6px!important;
+  line-height:1!important;
+  letter-spacing:.06em!important;
+  font-weight:950!important;
+  white-space:nowrap!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-carousel-card.is-elected .mobile-map-candidate-body{
+  padding-right:31px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-photo{
+  grid-column:1!important;
+  grid-row:1!important;
+  position:relative!important;
+  width:36px!important;
+  height:36px!important;
+  align-self:center!important;
+  justify-self:start!important;
+  border:3px solid var(--candidate-color,#64748b)!important;
+  border-radius:999px!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-body{
+  grid-column:2!important;
+  grid-row:1!important;
+  min-width:0!important;
+  width:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  gap:3px!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-name{
+  position:static!important;
+  grid-column:auto!important;
+  grid-row:auto!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+  overflow-wrap:anywhere!important;
+  text-overflow:ellipsis!important;
+  font-size:8.5px!important;
+  line-height:1.02!important;
+  font-weight:950!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-meta{
+  position:static!important;
+  grid-column:auto!important;
+  grid-row:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:3px!important;
+  overflow:hidden!important;
+  white-space:nowrap!important;
+  font-size:6.4px!important;
+  line-height:1!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-party{
+  min-height:14px!important;
+  padding:2px 4px!important;
+  font-size:6.5px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-bottom{
+  grid-column:1/-1!important;
+  grid-row:2!important;
+  width:100%!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:end!important;
+  gap:5px!important;
+  padding-top:3px!important;
+  border-top:1px solid #eef0f0!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-votes{
+  position:static!important;
+  grid-column:1!important;
+  grid-row:1!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:6.8px!important;
+  line-height:1!important;
+  font-weight:850!important;
+  color:#58676c!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-percent{
+  position:static!important;
+  grid-column:2!important;
+  grid-row:1!important;
+  transform:none!important;
+  width:auto!important;
+  max-width:none!important;
+  min-width:58px!important;
+  padding:0!important;
+  margin:0!important;
+  justify-self:end!important;
+  align-self:end!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+  text-align:right!important;
+  font-size:17px!important;
+  line-height:.9!important;
+  letter-spacing:-.045em!important;
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums!important;
+  color:#101719!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-swipe-hint{
+  grid-column:1!important;
+  min-height:12px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:4px!important;
+  padding:0 3px!important;
+  color:#718087!important;
+  font-size:6.4px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  pointer-events:none!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-swipe-hint b{
+  font-size:12px!important;
+  line-height:.7!important;
+  color:#174c57!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-office-prompt{
+  grid-column:1!important;
+  min-height:72px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px!important;
+  text-align:center!important;
+  padding:8px!important;
+  border:1px solid #e0e4e5!important;
+  border-radius:10px!important;
+  background:#fff!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-office-prompt strong{
+  font-size:11px!important;
+  line-height:1.1!important;
+  color:#101719!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-office-prompt span{
+  font-size:8px!important;
+  line-height:1.25!important;
+  color:#68777d!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drilldown-host{
+  bottom:154px!important;
+}
+
+@media(max-width:390px){
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-strip{
+    grid-auto-columns:calc((100% - 5px) / 2)!important;
+    gap:5px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate.mobile-map-carousel-card{
+    grid-template-columns:31px minmax(0,1fr)!important;
+    column-gap:4px!important;
+    min-height:76px!important;
+    padding:5px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-photo{
+    width:31px!important;
+    height:31px!important;
+    border-width:2px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-name{
+    font-size:7.7px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-percent{
+    min-width:51px!important;
+    font-size:15px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .mobile-map-candidate-votes{
+    font-size:6.2px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage > .ab-drilldown-host{
+    bottom:156px!important;
+  }
+}
