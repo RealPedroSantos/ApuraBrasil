@@ -42,4 +42,18 @@
     attributes: true,
     attributeFilter: ['src']
   });
+
+  function loadBroadcastControls() {
+    try {
+      if (window.parent === window || !window.parent.location.pathname.startsWith('/ao-vivo')) return;
+      if (document.querySelector('script[data-broadcast-layout-controls]')) return;
+      const script = document.createElement('script');
+      script.src = '/broadcast-layout-controls.js';
+      script.defer = true;
+      script.dataset.broadcastLayoutControls = 'true';
+      document.head.appendChild(script);
+    } catch {}
+  }
+
+  loadBroadcastControls();
 })();
