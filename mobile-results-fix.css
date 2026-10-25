@@ -1,0 +1,277 @@
+/* Final mobile app corrections: results summary, auxiliary vote cards and map overlays. */
+
+/* Brancos e nulos usam o mesmo sistema visual dos cards de candidatos. */
+.candidate-card--aux{
+  --aux-vote-color:#94a3b8;
+}
+
+.candidate-card--aux .candidate-avatar--aux{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:linear-gradient(180deg,#f5f6f7 0%,#e8ebed 100%)!important;
+}
+
+.candidate-card--aux .aux-vote-icon{
+  position:static!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:42px!important;
+  height:42px!important;
+  border:2px solid var(--aux-vote-color)!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  color:#25323a!important;
+  font-size:18px!important;
+  line-height:1!important;
+  font-weight:950!important;
+  opacity:1!important;
+}
+
+.candidate-card--aux .aux-vote-chip{
+  background:var(--aux-vote-color)!important;
+}
+
+.candidate-card--aux .aux-vote-bar i{
+  background:var(--aux-vote-color)!important;
+}
+
+.candidate-card--aux .aux-vote-status{
+  background:#eef1f3!important;
+  color:#46545b!important;
+}
+
+.candidate-card--blank{--aux-vote-color:#94a3b8}
+.candidate-card--null{--aux-vote-color:#6b7280}
+
+/* Mobile Resultados: prevent the totalization block from escaping the card. */
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .summary-box{
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .result-summary,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .totalization,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-head,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-main,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-state,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .section-counters,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .section-counter{
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-head{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:8px!important;
+  align-items:end!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-main{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:auto auto auto!important;
+  gap:1px!important;
+  align-items:end!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-main small{
+  grid-column:1!important;
+  grid-row:1!important;
+  white-space:normal!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-main strong{
+  grid-column:1!important;
+  grid-row:2!important;
+  justify-self:start!important;
+  max-width:100%!important;
+  font-size:31px!important;
+  line-height:.92!important;
+  white-space:nowrap!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-main .history-result-badge{
+  grid-column:1!important;
+  grid-row:3!important;
+  justify-self:start!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-state{
+  width:auto!important;
+  max-width:112px!important;
+  align-items:flex-end!important;
+  text-align:right!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-state b,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-state>span{
+  display:block!important;
+  max-width:100%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .mobile-vote-breakdown{
+  display:none!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .section-counters{
+  width:100%!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:7px!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .section-counter{
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .section-counter small,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .section-counter strong,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .section-counter span{
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* Keep each result row inside the viewport, including long candidate names. */
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-card{
+  grid-template-columns:58px minmax(0,1fr) 92px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-avatar{
+  width:58px!important;
+  min-width:0!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-main,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-score{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-name,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-number,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-score small,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-status{
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-score strong{
+  font-size:22px!important;
+  max-width:100%!important;
+  white-space:nowrap!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-card--aux .candidate-name{
+  letter-spacing:.01em!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-card--aux .candidate-number{
+  color:#68767d!important;
+  font-weight:750!important;
+}
+
+/* Map screen: leaders and intelligence controls must occupy separate rows. */
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .candidate-highlights{
+  top:7px!important;
+  left:7px!important;
+  right:7px!important;
+  bottom:auto!important;
+  width:auto!important;
+  height:48px!important;
+  z-index:14!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-intel-panel{
+  top:60px!important;
+  left:7px!important;
+  right:7px!important;
+  width:auto!important;
+  max-width:none!important;
+  z-index:13!important;
+  gap:3px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-intel-controls{
+  justify-content:flex-end!important;
+  gap:3px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-intel-btn{
+  min-height:27px!important;
+  padding:4px 7px!important;
+  font-size:7px!important;
+  white-space:nowrap!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-intel-status{
+  display:none!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-intel-legend{
+  width:100%!important;
+  max-width:100%!important;
+  max-height:26px!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  justify-content:flex-end!important;
+  gap:7px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  padding:4px 6px!important;
+  scrollbar-width:none!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-intel-legend::-webkit-scrollbar{
+  display:none!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-intel-item{
+  flex:0 0 auto!important;
+  font-size:7px!important;
+}
+
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-stage.highlight-ready .map-canvas,
+html.mobile-ui.mobile-app-ready[data-mobile-screen="map"] .map-canvas{
+  padding-top:112px!important;
+}
+
+@media(max-width:380px){
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-card{
+    grid-template-columns:54px minmax(0,1fr) 82px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-avatar{
+    width:54px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .candidate-score strong{
+    font-size:20px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-main strong{
+    font-size:28px!important;
+  }
+
+  html.mobile-ui.mobile-app-ready[data-mobile-screen="results"] .total-state{
+    max-width:92px!important;
+  }
+}
