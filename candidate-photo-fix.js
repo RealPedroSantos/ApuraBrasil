@@ -109,7 +109,6 @@
         white-space:nowrap!important;
       }
 
-      /* Fotos da barra: moldura mais estreita, próxima da proporção oficial 161x225 do TSE. */
       html.broadcast-tv-readable .ab-race-photo{
         width:5.35%!important;
         background:#fff!important;
@@ -131,7 +130,6 @@
         background:#fff!important;
       }
 
-      /* Aproxima textos e barra colorida da nova largura das fotos. */
       html.broadcast-tv-readable .ab-race-track{left:6.35%!important;right:6.35%!important}
       html.broadcast-tv-readable .ab-race-head.left{left:6.65%!important}
       html.broadcast-tv-readable .ab-race-head.right{right:6.65%!important}
@@ -168,7 +166,8 @@
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
       loadScriptOnce('/election-race-bar-tv.js','data-election-race-bar-tv');
       loadScriptOnce('/election-race-candidate-only-guard.js','data-election-race-candidate-only-guard');
-      window.__apuraBrasilBroadcastLoaderVersion='2.5.8';
+      loadScriptOnce('/election-race-national-source.js','data-election-race-national-source');
+      window.__apuraBrasilBroadcastLoaderVersion='2.5.9';
     }catch{}
   }
 
