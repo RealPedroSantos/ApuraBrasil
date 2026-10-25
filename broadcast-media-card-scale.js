@@ -41,7 +41,6 @@
     const ratio=track/base;
     const f=clamp(1+(ratio-1)*.82,.9,1.68);
 
-    /* neutraliza a escala global apenas na esquerda; o Media Card cresce por componentes */
     left.style.setProperty('transform','none','important');
     left.style.setProperty('width','100%','important');
     left.style.setProperty('height','100%','important');
@@ -86,7 +85,6 @@
     if(!grid||!left) return false;
     new ResizeObserver(schedule).observe(grid);
     new MutationObserver(schedule).observe(grid,{attributes:true,attributeFilter:['style','class']});
-    new MutationObserver(schedule).observe(left,{attributes:true,attributeFilter:['style','class']});
     schedule();
     return true;
   }
