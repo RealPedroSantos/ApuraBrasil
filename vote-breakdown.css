@@ -13,38 +13,57 @@
   text-overflow:ellipsis;
 }
 
+.mobile-vote-breakdown{
+  display:none;
+}
+
 @media(max-aspect-ratio:4/3){
   .summary-metrics.apura-vote-breakdown{
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
 }
 
+/* Preserve the original app-like mobile layout. The desktop metrics row stays hidden
+   on phones/tablets; white/null votes are rendered in a compact line in .total-state. */
 html.mobile-ui .summary-metrics.apura-vote-breakdown{
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:3px!important;
-  margin-top:3px!important;
+  display:none!important;
 }
 
-html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric{
-  padding-top:3px!important;
+html.mobile-ui .mobile-vote-breakdown{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  max-width:100%;
+  font-size:8px;
+  line-height:1.1;
+  color:var(--muted,#6c7478);
+  white-space:nowrap;
 }
 
-html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric span{
-  font-size:8px!important;
+html.mobile-ui .mobile-vote-breakdown span{
+  display:inline-flex;
+  align-items:baseline;
+  gap:3px;
 }
 
-html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric b{
-  font-size:11px!important;
-  line-height:1.05!important;
+html.mobile-ui .mobile-vote-breakdown b{
+  color:var(--text,#101518);
+  font-size:9px;
+  font-weight:900;
 }
 
-html.mobile-ui .summary-metrics.apura-vote-breakdown .summary-metric small{
-  font-size:7px!important;
+html.mobile-ui.mobile-portrait .mobile-vote-breakdown{
+  gap:5px;
+  font-size:7px;
+}
+
+html.mobile-ui.mobile-portrait .mobile-vote-breakdown b{
+  font-size:8px;
 }
 
 @media(min-width:701px) and (max-aspect-ratio:4/3){
-  .summary-metrics.apura-vote-breakdown{
+  html:not(.mobile-ui) .summary-metrics.apura-vote-breakdown{
     grid-template-columns:repeat(5,minmax(0,1fr));
   }
 }
