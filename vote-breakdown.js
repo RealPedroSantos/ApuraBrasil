@@ -12,7 +12,9 @@
   function applyVoteBreakdown(result) {
     if (!result || result.available === false) return;
 
+    const root = document.documentElement;
     const summary = document.querySelector('#resultSummary .summary-metrics');
+    const totalState = document.querySelector('#resultSummary .total-state');
     if (!summary) return;
 
     const votes = result.votes || {};
@@ -22,8 +24,8 @@
     const nullPercentage = Number(votes.nullPercentage || 0);
 
     summary.classList.add('apura-vote-breakdown');
-
     summary.querySelectorAll('.vote-breakdown-metric').forEach((node) => node.remove());
+    document.querySelectorAll('#resultSummary .mobile-vote-breakdown').forEach((node) => node.remove());
 
     const combined = [...summary.querySelectorAll('.summary-metric')].find((metric) => {
       const label = metric.querySelector('span')?.textContent?.trim().toLowerCase() || '';
@@ -40,6 +42,14 @@
     nullMetric.innerHTML = `<span>Nulos</span><b>${fmt(nullVotes)}</b><small>${pct(nullPercentage)}</small>`;
 
     summary.append(blankMetric, nullMetric);
+
+    if (root.classList.contains('mobile-ui') && totalState) {
+      const compact = document.createElement('div');
+      compact.className = 'mobile-vote-breakdown';
+      compact.setAttribute('aria-label', `Brancos ${fmt(blank)}, nulos ${fmt(nullVotes)}`);
+      compact.innerHTML = `<span>Brancos <b>${fmt(blank)}</b></span><span>Nulos <b>${fmt(nullVotes)}</b></span>`;
+      totalState.appendChild(compact);
+    }
   }
 
   function rememberAndApply(result) {
@@ -54,6 +64,14 @@
   window.addEventListener('apura:election-year-changed', (event) => {
     rememberAndApply(event.detail?.result);
   });
+
+  window.addEventListener('resize', () => {
+    if (lastResult) requestAnimationFrame(() => applyVoteBreakdown(lastResult));
+  }, { passive:true });
+
+  window.addEventListener('orientationchange', () => {
+    if (lastResult) setTimeout(() => applyVoteBreakdown(lastResult), 80);
+  }, { passive:true });
 
   const target = document.getElementById('resultSummary');
   if (target) {
