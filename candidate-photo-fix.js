@@ -43,19 +43,33 @@
     attributeFilter: ['src']
   });
 
-  function loadBroadcastControls() {
+  function isBroadcastEmbed() {
     try {
-      if (window.parent === window || !window.parent.location.pathname.startsWith('/ao-vivo')) return;
-      if (document.querySelector('script[data-broadcast-layout-controls-v2]')) return;
+      return window.parent !== window && window.parent.location.pathname.startsWith('/ao-vivo');
+    } catch {
+      return false;
+    }
+  }
+
+  function loadScriptOnce(src, dataAttribute) {
+    const selector = `script[${dataAttribute}]`;
+    if (document.querySelector(selector)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.setAttribute(dataAttribute, 'true');
+    document.head.appendChild(script);
+  }
+
+  function loadBroadcastEnhancements() {
+    try {
+      if (!isBroadcastEmbed()) return;
       document.querySelectorAll('script[data-broadcast-layout-controls]').forEach(node => node.remove());
-      const script = document.createElement('script');
-      script.src = '/broadcast-layout-controls-v2.js';
-      script.defer = true;
-      script.dataset.broadcastLayoutControlsV2 = 'true';
-      document.head.appendChild(script);
-      window.__apuraBrasilBroadcastLoaderVersion = '2.0.0';
+      loadScriptOnce('/broadcast-layout-controls-v2.js', 'data-broadcast-layout-controls-v2');
+      loadScriptOnce('/broadcast-tv-typography.js', 'data-broadcast-tv-typography');
+      window.__apuraBrasilBroadcastLoaderVersion = '2.1.0';
     } catch {}
   }
 
-  loadBroadcastControls();
+  loadBroadcastEnhancements();
 })();
