@@ -2,25 +2,34 @@
   'use strict';
 
   const KEY = 'apurabrasil.customLogo';
-  const DEFAULT_LOGO = '/assets/logo-apura-current.svg?v=20261025-0224';
+  const DEFAULT_LOGO = '/assets/logo-apura-current.svg?v=20261025-0235';
   const SELECTOR = '.brand-logo, .projection-logo';
   let applying = false;
 
   function getSavedLogo() {
-    return '';
+    try {
+      return String(localStorage.getItem(KEY) || '').trim();
+    } catch {
+      return '';
+    }
+  }
+
+  function desiredLogo() {
+    return getSavedLogo() || DEFAULT_LOGO;
   }
 
   function setLogoSource(img, source) {
     if (!(img instanceof HTMLImageElement) || !source) return;
     if (img.getAttribute('src') !== source) img.setAttribute('src', source);
-    delete img.dataset.customLogo;
+    if (source === DEFAULT_LOGO) delete img.dataset.customLogo;
+    else img.dataset.customLogo = '1';
   }
 
   function applyLogo(root = document) {
     if (applying) return;
     applying = true;
     try {
-      const source = DEFAULT_LOGO;
+      const source = desiredLogo();
 
       if (root instanceof HTMLImageElement && root.matches(SELECTOR)) {
         setLogoSource(root, source);
@@ -40,25 +49,24 @@
     }
   }
 
-  function clearLocalOverride() {
-    try { localStorage.removeItem(KEY); } catch {}
-  }
-
   function saveLogo(source) {
     try {
       if (source) localStorage.setItem(KEY, source);
       else localStorage.removeItem(KEY);
-    } catch {}
+    } catch {
+      return false;
+    }
     applyLogo();
-    return true;
+    return getSavedLogo() === String(source || '').trim();
   }
 
   const observer = new MutationObserver((mutations) => {
     if (applying) return;
+    const expected = desiredLogo();
     for (const mutation of mutations) {
       if (mutation.type === 'attributes') {
         const img = mutation.target;
-        if (img instanceof HTMLImageElement && img.matches(SELECTOR) && img.getAttribute('src') !== DEFAULT_LOGO) {
+        if (img instanceof HTMLImageElement && img.matches(SELECTOR) && img.getAttribute('src') !== expected) {
           applyLogo(img);
         }
         continue;
@@ -73,7 +81,6 @@
   });
 
   function start() {
-    clearLocalOverride();
     applyLogo();
     observer.observe(document.documentElement, {
       childList: true,
@@ -86,8 +93,13 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 
-  window.addEventListener('pageshow', applyLogo);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) applyLogo(); });
+  window.addEventListener('pageshow', () => applyLogo());
+  window.addEventListener('storage', (event) => {
+    if (event.key === KEY) applyLogo();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) applyLogo();
+  });
 
   window.ApuraBrasilLogo = {
     key: KEY,
