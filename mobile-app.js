@@ -5,7 +5,29 @@
   const STORAGE_KEY = 'apurabrasil.mobile.screen';
   const VALID_SCREENS = new Set(['map', 'results', 'places', 'zones', 'more']);
 
+  const PARTY_COLORS = {
+    PL:'#165dff', PT:'#e31d2b', PSD:'#ef8d22', NOVO:'#e86e1c', MDB:'#3e9278',
+    PSOL:'#d5b913', PDT:'#d34646', PSB:'#d5a51d', PP:'#3471bf', 'UNIÃO':'#207da5',
+    REPUBLICANOS:'#587cca', AVANTE:'#7b1bd1', PCB:'#8d2737', PSTU:'#b82d3d', UP:'#bd20c8',
+    PCO:'#7a2530', DC:'#23847b', 'MISSÃO':'#6e58a0', DEMOCRATA:'#25838d'
+  };
+
   const isMobile = () => root.classList.contains('mobile-ui') || window.matchMedia?.('(max-width: 900px)').matches;
+  const fmt = (value) => new Intl.NumberFormat('pt-BR').format(Number(value || 0));
+  const pct = (value) => `${Number(value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+
+  function partyColor(party) {
+    const key = String(party || '').toUpperCase();
+    if (PARTY_COLORS[key]) return PARTY_COLORS[key];
+    let hash = 0;
+    for (const char of key) hash = (hash * 31 + char.charCodeAt(0)) % 360;
+    return `hsl(${hash || 205} 62% 46%)`;
+  }
+
+  function initials(name) {
+    return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase();
+  }
 
   const icons = {
     map: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2V6Z"/><path d="M8 4v13M16 7v13"/></svg>',
@@ -91,38 +113,66 @@
     return panel;
   }
 
-  function createMapPreview(mapPanel) {
-    let preview = mapPanel.querySelector('.mobile-map-result-card');
-    if (preview) return preview;
-    preview = document.createElement('button');
-    preview.type = 'button';
-    preview.className = 'mobile-map-result-card';
-    preview.setAttribute('aria-label', 'Abrir resultados deste recorte');
-    preview.innerHTML = '<span class="mobile-map-result-label">APURAÇÃO</span><strong>Carregando resultado…</strong><small>Toque para abrir Resultados</small>';
-    preview.addEventListener('click', () => setScreen('results'));
-    mapPanel.appendChild(preview);
-    return preview;
+  function createMapBottomResults(mapStage) {
+    let panel = mapStage.querySelector('.mobile-map-bottom-results');
+    if (panel) return panel;
+    panel = document.createElement('section');
+    panel.className = 'mobile-map-bottom-results';
+    panel.setAttribute('aria-label', 'Resumo da apuração no mapa');
+    panel.innerHTML = '<div class="mobile-map-bottom-empty">Carregando apuração...</div>';
+    panel.addEventListener('click', () => setScreen('results'));
+    mapStage.appendChild(panel);
+    return panel;
+  }
+
+  function candidateCard(candidate) {
+    const name = candidate?.ballotName || candidate?.name || 'Candidato';
+    const color = partyColor(candidate?.party);
+    const photo = candidate?.photoUrl
+      ? `<img src="${escapeHtml(candidate.photoUrl)}" alt="Foto de ${escapeHtml(name)}" loading="lazy" onerror="this.remove()">`
+      : '';
+    return `
+      <article class="mobile-map-candidate" style="--candidate-color:${color}">
+        <div class="mobile-map-candidate-photo">${photo}<span>${escapeHtml(initials(name))}</span></div>
+        <div class="mobile-map-candidate-name">${escapeHtml(name)}</div>
+        <div class="mobile-map-candidate-meta">
+          <span class="mobile-map-candidate-party">${escapeHtml(candidate?.party || '—')}</span>
+          <span>Nº ${escapeHtml(candidate?.number || '—')}</span>
+        </div>
+        <div class="mobile-map-candidate-votes">${fmt(candidate?.votes)} votos</div>
+        <div class="mobile-map-candidate-percent">${pct(candidate?.percentage)}</div>
+      </article>`;
+  }
+
+  function renderMapBottomResults(result) {
+    if (!result || result.available === false) return;
+    const panel = document.querySelector('.mobile-map-bottom-results');
+    if (!panel) return;
+
+    const sections = result.sections || {};
+    const total = Math.max(0, Number(sections.total || 0));
+    const totalized = Math.max(0, Number(sections.totalized || 0));
+    const progress = Math.max(0, Math.min(100, Number(sections.percentage || (total ? totalized / total * 100 : 0))));
+    const candidates = (result.candidates || []).slice(0, 2);
+
+    const count = `
+      <div class="mobile-map-count">
+        <div>
+          <span>URNAS APURADAS</span>
+          <strong>${fmt(totalized)}${total ? ` de ${fmt(total)}` : ''}</strong>
+        </div>
+        <b>${pct(progress)}</b>
+      </div>`;
+
+    panel.innerHTML = candidates.length
+      ? `${count}${candidates.map(candidateCard).join('')}`
+      : `${count}<div class="mobile-map-bottom-empty">Ainda não há votos computados para este recorte.</div>`;
   }
 
   function syncSource() {
     const source = document.getElementById('feedStatus')?.textContent?.trim() || document.getElementById('bottomSource')?.textContent?.trim() || 'Fonte oficial';
     const target = document.getElementById('mobileSourceText');
     if (target) target.textContent = source;
-  }
-
-  function renderMapPreview(result) {
-    if (!result || result.available === false) return;
-    const preview = document.querySelector('.mobile-map-result-card');
-    if (!preview) return;
-    const leader = result.candidates?.[0];
-    const scope = document.getElementById('scopeTitle')?.textContent?.trim() || 'Brasil';
-    const progress = Number(result.sections?.percentage || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const leaderPct = Number(leader?.percentage || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const leaderName = leader?.ballotName || leader?.name || 'Sem votos computados';
-    preview.innerHTML = `
-      <span class="mobile-map-result-label">${scope} · ${progress}% APURADO</span>
-      <strong>${leaderName}</strong>
-      <small>${leader ? `${leaderPct}% · toque para ver todos os resultados` : 'Toque para abrir Resultados'}</small>`;
   }
 
   function syncContextHeader(screen) {
@@ -169,13 +219,14 @@
     const shell = document.querySelector('.app-shell');
     const main = document.querySelector('.main-grid');
     const mapPanel = document.querySelector('.map-panel');
+    const mapStage = document.getElementById('mapStage');
     const resultsPanel = document.querySelector('.results-panel');
-    if (!shell || !main || !mapPanel || !resultsPanel) return;
+    if (!shell || !main || !mapPanel || !mapStage || !resultsPanel) return;
 
     createBottomNav(shell);
     createContextHeader(resultsPanel);
     createMorePanel(main);
-    createMapPreview(mapPanel);
+    createMapBottomResults(mapStage);
 
     document.getElementById('mobileAppNav')?.addEventListener('click', event => {
       const button = event.target.closest('[data-mobile-screen-target]');
@@ -196,11 +247,11 @@
     if (feed) sourceObserver.observe(feed, { childList: true, subtree: true, characterData: true });
 
     window.addEventListener('apura:result-year-loaded', event => {
-      renderMapPreview(event.detail?.result);
+      renderMapBottomResults(event.detail?.result);
       syncSource();
     });
-    window.addEventListener('apura:election-year-changed', event => renderMapPreview(event.detail?.result));
-    window.addEventListener('apura:historical-result-loaded', event => renderMapPreview(event.detail?.result));
+    window.addEventListener('apura:election-year-changed', event => renderMapBottomResults(event.detail?.result));
+    window.addEventListener('apura:historical-result-loaded', event => renderMapBottomResults(event.detail?.result));
 
     setScreen(readScreen(), { remember: false, keepScroll: true });
     syncSource();
