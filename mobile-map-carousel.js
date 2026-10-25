@@ -25,6 +25,12 @@
     return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase();
   }
 
+  function isElected(candidate) {
+    if (candidate?.elected === true || candidate?.isElected === true) return true;
+    const status = String(candidate?.status || candidate?.resultStatus || candidate?.situation || '').toUpperCase();
+    return /\bELEIT[OA]S?\b/.test(status) && !/NÃO\s+ELEIT/.test(status);
+  }
+
   function panel() {
     return document.querySelector('.mobile-map-bottom-results');
   }
@@ -64,19 +70,25 @@
   function candidateCard(candidate, index) {
     const name = candidate?.ballotName || candidate?.name || 'Candidato';
     const color = partyColor(candidate?.party);
+    const elected = isElected(candidate);
     const photo = candidate?.photoUrl
       ? `<img src="${escapeHtml(candidate.photoUrl)}" alt="Foto de ${escapeHtml(name)}" loading="lazy" onerror="this.remove()">`
       : '';
     return `
-      <article class="mobile-map-candidate mobile-map-carousel-card" data-candidate-index="${index}" style="--candidate-color:${color}" tabindex="0">
+      <article class="mobile-map-candidate mobile-map-carousel-card${elected ? ' is-elected' : ''}" data-candidate-index="${index}" style="--candidate-color:${color}" tabindex="0" role="listitem">
+        ${elected ? '<span class="mobile-map-elected-badge">ELEITO</span>' : ''}
         <div class="mobile-map-candidate-photo">${photo}<span>${escapeHtml(initials(name))}</span></div>
-        <div class="mobile-map-candidate-name">${escapeHtml(name)}</div>
-        <div class="mobile-map-candidate-meta">
-          <span class="mobile-map-candidate-party">${escapeHtml(candidate?.party || '—')}</span>
-          <span>Nº ${escapeHtml(candidate?.number || '—')}</span>
+        <div class="mobile-map-candidate-body">
+          <div class="mobile-map-candidate-name">${escapeHtml(name)}</div>
+          <div class="mobile-map-candidate-meta">
+            <span class="mobile-map-candidate-party">${escapeHtml(candidate?.party || '—')}</span>
+            <span>Nº ${escapeHtml(candidate?.number || '—')}</span>
+          </div>
         </div>
-        <div class="mobile-map-candidate-percent">${pct(candidate?.percentage)}</div>
-        <div class="mobile-map-candidate-votes">${fmt(candidate?.votes)} votos</div>
+        <div class="mobile-map-candidate-bottom">
+          <div class="mobile-map-candidate-votes">${fmt(candidate?.votes)} votos</div>
+          <div class="mobile-map-candidate-percent">${pct(candidate?.percentage)}</div>
+        </div>
       </article>`;
   }
 
