@@ -53,11 +53,11 @@
     try{
       if(!isBroadcastEmbed()) return;
       document.querySelectorAll('script[data-broadcast-layout-controls]').forEach(node=>node.remove());
-      loadScriptOnce('/broadcast-native-header.js','data-broadcast-native-header');
+      loadScriptOnce('/broadcast-native-header-v2.js','data-broadcast-native-header-v2');
       loadScriptOnce('/broadcast-layout-controls-v2.js','data-broadcast-layout-controls-v2');
       loadScriptOnce('/broadcast-tv-typography.js','data-broadcast-tv-typography');
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
-      window.__apuraBrasilBroadcastLoaderVersion='2.3.0';
+      window.__apuraBrasilBroadcastLoaderVersion='2.4.0';
     }catch{}
   }
 
