@@ -5,73 +5,141 @@ const CHANNELS = {
 };
 
 const VIDEO_ID_RE = /^[A-Za-z0-9_-]{11}$/;
+const CHANNEL_ID_RE = /^UC[A-Za-z0-9_-]{22}$/;
 
 function videoIdFromUrl(value) {
   try {
     const url = new URL(value, 'https://www.youtube.com');
     const byQuery = url.searchParams.get('v');
     if (byQuery && VIDEO_ID_RE.test(byQuery)) return byQuery;
-
     const parts = url.pathname.split('/').filter(Boolean);
     const liveIndex = parts.indexOf('live');
-    if (liveIndex >= 0 && VIDEO_ID_RE.test(parts[liveIndex + 1] || '')) {
-      return parts[liveIndex + 1];
-    }
+    if (liveIndex >= 0 && VIDEO_ID_RE.test(parts[liveIndex + 1] || '')) return parts[liveIndex + 1];
   } catch {}
   return null;
 }
 
-function canonicalVideoId(html) {
+function extractChannelId(html) {
   const patterns = [
-    /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i,
-    /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i,
-    /"canonicalUrl":"([^"]+)"/,
-    /"urlCanonical":"([^"]+)"/
+    /"channelId":"(UC[A-Za-z0-9_-]{22})"/,
+    /"externalId":"(UC[A-Za-z0-9_-]{22})"/,
+    /itemprop="channelId" content="(UC[A-Za-z0-9_-]{22})"/
   ];
-
   for (const pattern of patterns) {
     const match = html.match(pattern);
-    const id = match ? videoIdFromUrl(match[1].replace(/\\u0026/g, '&').replace(/\\\//g, '/')) : null;
-    if (id) return id;
+    if (match && CHANNEL_ID_RE.test(match[1])) return match[1];
   }
   return null;
 }
 
-function pageClaimsLive(html) {
-  return html.includes('"isLiveNow":true') ||
-    html.includes('"isLiveContent":true') ||
-    html.includes('"isLive":true') ||
-    html.includes('"style":"BADGE_STYLE_TYPE_LIVE_NOW"');
+function collectLiveCandidates(html) {
+  const markers = [
+    '"isLiveNow":true',
+    '"style":"BADGE_STYLE_TYPE_LIVE_NOW"',
+    '"style":"LIVE"',
+    '"label":"AO VIVO"',
+    '"label":"LIVE"',
+    '"text":"AO VIVO"',
+    '"text":"LIVE"'
+  ];
+
+  const ranked = [];
+  for (const marker of markers) {
+    let markerIndex = html.indexOf(marker);
+    while (markerIndex >= 0) {
+      const start = Math.max(0, markerIndex - 7000);
+      const end = Math.min(html.length, markerIndex + 5000);
+      const slice = html.slice(start, end);
+      for (const match of slice.matchAll(/"videoId":"([A-Za-z0-9_-]{11})"/g)) {
+        const absoluteIndex = start + match.index;
+        ranked.push({ id: match[1], distance: Math.abs(absoluteIndex - markerIndex) });
+      }
+      markerIndex = html.indexOf(marker, markerIndex + marker.length);
+    }
+  }
+
+  ranked.sort((a, b) => a.distance - b.distance);
+  const seen = new Set();
+  const result = [];
+  for (const item of ranked) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    result.push(item.id);
+    if (result.length >= 18) break;
+  }
+  return result;
 }
 
-async function fetchLiveEndpoint(handle) {
-  const liveUrl = `https://www.youtube.com/@${handle}/live`;
-  const response = await fetch(liveUrl, {
-    redirect: 'manual',
+function extractWatchOwner(html, expectedVideoId) {
+  const detailsIndex = html.indexOf('"videoDetails":');
+  if (detailsIndex < 0) return null;
+  const details = html.slice(detailsIndex, detailsIndex + 24000);
+  const videoMatch = details.match(/"videoId":"([A-Za-z0-9_-]{11})"/);
+  const channelMatch = details.match(/"channelId":"(UC[A-Za-z0-9_-]{22})"/);
+  if (!videoMatch || videoMatch[1] !== expectedVideoId || !channelMatch) return null;
+  return channelMatch[1];
+}
+
+function watchClaimsLive(html) {
+  return html.includes('"isLiveNow":true') ||
+    html.includes('"style":"BADGE_STYLE_TYPE_LIVE_NOW"') ||
+    html.includes('"isLiveContent":true');
+}
+
+async function fetchYouTube(url, redirect = 'follow') {
+  return fetch(url, {
+    redirect,
     headers: {
       'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
       'accept-language': 'pt-BR,pt;q=0.9,en;q=0.7',
       accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
     }
   });
+}
 
-  const location = response.headers.get('location');
-  const redirectedVideoId = location ? videoIdFromUrl(location) : null;
-  if (redirectedVideoId) {
-    return { videoId: redirectedVideoId, live: true, source: 'official-live-redirect' };
+async function validateLiveCandidate(videoId, expectedChannelId) {
+  try {
+    const response = await fetchYouTube(`https://www.youtube.com/watch?v=${videoId}`);
+    if (!response.ok) return false;
+    const html = await response.text();
+    const owner = extractWatchOwner(html, videoId);
+    return owner === expectedChannelId && watchClaimsLive(html);
+  } catch {
+    return false;
+  }
+}
+
+async function resolveChannel(handle) {
+  const channelPage = await fetchYouTube(`https://www.youtube.com/@${handle}`);
+  if (!channelPage.ok) throw new Error(`Canal @${handle} respondeu ${channelPage.status}`);
+  const channelHtml = await channelPage.text();
+  const expectedChannelId = extractChannelId(channelHtml);
+  if (!expectedChannelId) throw new Error(`Não foi possível validar o channelId de @${handle}.`);
+
+  const pages = [
+    `https://www.youtube.com/@${handle}/live`,
+    `https://www.youtube.com/@${handle}/streams`
+  ];
+
+  for (const url of pages) {
+    const response = await fetchYouTube(url);
+    if (!response.ok) continue;
+    const html = await response.text();
+
+    const redirectedId = videoIdFromUrl(response.url);
+    if (redirectedId && await validateLiveCandidate(redirectedId, expectedChannelId)) {
+      return { videoId: redirectedId, live: true, source: 'official-live-redirect', channelId: expectedChannelId };
+    }
+
+    const candidates = collectLiveCandidates(html);
+    for (const videoId of candidates) {
+      if (await validateLiveCandidate(videoId, expectedChannelId)) {
+        return { videoId, live: true, source: 'validated-channel-live', channelId: expectedChannelId };
+      }
+    }
   }
 
-  if (!response.ok) {
-    return { videoId: null, live: false, source: 'offline' };
-  }
-
-  const html = await response.text();
-  const canonicalId = canonicalVideoId(html);
-  if (canonicalId && pageClaimsLive(html)) {
-    return { videoId: canonicalId, live: true, source: 'official-live-canonical' };
-  }
-
-  return { videoId: null, live: false, source: 'offline' };
+  return { videoId: null, live: false, source: 'offline', channelId: expectedChannelId };
 }
 
 module.exports = async function handler(req, res) {
@@ -84,7 +152,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const result = await fetchLiveEndpoint(channel.handle);
+    const result = await resolveChannel(channel.handle);
     res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
     res.status(200).json({
       ok: true,
