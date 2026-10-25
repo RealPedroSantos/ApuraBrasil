@@ -187,9 +187,8 @@
       if (!isMobile()) return;
       const tab = event.target.closest('.detail-tab[data-tab]');
       if (!tab) return;
-      if (tab.dataset.tab === 'candidates' && root.dataset.mobileScreen !== 'map') setScreen('results', { keepScroll: true });
-      if (tab.dataset.tab === 'places') setScreen('places', { keepScroll: true });
-      if (tab.dataset.tab === 'zones') setScreen('zones', { keepScroll: true });
+      const mapped = tab.dataset.tab === 'candidates' ? 'results' : tab.dataset.tab === 'places' ? 'places' : tab.dataset.tab === 'zones' ? 'zones' : null;
+      if (mapped && root.dataset.mobileScreen !== mapped) setScreen(mapped, { keepScroll: true });
     }, true);
 
     const sourceObserver = new MutationObserver(syncSource);
