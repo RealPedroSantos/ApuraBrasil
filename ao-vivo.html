@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#071522" />
+  <title>ApuraBrasil — Central ao vivo</title>
+  <style>
+    :root{--ink:#071522;--paper:#f4f4f2;--line:rgba(255,255,255,.14);--green:#2f9b61}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050a0e;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    body{display:grid;place-items:center}
+    .broadcast-frame{position:relative;width:min(100vw,177.7777778vh);height:min(100vh,56.25vw);aspect-ratio:16/9;display:grid;grid-template-rows:54px minmax(0,1fr) 33.333333%;overflow:hidden;background:var(--ink);box-shadow:0 20px 80px rgba(0,0,0,.38)}
+    .studio-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:18px;padding:7px 14px;background:#071522;color:#fff;border-bottom:1px solid var(--line);z-index:3}
+    .brand{display:flex;align-items:center;gap:11px;min-width:0}
+    .brand img{display:block;width:auto;height:36px;max-width:190px;object-fit:contain;filter:brightness(0) invert(1)}
+    .brand-divider{width:1px;height:30px;background:rgba(255,255,255,.28)}
+    .studio-title{min-width:0;font-weight:900;letter-spacing:.01em;font-size:clamp(14px,1.18vw,22px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .studio-title small{font-weight:650;color:#aebbc2;margin-left:7px}
+    .round-switch{display:flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(255,255,255,.17);border-radius:9px;background:rgba(255,255,255,.055);white-space:nowrap}
+    .round-switch button{appearance:none;border:0;border-radius:6px;background:transparent;color:#bac5cb;padding:7px 10px;font:800 11px/1 inherit;cursor:pointer}
+    .round-switch button.active{background:#fff;color:#071522}
+    .live-state{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#d8e0e4;font-size:11px;font-weight:800}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(47,155,97,.14)}
+    .clock{font-variant-numeric:tabular-nums;color:#fff}
+    .election-stage{position:relative;min-width:0;min-height:0;background:var(--paper);overflow:hidden}
+    #electionFrame{display:block;width:100%;height:100%;border:0;background:var(--paper)}
+    .streams-grid{min-width:0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#000;border-top:1px solid rgba(255,255,255,.2)}
+    .stream-card{position:relative;min-width:0;min-height:0;overflow:hidden;background:#000;border-right:1px solid rgba(255,255,255,.24)}
+    .stream-card:last-child{border-right:0}
+    .stream-card iframe{display:block;width:100%;height:100%;border:0;background:#000}
+    .stream-tag{position:absolute;z-index:2;left:9px;top:9px;display:flex;align-items:center;gap:7px;max-width:calc(100% - 18px);padding:5px 8px;border-radius:6px;background:rgba(7,21,34,.86);backdrop-filter:blur(9px);color:#fff;font-size:10px;font-weight:900;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.22)}
+    .stream-tag i{width:7px;height:7px;border-radius:50%;background:#e23b43;box-shadow:0 0 0 3px rgba(226,59,67,.18);flex:0 0 auto}
+    .stream-link{position:absolute;z-index:2;right:8px;bottom:8px;padding:5px 7px;border-radius:5px;background:rgba(7,21,34,.78);color:#fff;text-decoration:none;font-size:9px;font-weight:800;opacity:.25;transition:opacity .15s ease}
+    .stream-card:hover .stream-link,.stream-link:focus-visible{opacity:1}
+    @media(max-width:900px){
+      .broadcast-frame{grid-template-rows:42px minmax(0,1fr) 33.333333%}
+      .studio-head{gap:7px;padding:5px 7px}
+      .brand img{height:27px;max-width:120px}.brand-divider{display:none}.studio-title small{display:none}
+      .round-switch button{padding:6px 7px;font-size:9px}.live-state{font-size:9px}.clock{display:none}
+      .stream-tag{left:5px;top:5px;max-width:calc(100% - 10px);padding:4px 6px;font-size:8px}.stream-link{display:none}
+    }
+    @media(max-width:560px){.studio-title{display:none}.studio-head{grid-template-columns:auto 1fr auto}.round-switch{justify-self:center}.live-state{justify-self:end}}
+  </style>
+</head>
+<body>
+  <main class="broadcast-frame" aria-label="Central de apuração ApuraBrasil">
+    <header class="studio-head">
+      <div class="brand">
+        <img src="/assets/logo-apurabrasil.svg" alt="Apura Brasil" />
+        <span class="brand-divider" aria-hidden="true"></span>
+      </div>
+      <div class="studio-title">Central de Apuração <small>Presidente • Eleições 2026</small></div>
+      <div class="round-switch" role="group" aria-label="Turno da eleição">
+        <button type="button" data-round="1">1º turno</button>
+        <button type="button" data-round="2">2º turno</button>
+      </div>
+      <div class="live-state"><span class="live-dot"></span><span id="dataState">AO VIVO</span><span class="clock" id="studioClock">--:--:--</span></div>
+    </header>
+
+    <section class="election-stage" aria-label="Mapa e apuração ao vivo">
+      <iframe id="electionFrame" src="/" title="Mapa dinâmico e apuração de votos do ApuraBrasil"></iframe>
+    </section>
+
+    <section class="streams-grid" aria-label="Cobertura jornalística ao vivo">
+      <article class="stream-card">
+        <div class="stream-tag"><i></i>CNN Brasil • ao vivo</div>
+        <iframe src="https://www.youtube.com/embed/live_stream?channel=UCvdwhh_fDyWccR42-rReZLw&autoplay=1&mute=1&playsinline=1&rel=0" title="CNN Brasil ao vivo" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <a class="stream-link" href="https://www.youtube.com/@cnnbrasil/live" target="_blank" rel="noopener">Abrir canal</a>
+      </article>
+      <article class="stream-card">
+        <div class="stream-tag"><i></i>Jovem Pan News • ao vivo</div>
+        <iframe src="https://www.youtube.com/embed/live_stream?channel=UCP391YRAjSOdM_bwievgaZA&autoplay=1&mute=1&playsinline=1&rel=0" title="Jovem Pan News ao vivo" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <a class="stream-link" href="https://www.youtube.com/c/jovempannews/live" target="_blank" rel="noopener">Abrir canal</a>
+      </article>
+      <article class="stream-card">
+        <div class="stream-tag"><i></i>Times Brasil CNBC • ao vivo</div>
+        <iframe src="https://www.youtube.com/embed/live_stream?channel=UCY-FPXguTtLHSTK5YpQ-sgQ&autoplay=1&mute=1&playsinline=1&rel=0" title="Times Brasil CNBC ao vivo" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <a class="stream-link" href="https://www.youtube.com/@otimesbrasil/live" target="_blank" rel="noopener">Abrir canal</a>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+      const ROUND_KEY = 'apurabrasil.round.2026';
+      const frame = document.getElementById('electionFrame');
+      const roundButtons = [...document.querySelectorAll('[data-round]')];
+      const dataState = document.getElementById('dataState');
+      const clock = document.getElementById('studioClock');
+
+      function readRound(){
+        const value = Number(localStorage.getItem(ROUND_KEY));
+        return value === 1 || value === 2 ? value : 2;
+      }
+      function syncRound(){
+        const round = readRound();
+        roundButtons.forEach(button => {
+          const active = Number(button.dataset.round) === round;
+          button.classList.toggle('active', active);
+          button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      }
+      roundButtons.forEach(button => button.addEventListener('click', () => {
+        const next = Number(button.dataset.round);
+        if (next !== 1 && next !== 2 || next === readRound()) return;
+        localStorage.setItem(ROUND_KEY, String(next));
+        syncRound();
+        frame.contentWindow.location.reload();
+      }));
+
+      function tuneEmbeddedDashboard(){
+        try{
+          const doc = frame.contentDocument;
+          if (!doc || !doc.head) return;
+          const normalize = () => doc.documentElement.classList.remove('mobile-ui','mobile-app-ready');
+          normalize();
+          setTimeout(normalize, 150);
+          setTimeout(normalize, 700);
+          setTimeout(normalize, 1600);
+
+          if (!doc.getElementById('broadcastEmbedStyle')) {
+            const style = doc.createElement('style');
+            style.id = 'broadcastEmbedStyle';
+            style.textContent = `
+              html,body{width:100%!important;height:100%!important;overflow:hidden!important;background:#f4f4f2!important}
+              .app-shell{width:100%!important;height:100vh!important;min-height:0!important;display:grid!important;grid-template-rows:minmax(0,1fr)!important;gap:0!important;padding:7px!important;overflow:hidden!important}
+              .topbar,.status-bar,.round-selector,.mobile-app-nav{display:none!important}
+              .main-grid{position:relative!important;inset:auto!important;display:grid!important;grid-template-columns:minmax(0,57fr) minmax(410px,43fr)!important;grid-template-rows:minmax(0,1fr)!important;height:100%!important;min-height:0!important;gap:10px!important;padding:0!important;overflow:hidden!important}
+              .map-panel,.results-panel{position:relative!important;inset:auto!important;display:grid!important;visibility:visible!important;opacity:1!important;transform:none!important;min-width:0!important;min-height:0!important;height:100%!important;overflow:hidden!important}
+              .map-panel{grid-template-rows:auto minmax(0,1fr) auto!important}
+              .results-panel{grid-template-rows:auto auto minmax(0,1fr)!important;gap:6px!important}
+              .map-head{padding:0 2px 4px!important}.map-head h1{font-size:28px!important}.map-head p{margin-top:3px!important;font-size:11px!important}
+              .map-actions button,.refresh-button{min-height:34px!important;padding:5px 9px!important;font-size:11px!important}
+              .map-foot{min-height:22px!important;padding-top:3px!important}
+              .summary-box{padding:7px!important}.summary-heading{margin-bottom:4px!important}.summary-heading h2{font-size:24px!important}.summary-heading p{margin-top:2px!important;font-size:10px!important}
+              .totalization{gap:4px!important}.total-main strong{font-size:38px!important}.section-counter{padding:4px 7px!important}.section-counter strong{font-size:22px!important}
+              .details-tabs{min-height:34px!important}.detail-tab{padding:5px 4px!important;font-size:11px!important}
+              .candidate-list{gap:5px!important}.candidate-card{min-height:66px!important}.candidate-main{padding:5px 7px!important}.candidate-name{font-size:15px!important}.candidate-score strong{font-size:28px!important}.candidate-bar{height:17px!important}
+              .candidate-highlights{transform:scale(.86)!important;transform-origin:top left!important}
+            `;
+            doc.head.appendChild(style);
+          }
+        } catch(e) {}
+      }
+
+      function mirrorFeedState(){
+        try{
+          const childText = frame.contentDocument?.getElementById('feedStatus')?.textContent?.trim();
+          dataState.textContent = childText && childText !== 'Conectando' ? childText.toUpperCase() : 'AO VIVO';
+        } catch(e){ dataState.textContent = 'AO VIVO'; }
+      }
+
+      frame.addEventListener('load', () => {
+        tuneEmbeddedDashboard();
+        setTimeout(tuneEmbeddedDashboard, 350);
+        setTimeout(tuneEmbeddedDashboard, 1200);
+        setTimeout(mirrorFeedState, 1000);
+      });
+
+      function updateClock(){
+        clock.textContent = new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
+      }
+      syncRound();
+      updateClock();
+      setInterval(updateClock,1000);
+      setInterval(mirrorFeedState,2500);
+    })();
+  </script>
+</body>
+</html>
