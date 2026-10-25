@@ -1,8 +1,9 @@
 (()=>{
   'use strict';
 
-  const frame=document.getElementById('electionFrame');
-  if(!frame)return;
+  try{
+    if(window.parent===window||!window.parent.location.pathname.startsWith('/ao-vivo'))return;
+  }catch{return;}
 
   const state={
     leftKey:null,
@@ -12,15 +13,14 @@
     leftVotes:0,
     rightVotes:0,
     leader:null,
-    rafs:new Set(),
     observer:null,
-    interval:null,
-    scheduled:false
+    observerTarget:null,
+    scheduled:false,
+    animationEpoch:0
   };
 
   const fmtVotes=new Intl.NumberFormat('pt-BR');
   const fmtPct=new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-
   const text=(node)=>node?.textContent?.trim()||'';
   const candidateKey=(name,party)=>`${String(name||'').trim().toUpperCase()}|${String(party||'').trim().toUpperCase()}`;
 
@@ -41,8 +41,8 @@
     return String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0]).join('').toUpperCase();
   }
 
-  function readCandidates(doc){
-    const cards=[...doc.querySelectorAll('#candidateList .candidate-card,.candidate-list .candidate-card')];
+  function readCandidates(){
+    const cards=[...document.querySelectorAll('#candidateList .candidate-card,.candidate-list .candidate-card')];
     return cards.map(card=>{
       const name=text(card.querySelector('.candidate-name'))||'Candidato';
       const party=text(card.querySelector('.party-chip'))||'—';
@@ -51,8 +51,8 @@
       const percentage=parsePct(text(score?.querySelector('strong')));
       const photo=card.querySelector('.candidate-avatar img')?.src||'';
       const partyChip=card.querySelector('.party-chip');
-      const bar=card.querySelector('.candidate-bar i');
-      const color=(partyChip?.style?.backgroundColor||bar?.style?.backgroundColor||getComputedStyle(partyChip||card).backgroundColor||'#1d168d').trim();
+      const voteBar=card.querySelector('.candidate-bar i');
+      const color=(partyChip?.style?.background||partyChip?.style?.backgroundColor||voteBar?.style?.background||voteBar?.style?.backgroundColor||'#1d168d').trim();
       return {key:candidateKey(name,party),name,party,votes,percentage,photo,color};
     }).filter(item=>item.name);
   }
@@ -62,7 +62,7 @@
     if(state.leftKey&&state.rightKey){
       const left=candidates.find(item=>item.key===state.leftKey);
       const right=candidates.find(item=>item.key===state.rightKey);
-      if(left&&right)return {left,right,reset:false};
+      if(left&&right)return {left,right};
     }
     const left=candidates[0];
     const right=candidates[1];
@@ -73,12 +73,12 @@
     state.leftVotes=0;
     state.rightVotes=0;
     state.leader=null;
-    return {left,right,reset:true};
+    return {left,right};
   }
 
-  function installStyle(doc){
-    if(doc.getElementById('apuraElectionRaceBarStyle'))return;
-    const style=doc.createElement('style');
+  function installStyle(){
+    if(document.getElementById('apuraElectionRaceBarStyle'))return;
+    const style=document.createElement('style');
     style.id='apuraElectionRaceBarStyle';
     style.textContent=`
       .ab-race-tv{position:relative;width:100%;aspect-ratio:9.6/1;min-height:68px;max-height:102px;margin:2px 0 5px;overflow:hidden;background:#f7f8fa;border:1px solid #cfd4dc;border-radius:10px;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;isolation:isolate}
@@ -114,11 +114,11 @@
       @media(max-width:900px){.ab-race-tv{min-height:62px}.ab-race-foot{font-size:7px}}
       @media(prefers-reduced-motion:reduce){.ab-race-fill{transition:none!important}.ab-race-tv *{animation-duration:.001ms!important;animation-iteration-count:1!important}}
     `;
-    doc.head.appendChild(style);
+    document.head.appendChild(style);
   }
 
-  function barMarkup(doc){
-    const bar=doc.createElement('div');
+  function createBar(){
+    const bar=document.createElement('div');
     bar.className='ab-race-tv';
     bar.id='apuraElectionRaceBar';
     bar.setAttribute('aria-label','Comparativo animado dos dois principais candidatos');
@@ -137,35 +137,34 @@
     return bar;
   }
 
-  function ensureBar(doc){
-    const metrics=doc.querySelector('.summary-metrics');
+  function ensureBar(){
+    const metrics=document.querySelector('.summary-metrics');
     if(!metrics)return null;
-    let bar=doc.getElementById('apuraElectionRaceBar');
+    let bar=document.getElementById('apuraElectionRaceBar');
     if(!bar){
-      bar=barMarkup(doc);
+      bar=createBar();
       metrics.parentNode.insertBefore(bar,metrics);
-      const prevTotal=state.leftVotes+state.rightVotes;
-      const prevLeft=prevTotal?state.leftVotes/prevTotal*100:50;
-      bar.querySelector('[data-fill-left]').style.width=`${prevLeft}%`;
-      bar.querySelector('[data-fill-right]').style.width=`${100-prevLeft}%`;
+      const previousTotal=state.leftVotes+state.rightVotes;
+      const previousWidth=previousTotal?state.leftVotes/previousTotal*100:50;
+      bar.querySelector('[data-fill-left]').style.width=`${previousWidth}%`;
+      bar.querySelector('[data-fill-right]').style.width=`${100-previousWidth}%`;
       bar.querySelector('[data-pct-left]').textContent=fmtPct.format(state.leftPct);
       bar.querySelector('[data-pct-right]').textContent=fmtPct.format(state.rightPct);
       bar.querySelector('[data-votes-left]').textContent=fmtVotes.format(state.leftVotes);
       bar.querySelector('[data-votes-right]').textContent=fmtVotes.format(state.rightVotes);
       bar.querySelector('[data-diff]').textContent=fmtVotes.format(Math.abs(state.leftVotes-state.rightVotes));
-    }else if(bar.nextElementSibling!==metrics){
+    }else if(bar.parentNode!==metrics.parentNode||bar.nextElementSibling!==metrics){
       metrics.parentNode.insertBefore(bar,metrics);
     }
     return bar;
   }
 
   function setPhoto(box,candidate){
-    const currentKey=box.dataset.key;
-    if(currentKey===candidate.key)return;
+    if(box.dataset.key===candidate.key)return;
     box.dataset.key=candidate.key;
     box.replaceChildren();
     if(candidate.photo){
-      const img=box.ownerDocument.createElement('img');
+      const img=document.createElement('img');
       img.src=candidate.photo;
       img.alt=`Foto de ${candidate.name}`;
       img.addEventListener('error',()=>{box.innerHTML=`<span class="ab-race-fallback">${initials(candidate.name)}</span>`},{once:true});
@@ -175,28 +174,20 @@
     }
   }
 
-  function stopTweens(){
-    state.rafs.forEach(id=>cancelAnimationFrame(id));
-    state.rafs.clear();
-  }
-
-  function tween(from,to,duration,draw){
+  function tween(from,to,duration,draw,epoch){
     if(Math.abs(to-from)<0.0001){draw(to);return;}
     const start=performance.now();
-    function frameStep(now){
+    function step(now){
+      if(epoch!==state.animationEpoch)return;
       const progress=Math.min(1,(now-start)/duration);
       const eased=1-Math.pow(1-progress,3);
       draw(from+(to-from)*eased);
-      if(progress<1){
-        const id=requestAnimationFrame(frameStep);
-        state.rafs.add(id);
-      }
+      if(progress<1)requestAnimationFrame(step);
     }
-    const id=requestAnimationFrame(frameStep);
-    state.rafs.add(id);
+    requestAnimationFrame(step);
   }
 
-  function leaderAnimation(bar,leader,candidate){
+  function showLeaderChange(bar,leader,candidate){
     const cross=bar.querySelector('[data-cross]');
     cross.classList.remove('fire');
     void cross.offsetWidth;
@@ -215,15 +206,15 @@
     fill.classList.add('ab-race-leading');
   }
 
-  function applyPair(doc,pair){
-    const bar=ensureBar(doc);
+  function applyPair(pair){
+    const bar=ensureBar();
     if(!bar)return;
     const {left,right}=pair;
     const pairTotal=left.votes+right.votes;
     const leftWidth=pairTotal?left.votes/pairTotal*100:50;
     const rightWidth=100-leftWidth;
-    const leftOfficial=Number.isFinite(left.percentage)?left.percentage:leftWidth;
-    const rightOfficial=Number.isFinite(right.percentage)?right.percentage:rightWidth;
+    const leftOfficial=left.percentage||leftWidth;
+    const rightOfficial=right.percentage||rightWidth;
     const leader=left.votes>right.votes?'left':right.votes>left.votes?'right':'tie';
     const leaderChanged=state.leader&&state.leader!=='tie'&&leader!=='tie'&&leader!==state.leader;
 
@@ -248,14 +239,14 @@
     fillLeft.style.width=`${leftWidth}%`;
     fillRight.style.width=`${rightWidth}%`;
 
-    stopTweens();
-    tween(state.leftPct,leftOfficial,1050,value=>bar.querySelector('[data-pct-left]').textContent=fmtPct.format(value));
-    tween(state.rightPct,rightOfficial,1050,value=>bar.querySelector('[data-pct-right]').textContent=fmtPct.format(value));
-    tween(state.leftVotes,left.votes,950,value=>bar.querySelector('[data-votes-left]').textContent=fmtVotes.format(Math.round(value)));
-    tween(state.rightVotes,right.votes,950,value=>bar.querySelector('[data-votes-right]').textContent=fmtVotes.format(Math.round(value)));
-    tween(Math.abs(state.leftVotes-state.rightVotes),Math.abs(left.votes-right.votes),950,value=>bar.querySelector('[data-diff]').textContent=fmtVotes.format(Math.round(value)));
+    const epoch=++state.animationEpoch;
+    tween(state.leftPct,leftOfficial,1050,value=>bar.querySelector('[data-pct-left]').textContent=fmtPct.format(value),epoch);
+    tween(state.rightPct,rightOfficial,1050,value=>bar.querySelector('[data-pct-right]').textContent=fmtPct.format(value),epoch);
+    tween(state.leftVotes,left.votes,950,value=>bar.querySelector('[data-votes-left]').textContent=fmtVotes.format(Math.round(value)),epoch);
+    tween(state.rightVotes,right.votes,950,value=>bar.querySelector('[data-votes-right]').textContent=fmtVotes.format(Math.round(value)),epoch);
+    tween(Math.abs(state.leftVotes-state.rightVotes),Math.abs(left.votes-right.votes),950,value=>bar.querySelector('[data-diff]').textContent=fmtVotes.format(Math.round(value)),epoch);
 
-    if(leaderChanged)leaderAnimation(bar,leader,leader==='left'?left:right);
+    if(leaderChanged)showLeaderChange(bar,leader,leader==='left'?left:right);
 
     state.leftPct=leftOfficial;
     state.rightPct=rightOfficial;
@@ -266,17 +257,11 @@
 
   function refresh(){
     state.scheduled=false;
-    try{
-      const doc=frame.contentDocument;
-      if(!doc?.head||!doc?.body)return;
-      installStyle(doc);
-      const candidates=readCandidates(doc);
-      const pair=choosePair(candidates);
-      if(!pair)return;
-      applyPair(doc,pair);
-    }catch(error){
-      console.debug('Barra eleitoral ainda não disponível:',error?.message||error);
-    }
+    installStyle();
+    const candidates=readCandidates();
+    const pair=choosePair(candidates);
+    if(!pair)return;
+    applyPair(pair);
   }
 
   function scheduleRefresh(){
@@ -285,23 +270,26 @@
     requestAnimationFrame(()=>requestAnimationFrame(refresh));
   }
 
-  function observeFrame(){
-    try{
-      state.observer?.disconnect();
-      const doc=frame.contentDocument;
-      if(!doc?.body)return;
-      state.observer=new MutationObserver(scheduleRefresh);
-      state.observer.observe(doc.body,{subtree:true,childList:true,characterData:true});
-      scheduleRefresh();
-    }catch(error){}
+  function attachObserver(){
+    const target=document.getElementById('candidateList')||document.querySelector('.candidate-list');
+    if(!target||state.observerTarget===target)return Boolean(target);
+    state.observer?.disconnect();
+    state.observerTarget=target;
+    state.observer=new MutationObserver(scheduleRefresh);
+    state.observer.observe(target,{subtree:true,childList:true,characterData:true});
+    return true;
   }
 
-  frame.addEventListener('load',()=>{
-    setTimeout(observeFrame,60);
-    setTimeout(scheduleRefresh,250);
-    setTimeout(scheduleRefresh,900);
-  });
+  function tick(){
+    attachObserver();
+    scheduleRefresh();
+  }
 
-  if(frame.contentDocument?.readyState==='complete'||frame.contentDocument?.readyState==='interactive')observeFrame();
-  state.interval=setInterval(scheduleRefresh,2500);
+  installStyle();
+  attachObserver();
+  scheduleRefresh();
+  setTimeout(tick,120);
+  setTimeout(tick,500);
+  setTimeout(tick,1200);
+  setInterval(tick,2500);
 })();
