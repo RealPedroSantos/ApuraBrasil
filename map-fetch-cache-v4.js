@@ -49,8 +49,8 @@
   function responseFrom(entry) {
     return new Response(entry.body, {
       status: entry.status,
-      statusText: entry.statusText || 'OK',
-      headers: entry.headers || { 'content-type': 'application/json; charset=utf-8' }
+      statusText: entry.statusText || '',
+      headers: { 'content-type': entry.contentType || 'application/json; charset=utf-8' }
     });
   }
 
@@ -77,27 +77,21 @@
 
     const promise = (async () => {
       const response = await nativeFetch(input, init);
-      if (!response.ok) return null;
       const clone = response.clone();
-      const body = await clone.text();
-      const headers = {};
-      clone.headers.forEach((value, name) => { headers[name] = value; });
       const entry = {
         at: Date.now(),
-        body,
+        body: await clone.text(),
         status: clone.status,
         statusText: clone.statusText,
-        headers
+        contentType: clone.headers.get('content-type') || 'application/json; charset=utf-8'
       };
-      store(key, entry, rule.persist);
+      if (response.ok) store(key, entry, rule.persist);
       return entry;
     })();
 
     inflight.set(key, promise);
     try {
-      const entry = await promise;
-      if (entry) return responseFrom(entry);
-      return nativeFetch(input, init);
+      return responseFrom(await promise);
     } finally {
       inflight.delete(key);
     }
