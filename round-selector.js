@@ -13,10 +13,43 @@
   }
 
   let currentRound = readRound();
+  let selectorSync = () => {};
 
   function saveRound(round) {
     currentRound = round === 1 ? 1 : 2;
     try { localStorage.setItem(STORAGE_KEY, String(currentRound)); } catch {}
+  }
+
+  function refreshCurrentData(previousRound, source = 'selector') {
+    const detail = {
+      round: currentRound,
+      previousRound,
+      source
+    };
+
+    window.dispatchEvent(new CustomEvent('apura:round-changed', { detail }));
+
+    // O dashboard já possui uma rotina própria de atualização. Acioná-la mantém
+    // mapa, UF/município/distrito, zoom, abas, filtros e scroll intactos.
+    requestAnimationFrame(() => {
+      const refreshButton = document.getElementById('refreshButton');
+      if (refreshButton) refreshButton.click();
+    });
+  }
+
+  function setRound(round, source = 'api') {
+    const next = Number(round);
+    if (next !== 1 && next !== 2) return currentRound;
+    if (next === currentRound) {
+      selectorSync();
+      return currentRound;
+    }
+
+    const previousRound = currentRound;
+    saveRound(next);
+    selectorSync();
+    refreshCurrentData(previousRound, source);
+    return currentRound;
   }
 
   const nativeFetch = window.fetch.bind(window);
@@ -29,6 +62,9 @@
           const year = Number(url.searchParams.get('year') || 2026);
           const office = url.searchParams.get('office') || 'presidente';
           if (year === 2026) {
+            // Cargos legislativos continuam vinculados ao 1º turno, mas isso não
+            // altera a seleção global do usuário. Assim, voltar para Presidente
+            // mantém exatamente o turno que estava selecionado.
             const effectiveRound = currentRound === 2 && !SECOND_ROUND_ONLY_OFFICES.has(office) ? 1 : currentRound;
             url.searchParams.set('round', String(effectiveRound));
             input = url.pathname + url.search;
@@ -65,43 +101,41 @@
     `;
     document.head.appendChild(style);
 
-    function sync() {
+    selectorSync = function sync() {
       wrap.querySelectorAll('[data-round]').forEach(button => {
         const active = Number(button.dataset.round) === currentRound;
         button.classList.toggle('active', active);
         button.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
-    }
+    };
 
     wrap.addEventListener('click', event => {
       const button = event.target.closest('[data-round]');
       if (!button) return;
-      const next = Number(button.dataset.round);
-      if (next !== 1 && next !== 2) return;
-      if (next === currentRound) return;
-      saveRound(next);
-      sync();
-      window.location.reload();
+      setRound(Number(button.dataset.round), 'selector');
     });
 
-    document.querySelectorAll('.office-btn[data-office]').forEach(button => {
-      button.addEventListener('click', () => {
-        const office = button.dataset.office || '';
-        if (currentRound === 2 && !SECOND_ROUND_ONLY_OFFICES.has(office)) {
-          saveRound(1);
-          sync();
-        }
-      }, true);
-    });
-
-    sync();
+    selectorSync();
   }
+
+  // Sincroniza contextos irmãos (por exemplo, iframe da Central ao Vivo) sem
+  // reinicializar o documento ou reconstruir o mapa.
+  window.addEventListener('storage', event => {
+    if (event.key !== STORAGE_KEY) return;
+    const next = Number(event.newValue);
+    if (next !== 1 && next !== 2 || next === currentRound) return;
+    const previousRound = currentRound;
+    currentRound = next;
+    selectorSync();
+    refreshCurrentData(previousRound, 'storage');
+  });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildSelector, {once:true});
   else buildSelector();
 
   window.ApuraBrasilRound = {
     get: () => currentRound,
-    set: (round) => { saveRound(Number(round)); window.location.reload(); }
+    set: round => setRound(round, 'api'),
+    refresh: () => refreshCurrentData(currentRound, 'api-refresh')
   };
 })();
