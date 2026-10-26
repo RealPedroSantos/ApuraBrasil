@@ -1,10 +1,13 @@
 (() => {
   'use strict';
 
+  // Mandatos iniciados em 2023 que continuam até 2031.
+  // Atualizado após o 2º turno de 2026, incluindo as substituições decorrentes
+  // das eleições estaduais: AM (Cheila Moreira), MG (Alex Diniz) e PR (Luís Felipe Cunha).
   const INCUMBENTS = [
     {uf:'AC',name:'Alan Rick',party:'REPUBLICANOS'},
     {uf:'AL',name:'Renan Filho',party:'MDB'},
-    {uf:'AM',name:'Omar Aziz',party:'PSD'},
+    {uf:'AM',name:'Cheila Moreira',party:'PT'},
     {uf:'AP',name:'Davi Alcolumbre',party:'UNIÃO'},
     {uf:'BA',name:'Otto Alencar',party:'PSD'},
     {uf:'CE',name:'Camilo Santana',party:'PT'},
@@ -12,14 +15,14 @@
     {uf:'ES',name:'Magno Malta',party:'PL'},
     {uf:'GO',name:'Wilder Morais',party:'PL'},
     {uf:'MA',name:'Ana Paula Lobato',party:'PSB'},
-    {uf:'MG',name:'Cleitinho',party:'REPUBLICANOS'},
+    {uf:'MG',name:'Alex Diniz',party:'PL'},
     {uf:'MS',name:'Tereza Cristina',party:'PP'},
     {uf:'MT',name:'Wellington Fagundes',party:'PL'},
     {uf:'PA',name:'Beto Faro',party:'PT'},
     {uf:'PB',name:'Efraim Filho',party:'PL'},
     {uf:'PE',name:'Teresa Leitão',party:'PT'},
     {uf:'PI',name:'Jussara Lima',party:'PSD'},
-    {uf:'PR',name:'Sergio Moro',party:'PL'},
+    {uf:'PR',name:'Luís Felipe Cunha',party:'PL'},
     {uf:'RJ',name:'Romário',party:'S/PARTIDO'},
     {uf:'RN',name:'Rogerio Marinho',party:'PL'},
     {uf:'RO',name:'Jaime Bagattoli',party:'PL'},
@@ -99,20 +102,28 @@
     if(!svg||!incumbents.length)return;
     const seats=[...svg.querySelectorAll('.ab-seat')];
     if(!seats.length)return;
-    const fixedCount=incumbents.length;
-    const fixed=seats.slice(Math.max(0,seats.length-fixedCount));
+    const fixed=seats.slice(Math.max(0,seats.length-incumbents.length));
     fixed.forEach((seat,index)=>{
       const senator=incumbents[index];if(!senator)return;
       seat.setAttribute('fill',color(senator.party));
       seat.setAttribute('fill-opacity','1');
       seat.dataset.abIncumbent='1';
+      seat.dataset.abFinalParty=senator.party;
       seat.style.pointerEvents='none';
-      if(!seat.querySelector('title')){
-        const title=document.createElementNS('http://www.w3.org/2000/svg','title');
-        title.textContent=`${senator.name} • ${senator.party} • ${senator.uf} • mandato vigente até 2031`;
-        seat.appendChild(title);
-      }
+      let title=seat.querySelector('title');
+      if(!title){title=document.createElementNS('http://www.w3.org/2000/svg','title');seat.appendChild(title);}
+      title.textContent=`${senator.name} • ${senator.party} • ${senator.uf} • mandato vigente até 2031`;
     });
+  }
+
+  function updateSenateCenter(visual){
+    const total=ufSelect.value==='BR'?81:3;
+    const legacy=visual?.querySelector('.chamber-center-label');
+    const svg=visual?.querySelector('.ab-parliament-svg');
+    const count=svg?.querySelector('.ab-center-count')||legacy?.querySelector('strong');
+    const label=svg?.querySelector('.ab-center-label')||legacy?.querySelector('span');
+    if(count)count.textContent=String(total);
+    if(label&&!label.querySelector?.('tspan'))label.textContent='COMPOSIÇÃO 2027';
   }
 
   function splitCenterLabels(){
@@ -121,7 +132,8 @@
       'VAGAS DE 2026 PROJETADAS':['VAGAS DE 2026','PROJETADAS'],
       'VAGAS 2026':['VAGAS DE 2026','PROJETADAS'],
       'CADEIRAS SIMULADAS':['CADEIRAS','SIMULADAS'],
-      'VAGAS SIMULADAS':['VAGAS','SIMULADAS']
+      'VAGAS SIMULADAS':['VAGAS','SIMULADAS'],
+      'COMPOSIÇÃO 2027':['COMPOSIÇÃO','2027']
     };
     document.querySelectorAll('.ab-center-label').forEach(label=>{
       const raw=String(label.textContent||'').trim().replace(/\s+/g,' ');
@@ -159,24 +171,56 @@
     partyComposition.innerHTML=rows.map(([party,seats],index)=>`<div class="party-row ab-combined-party-row" style="animation-delay:${Math.min(index*20,220)}ms"><div class="party-main"><div class="party-name"><i class="party-dot" style="background:${color(party)}"></i>${esc(party)}</div><div class="party-bar"><i style="width:${seats/max*100}%;background:${color(party)}"></i></div></div><div class="party-seats"><strong>${seats}</strong><span>${total?`${(seats/total*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}% da composição exibida`:'cadeiras'}</span></div></div>`).join('');
   }
 
+  function combineSenateLegend(visual,incumbents){
+    const legend=visual?.closest('.chamber-card')?.querySelector('.chamber-legend');
+    if(!legend||!incumbents.length||legend.querySelector('.ab-combined-senate-legend'))return;
+    const map=new Map();
+    legend.querySelectorAll('.legend-item').forEach(item=>{
+      const raw=String(item.textContent||'').trim().replace(/\s+/g,' ');
+      const match=raw.match(/^(.*)\s+(\d+)$/);
+      if(!match)return;
+      const party=match[1].trim();
+      if(/^(em disputa|mandato|senado não renovado)/i.test(party))return;
+      map.set(party,(map.get(party)||0)+Number(match[2]||0));
+    });
+    for(const [party,seats] of incumbentPartyCounts(incumbents))map.set(party,(map.get(party)||0)+seats);
+    const rows=[...map.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR'));
+    legend.innerHTML=rows.map(([party,seats],index)=>`<span class="legend-item ${index===0?'ab-combined-senate-legend':''}"><i class="legend-dot" style="background:${color(party)}"></i>${esc(party)} ${seats}</span>`).join('');
+  }
+
   function appendIncumbentNames(incumbents){
     if(!incumbents.length||projectedList.querySelector('.ab-incumbent-card'))return;
     const cards=incumbents.map(item=>`<article class="projected-card ab-incumbent-card"><div class="rank-badge">${esc(item.uf)}</div><div class="projected-main"><strong>${esc(item.name)}</strong><span>${esc(item.party)} • mandato 2023–2031</span></div><div class="seat-status"><strong>MANDATO VIGENTE</strong><span>cadeira não está em disputa em 2026</span></div></article>`).join('');
     projectedList.insertAdjacentHTML('beforeend',cards);
-    if(namesTitle&&!namesTitle.textContent.startsWith('Parlamentares do '))namesTitle.textContent='Projetados + mandatos vigentes';
+    if(namesTitle&&!namesTitle.textContent.startsWith('Parlamentares do '))namesTitle.textContent='Eleitos em 2026 + mandatos vigentes';
   }
 
-  function updateSummary(incumbents){
+  function projectedSenateCount(visual){
+    const raw=visual?.querySelector('.ab-center-count')?.textContent||visual?.querySelector('.chamber-center-label strong')?.textContent||'';
+    const n=Number(String(raw).replace(/\D/g,''));
+    return Number.isFinite(n)?n:0;
+  }
+
+  function updateSummary(incumbents,senateProjected){
     const cards=[...document.querySelectorAll('#seatSummary .summary-card')];
-    if(view()!=='senador'||cards.length<4)return;
-    const total=ufSelect.value==='BR'?81:3;
-    const fixed=incumbents.length;
-    cards[0].querySelector('span')&&(cards[0].querySelector('span').textContent='CADEIRAS DO SENADO');
-    cards[0].querySelector('strong')&&(cards[0].querySelector('strong').textContent=String(total));
-    cards[1].querySelector('span')&&(cards[1].querySelector('span').textContent='VAGAS DE 2026');
-    cards[1].querySelector('strong')&&(cards[1].querySelector('strong').textContent=String(total-fixed));
-    cards[2].querySelector('span')&&(cards[2].querySelector('span').textContent='MANDATOS VIGENTES');
-    cards[2].querySelector('strong')&&(cards[2].querySelector('strong').textContent=String(fixed));
+    const currentView=view();
+    if(currentView==='senador'&&cards.length>=4){
+      const total=ufSelect.value==='BR'?81:3;
+      const fixed=incumbents.length;
+      cards[0].querySelector('span')&&(cards[0].querySelector('span').textContent='CADEIRAS DO SENADO');
+      cards[0].querySelector('strong')&&(cards[0].querySelector('strong').textContent=String(total));
+      cards[1].querySelector('span')&&(cards[1].querySelector('span').textContent='ELEITOS EM 2026');
+      cards[1].querySelector('strong')&&(cards[1].querySelector('strong').textContent=String(Math.max(0,total-fixed)));
+      cards[2].querySelector('span')&&(cards[2].querySelector('span').textContent='MANDATOS ATÉ 2031');
+      cards[2].querySelector('strong')&&(cards[2].querySelector('strong').textContent=String(fixed));
+      return;
+    }
+    if(currentView==='congresso'&&cards.length>=4){
+      const total=ufSelect.value==='BR'?81:3;
+      const composed=Math.min(total,Math.max(0,senateProjected)+incumbents.length);
+      cards[2].querySelector('span')&&(cards[2].querySelector('span').textContent='SENADO 2027');
+      cards[2].querySelector('strong')&&(cards[2].querySelector('strong').textContent=`${composed}/${total}`);
+    }
   }
 
   function apply(){
@@ -192,13 +236,18 @@
       }
     }
 
+    const senateVisual=currentView==='senador'?$('chamberVisual'):currentView==='congresso'?$('secondaryChamberVisual'):null;
+    const senateProjected=senateVisual?projectedSenateCount(senateVisual):0;
+
     if(currentView==='senador')colorIncumbentSeats($('chamberVisual'),incumbents);
     else if(currentView==='congresso')colorIncumbentSeats($('secondaryChamberVisual'),incumbents);
 
     if(incumbents.length){
       combinePartyComposition(incumbents);
+      combineSenateLegend(senateVisual,incumbents);
       appendIncumbentNames(incumbents);
-      updateSummary(incumbents);
+      updateSummary(incumbents,senateProjected);
+      updateSenateCenter(senateVisual);
     }
     splitCenterLabels();
   }
