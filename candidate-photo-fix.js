@@ -44,7 +44,7 @@
     if(document.querySelector(`script[${dataAttribute}]`)) return;
     const script=document.createElement('script');
     script.src=src;
-    script.defer=true;
+    script.async=false;
     script.setAttribute(dataAttribute,'true');
     document.head.appendChild(script);
   }
@@ -73,61 +73,28 @@
         background:#fff!important;
       }
 
-      html.broadcast-tv-readable .main-grid .broadcast-resizer-v2{
-        z-index:40!important;
-      }
+      html.broadcast-tv-readable .main-grid .broadcast-resizer-v2{z-index:40!important}
 
       html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race > .ab-race-tv{
-        grid-row:1!important;
-        width:100%!important;
-        height:100%!important;
-        min-height:0!important;
-        max-height:none!important;
-        aspect-ratio:auto!important;
-        margin:0!important;
-        border-radius:9px 9px 0 0!important;
+        grid-row:1!important;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;aspect-ratio:auto!important;margin:0!important;border-radius:9px 9px 0 0!important;
       }
 
       html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race > .broadcast-summary-metrics{
-        grid-row:2!important;
-        width:100%!important;
-        height:54px!important;
-        min-height:54px!important;
-        max-height:54px!important;
+        grid-row:2!important;width:100%!important;height:54px!important;min-height:54px!important;max-height:54px!important;
       }
 
       html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric small.vote-breakdown-percentage,
       html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric > small{
-        display:block!important;
-        font-size:clamp(15px,1.15vw,21px)!important;
-        line-height:1!important;
-        font-weight:950!important;
-        color:#263545!important;
-        letter-spacing:-.02em!important;
-        margin-top:1px!important;
-        opacity:1!important;
-        white-space:nowrap!important;
+        display:block!important;font-size:clamp(15px,1.15vw,21px)!important;line-height:1!important;font-weight:950!important;color:#263545!important;letter-spacing:-.02em!important;margin-top:1px!important;opacity:1!important;white-space:nowrap!important;
       }
 
       html.broadcast-tv-readable .ab-race-photo{
-        width:5.35%!important;
-        background:#fff!important;
-        padding:2px 2px 0!important;
-        display:flex!important;
-        align-items:flex-end!important;
-        justify-content:center!important;
+        width:5.35%!important;background:#fff!important;padding:2px 2px 0!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;
       }
-
       html.broadcast-tv-readable .ab-race-photo.left{left:.7%!important}
       html.broadcast-tv-readable .ab-race-photo.right{right:.7%!important}
-
       html.broadcast-tv-readable .ab-race-photo img{
-        width:100%!important;
-        height:100%!important;
-        object-fit:contain!important;
-        object-position:center bottom!important;
-        transform:none!important;
-        background:#fff!important;
+        width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;background:#fff!important;
       }
 
       html.broadcast-tv-readable .ab-race-track{left:6.35%!important;right:6.35%!important}
@@ -137,19 +104,12 @@
       html.broadcast-tv-readable .ab-race-pct.right{right:6.85%!important}
       html.broadcast-tv-readable .ab-race-foot{left:6.65%!important;right:6.65%!important}
 
-      html.broadcast-tv-readable .broadcast-candidates-column .mobile-map-bottom-results:has(> .ab-broadcast-media-fallback) .mobile-map-candidate-strip .mobile-map-candidate:nth-child(n+3){
-        display:none!important;
-      }
+      html.broadcast-tv-readable .broadcast-candidates-column .mobile-map-bottom-results:has(> .ab-broadcast-media-fallback) .mobile-map-candidate-strip .mobile-map-candidate:nth-child(n+3){display:none!important}
 
       @media(max-width:1100px){
-        html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race{
-          --ab-race-height:clamp(92px,10.4167vw,118px);
-          min-height:146px!important;
-        }
+        html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race{--ab-race-height:clamp(92px,10.4167vw,118px);min-height:146px!important}
         html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric small.vote-breakdown-percentage,
-        html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric > small{
-          font-size:14px!important;
-        }
+        html.broadcast-tv-readable .broadcast-summary-strip.broadcast-summary-strip--with-race .broadcast-summary-metrics .summary-metric > small{font-size:14px!important}
       }
     `;
     document.head.appendChild(style);
@@ -164,10 +124,11 @@
       loadScriptOnce('/broadcast-layout-controls-v2.js','data-broadcast-layout-controls-v2');
       loadScriptOnce('/broadcast-tv-typography.js','data-broadcast-tv-typography');
       loadScriptOnce('/broadcast-media-card-scale.js','data-broadcast-media-card-scale');
-      loadScriptOnce('/election-race-bar-tv.js','data-election-race-bar-tv');
-      loadScriptOnce('/election-race-candidate-only-guard.js','data-election-race-candidate-only-guard');
+      /* Nacional primeiro: trava a fonte antes de a barra existir. */
       loadScriptOnce('/election-race-national-source.js','data-election-race-national-source');
-      window.__apuraBrasilBroadcastLoaderVersion='2.5.9';
+      /* Shell visual sem observers de candidatos, sem polling local e sem re-render de gráficos. */
+      loadScriptOnce('/election-race-bar-shell.js','data-election-race-bar-shell');
+      window.__apuraBrasilBroadcastLoaderVersion='2.6.0';
     }catch{}
   }
 
