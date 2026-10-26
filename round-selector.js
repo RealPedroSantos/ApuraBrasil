@@ -21,16 +21,11 @@
   }
 
   function refreshCurrentData(previousRound, source = 'selector') {
-    const detail = {
-      round: currentRound,
-      previousRound,
-      source
-    };
-
+    const detail = { round: currentRound, previousRound, source };
     window.dispatchEvent(new CustomEvent('apura:round-changed', { detail }));
 
-    // O dashboard já possui uma rotina própria de atualização. Acioná-la mantém
-    // mapa, UF/município/distrito, zoom, abas, filtros e scroll intactos.
+    // O dashboard já possui a rotina oficial de atualização. Acioná-la sem
+    // recarregar o documento preserva mapa, drill-down, zoom, abas e scroll.
     requestAnimationFrame(() => {
       const refreshButton = document.getElementById('refreshButton');
       if (refreshButton) refreshButton.click();
@@ -62,9 +57,9 @@
           const year = Number(url.searchParams.get('year') || 2026);
           const office = url.searchParams.get('office') || 'presidente';
           if (year === 2026) {
-            // Cargos legislativos continuam vinculados ao 1º turno, mas isso não
-            // altera a seleção global do usuário. Assim, voltar para Presidente
-            // mantém exatamente o turno que estava selecionado.
+            // Cargos legislativos são sempre do 1º turno, sem mudar a seleção
+            // global do usuário. Ao voltar para Presidente/Governador, o turno
+            // anteriormente escolhido continua ativo.
             const effectiveRound = currentRound === 2 && !SECOND_ROUND_ONLY_OFFICES.has(office) ? 1 : currentRound;
             url.searchParams.set('round', String(effectiveRound));
             input = url.pathname + url.search;
@@ -75,10 +70,56 @@
     return nativeFetch(input, init);
   };
 
+  function syncParentButtons() {
+    try {
+      if (window.parent === window) return;
+      const buttons = window.parent.document.querySelectorAll('.round-switch [data-round]');
+      buttons.forEach(button => {
+        const active = Number(button.dataset.round) === currentRound;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    } catch {}
+  }
+
+  function installParentRoundBridge() {
+    try {
+      if (window.parent === window) return;
+      const parentDocument = window.parent.document;
+      const buttons = [...parentDocument.querySelectorAll('.round-switch [data-round]')];
+      if (!buttons.length) return;
+
+      buttons.forEach(button => {
+        if (button.dataset.apuraRoundBridge === '1') return;
+        button.dataset.apuraRoundBridge = '1';
+        button.addEventListener('click', event => {
+          const next = Number(button.dataset.round);
+          if (next !== 1 && next !== 2) return;
+
+          // A Central ao Vivo possuía um listener que recarregava o iframe.
+          // Interceptamos em capture para impedir esse reload e reutilizar o
+          // mesmo estado do dashboard já aberto.
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          setRound(next, 'embedded-live');
+          syncParentButtons();
+        }, true);
+      });
+
+      syncParentButtons();
+    } catch {}
+  }
+
   function buildSelector() {
-    if (document.getElementById('roundSelector')) return;
+    if (document.getElementById('roundSelector')) {
+      installParentRoundBridge();
+      return;
+    }
     const anchor = document.querySelector('.source-status') || document.querySelector('.topbar');
-    if (!anchor) return;
+    if (!anchor) {
+      installParentRoundBridge();
+      return;
+    }
 
     const wrap = document.createElement('div');
     wrap.id = 'roundSelector';
@@ -107,6 +148,7 @@
         button.classList.toggle('active', active);
         button.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
+      syncParentButtons();
     };
 
     wrap.addEventListener('click', event => {
@@ -116,14 +158,14 @@
     });
 
     selectorSync();
+    installParentRoundBridge();
   }
 
-  // Sincroniza contextos irmãos (por exemplo, iframe da Central ao Vivo) sem
-  // reinicializar o documento ou reconstruir o mapa.
+  // Sincroniza contextos irmãos sem reinicializar o documento.
   window.addEventListener('storage', event => {
     if (event.key !== STORAGE_KEY) return;
     const next = Number(event.newValue);
-    if (next !== 1 && next !== 2 || next === currentRound) return;
+    if ((next !== 1 && next !== 2) || next === currentRound) return;
     const previousRound = currentRound;
     currentRound = next;
     selectorSync();
